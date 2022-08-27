@@ -1,0 +1,3 @@
+image: ghcr.io/sagudev/servo-gitpod:latest
+ports:
+  - port: 6080
