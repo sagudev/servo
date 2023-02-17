@@ -4,9 +4,6 @@
 
 #![feature(test)]
 
-extern crate embedder_traits;
-extern crate test;
-
 pub use test::*;
 
 pub fn test_main_static(tests: &[&TestDescAndFn]) {
