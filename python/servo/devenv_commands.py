@@ -186,7 +186,7 @@ class MachCommands(CommandBase):
         help="Command-line arguments to be passed through to cargo-fix")
     @CommandBase.build_like_command_arguments
     def cargo_fix(self, params, features=[], media_stack=None, target=None,
-              android=False, magicleap=False, **kwargs):
+                  android=False, magicleap=False, **kwargs):
         if not params:
             params = []
 
@@ -210,7 +210,7 @@ class MachCommands(CommandBase):
         help="Command-line arguments to be passed through to cargo-clippy")
     @CommandBase.build_like_command_arguments
     def cargo_clippy(self, params, features=[], media_stack=None, target=None,
-              android=False, magicleap=False, **kwargs):
+                     android=False, magicleap=False, **kwargs):
         if not params:
             params = []
 
