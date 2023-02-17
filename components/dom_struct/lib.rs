@@ -3,8 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use proc_macro::TokenStream;
-use syn::*;
 use quote::quote;
+use syn::*;
 
 #[proc_macro_attribute]
 pub fn dom_struct(args: TokenStream, input: TokenStream) -> TokenStream {
