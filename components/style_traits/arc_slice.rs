@@ -8,10 +8,10 @@ use lazy_static::lazy_static;
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
 use servo_arc::ThinArc;
-use to_shmem_derive::ToShmem;
 use std::ops::Deref;
 use std::ptr::NonNull;
 use std::{iter, mem};
+use to_shmem_derive::ToShmem;
 
 /// A canary that we stash in ArcSlices.
 ///
