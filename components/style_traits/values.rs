@@ -479,7 +479,8 @@ macro_rules! define_css_keyword_enum {
     (pub enum $name:ident { $($variant:ident = $css:expr,)+ }) => {
         #[allow(missing_docs)]
         #[cfg_attr(feature = "servo", derive(serde::Deserialize, serde::Serialize))]
-        #[derive(Clone, Copy, Debug, Eq, Hash, malloc_size_of_derive::MallocSizeOf, PartialEq, to_shmem_derive::ToShmem)]
+        #[derive(Clone, Copy, Debug, Eq, Hash,
+            malloc_size_of_derive::MallocSizeOf, PartialEq, to_shmem_derive::ToShmem)]
         pub enum $name {
             $($variant),+
         }
