@@ -178,12 +178,12 @@ class MachCommands(CommandBase):
         self.ensure_bootstrapped()
         return self.call_rustup_run(["rustc"] + params, env=self.build_env())
 
-    @Command('cargo',
-             description='Run cargo command',
+    @Command('cargo-fix',
+             description='Run "cargo fix"',
              category='devenv')
     @CommandArgument(
         'params', default=None, nargs='...',
-        help="Command-line arguments to be passed through to cargo")
+        help="Command-line arguments to be passed through to cargo-fix")
     @CommandBase.build_like_command_arguments
     def cargo(self, params, features=[], media_stack=None, target=None,
               android=False, magicleap=False, **kwargs):
@@ -200,7 +200,7 @@ class MachCommands(CommandBase):
         self.ensure_clobbered()
         env = self.build_env()
 
-        return self.run_cargo_build_like_command("check", params, env=env, features=features, **kwargs)
+        return self.run_cargo_build_like_command("fix", params, env=env, features=features, **kwargs)
 
     @Command('grep',
              description='`git grep` for selected directories.',
