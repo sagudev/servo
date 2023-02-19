@@ -7563,7 +7563,7 @@ class CallbackMember(CGNativeMember):
                                 visibility=visibility)
         # We have to do all the generation of our body now, because
         # the caller relies on us throwing if we can't manage it.
-        self.exceptionCode = "return Err(JSFailed);"
+        self.exceptionCode = "return Err(JSFailed);\n"
         self.body = self.getImpl()
 
     def getImpl(self):

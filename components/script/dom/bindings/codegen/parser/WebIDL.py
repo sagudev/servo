@@ -3113,6 +3113,9 @@ class IDLPromiseType(IDLParametrizedType):
     def __init__(self, location, innerType):
         IDLParametrizedType.__init__(self, location, "Promise", innerType)
 
+    def __hash__(self):
+        return hash(self.promiseInnerType())
+
     def __eq__(self, other):
         return (isinstance(other, IDLPromiseType) and
                 self.promiseInnerType() == other.promiseInnerType())
