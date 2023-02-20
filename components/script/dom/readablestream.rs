@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+use crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamMethods;
 use crate::dom::bindings::conversions::{ConversionBehavior, ConversionResult};
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
@@ -57,6 +58,27 @@ pub struct ReadableStream {
     has_reader: Cell<bool>,
     #[ignore_malloc_size_of = "Rc is hard"]
     external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
+}
+
+impl ReadableStreamMethods for ReadableStream {
+    fn Locked(&self) -> bool {
+        todo!()
+    }
+
+    fn Cancel(
+        &self,
+        cx: SafeJSContext,
+        reason: SafeHandleValue,
+    ) -> super::bindings::error::Fallible<Rc<Promise>> {
+        todo!()
+    }
+
+    fn GetReader(
+        &self,
+        options: &crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamGetReaderOptions,
+    ) -> super::bindings::error::Fallible<DomRoot<super::types::ReadableStreamDefaultReader>> {
+        todo!()
+    }
 }
 
 impl ReadableStream {
