@@ -2220,12 +2220,8 @@ class CGImports(CGWrapper):
         descriptorProvider = config.getDescriptorProvider()
         extras = []
         for t in types:
-            print(t)
             # Importing these types in the same module that defines them is an error.
-            try:
-                if t in dictionaries or t in enums:
-                    continue
-            except AttributeError:
+            if (t.isDictionary() or t.isEnum()) and (t in dictionaries or t in enums):
                 continue
             if t.isInterface() or t.isNamespace():
                 name = getIdentifier(t).name
