@@ -2221,7 +2221,11 @@ class CGImports(CGWrapper):
         extras = []
         for t in types:
             # TODO: Investigate why it is failing?
-            if t.__str__() == "QueuingStrategySize":
+            blacklist = {"QueuingStrategySize",
+                         "UnderlyingSourceStartCallback",
+                         "UnderlyingSourcePullCallback",
+                         "UnderlyingSourceCancelCallback"}
+            if t.__str__() in blacklist:
                 continue
             if t in dictionaries or t in enums:
                 continue
