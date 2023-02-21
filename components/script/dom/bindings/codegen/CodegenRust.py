@@ -2220,6 +2220,7 @@ class CGImports(CGWrapper):
         descriptorProvider = config.getDescriptorProvider()
         extras = []
         for t in types:
+            # TODO: Investigate why it is failing?
             if t.__str__() == "QueuingStrategySize":
                 continue
             if t in dictionaries or t in enums:
