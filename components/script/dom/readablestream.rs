@@ -28,8 +28,8 @@ use js::jsapi::{
     ReadableStreamUpdateDataAvailableFromSource, UnwrapReadableStream,
 };
 use js::jsapi::{HandleObject, HandleValue, Heap, JSContext, JSObject};
-use js::jsval::JSVal;
 use js::jsval::UndefinedValue;
+use js::jsval::{JSVal, ObjectValue};
 use js::rust::HandleValue as SafeHandleValue;
 use js::rust::IntoHandle;
 use std::cell::{Cell, RefCell};
@@ -37,11 +37,14 @@ use std::os::raw::c_void;
 use std::ptr::{self, NonNull};
 use std::rc::Rc;
 use std::slice;
-
+use crate::dom::bindings::cell::DomRefCell;
 use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategy;
 use super::bindings::error::Fallible;
-use super::underlyingsource::UnderlyingSource;
-
+//use super::underlyingsource::UnderlyingSource;
+use super::bindings::codegen::Bindings::ReadableStreamBinding::UnderlyingSource;
+use super::bindings::root::MutNullableDom;
+use super::types::{ReadableStreamDefaultReader, ReadableStreamDefaultController};
+use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultReaderBinding::ReadableStreamDefaultReaderMethods;
 static UNDERLYING_SOURCE_TRAPS: ReadableStreamUnderlyingSourceTraps =
     ReadableStreamUnderlyingSourceTraps {
         requestData: Some(request_data),
@@ -52,16 +55,40 @@ static UNDERLYING_SOURCE_TRAPS: ReadableStreamUnderlyingSourceTraps =
         finalize: Some(finalize),
     };
 
+/// Stream’s state, used internally;
+#[derive(Clone, JSTraceable, MallocSizeOf)]
+enum ReadableStreamState {
+    Readable,
+    Closed,
+    Errored,
+}
+
 #[dom_struct]
 pub struct ReadableStream {
     reflector_: Reflector,
+    //#[ignore_malloc_size_of = "SM handles JS values"]
+    //js_stream: Heap<*mut JSObject>,
+    //#[ignore_malloc_size_of = "SM handles JS values"]
+    //js_reader: Heap<*mut JSObject>,
+    //has_reader: Cell<bool>,
+    //#[ignore_malloc_size_of = "Rc is hard"]
+    //external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
+    /// A [ReadableStreamDefaultController] or [ReadableByteStreamController]
+    /// created with the ability to control the state and queue of this stream.
+    controller: DomRefCell<ReadableStreamDefaultController>,
+    /// A boolean flag set to `true` when the stream is transferred
+    detached: Cell<bool>,
+    /// A boolean flag set to `true` when the stream has been read from or canceled
+    disturbute: Cell<bool>,
+    /// A [ReadableStreamDefaultReader] or [ReadableStreamBYOBReader] instance,
+    /// if the stream is locked to a reader, or `undefined` if it is not
+    reader: MutNullableDom<ReadableStreamDefaultReader>,
+    /// A enum containing the stream’s current state, used internally
+    state: ReadableStreamState,
+    /// A value indicating how the stream failed, to be given as a failure reason
+    /// or exception when trying to operate on an errored stream
     #[ignore_malloc_size_of = "SM handles JS values"]
-    js_stream: Heap<*mut JSObject>,
-    #[ignore_malloc_size_of = "SM handles JS values"]
-    js_reader: Heap<*mut JSObject>,
-    has_reader: Cell<bool>,
-    #[ignore_malloc_size_of = "Rc is hard"]
-    external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
+    stored_error: Heap<*mut JSObject>,
 }
 
 impl ReadableStreamMethods for ReadableStream {
@@ -74,14 +101,14 @@ impl ReadableStreamMethods for ReadableStream {
         cx: SafeJSContext,
         reason: SafeHandleValue,
     ) -> super::bindings::error::Fallible<Rc<Promise>> {
-        todo!()
+        self.reader.Cancel(cx, reason)
     }
 
     fn GetReader(
         &self,
         options: &crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamGetReaderOptions,
     ) -> super::bindings::error::Fallible<DomRoot<super::types::ReadableStreamDefaultReader>> {
-        todo!()
+        Ok(self.reader.get().unwrap())
     }
 }
 
@@ -91,9 +118,25 @@ impl ReadableStream {
     pub fn Constructor(
         cx: SafeJSContext,
         global: &GlobalScope,
-        underlying_source: UnderlyingSource,
+        underlying_source: Option<*mut JSObject>,
         strategy: &QueuingStrategy,
     ) -> Fallible<DomRoot<Self>> {
+        // Step 1
+        rooted!(in(*cx) let underlying_source_obj = underlying_source.unwrap_or(0 as *mut JSObject));
+        // Step 2 (TODO: error handling https://phabricator.services.mozilla.com/D122643#change-B79HNAkmIxym)
+        let underlying_source_dict = if !underlying_source_obj.is_null() {
+            rooted!(in(*cx) let obj_val = ObjectValue(underlying_source_obj.get()));
+            match UnderlyingSource::new(global.get_cx(), obj_val.handle().into()) {
+                Ok(ConversionResult::Success(underlying_source_dict)) => underlying_source_dict,
+                Ok(ConversionResult::Failure(error)) => {
+                    return Err(Error::Type(error.into_owned()))
+                },
+                Err(_) => return Err(Error::Type(String::from("TODO"))),
+            }
+        } else {
+            UnderlyingSource::empty()
+        };
+        // Step 3
         todo!()
     }
 }

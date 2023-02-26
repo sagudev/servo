@@ -5,9 +5,16 @@
 use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultReaderBinding::ReadableStreamDefaultReaderMethods;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
 use dom_struct::dom_struct;
+
+use super::bindings::error::Fallible;
+use super::bindings::root::DomRoot;
+use super::readablestream::ReadableStream;
+use super::types::GlobalScope;
 #[dom_struct]
 pub struct ReadableStreamDefaultReader {
     reflector_: Reflector,
+    /// A list of read requests, used when a consumer requests chunks sooner than they are available
+    read_requests: todo!(),
 }
 
 impl ReadableStreamDefaultReaderMethods for ReadableStreamDefaultReader {
@@ -28,6 +35,14 @@ impl ReadableStreamDefaultReaderMethods for ReadableStreamDefaultReader {
         cx: crate::script_runtime::JSContext,
         reason: js::rust::HandleValue,
     ) -> super::bindings::error::Fallible<std::rc::Rc<super::promise::Promise>> {
+        todo!()
+    }
+}
+
+#[allow(non_snake_case)]
+impl ReadableStreamDefaultReader {
+    //https://streams.spec.whatwg.org/#default-reader-constructor
+    pub fn Constructor(global: &GlobalScope, stream: &ReadableStream) -> Fallible<DomRoot<Self>> {
         todo!()
     }
 }

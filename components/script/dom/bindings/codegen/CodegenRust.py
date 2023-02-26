@@ -2221,6 +2221,7 @@ class CGImports(CGWrapper):
         extras = []
         for t in types:
             # TODO: Investigate why it is failing?
+            # we get another round of errors that are again due to those callbacks
             blacklist = {"QueuingStrategySize",
                          "UnderlyingSourceStartCallback",
                          "UnderlyingSourcePullCallback",
@@ -7705,7 +7706,7 @@ class CallbackMember(CGNativeMember):
             "}\n")
 
     def getArgcDecl(self):
-        if self.argCount <= 1:
+        if self.argCount < 1:
             return CGGeneric("let argc = %s;" % self.argCountStr)
         return CGGeneric("let mut argc = %s;" % self.argCountStr)
 
