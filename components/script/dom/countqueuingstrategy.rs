@@ -7,10 +7,13 @@ use dom_struct::dom_struct;
 //use crate::dom::bindings::codegen::Bindings::CountQueuingStrategyBindings::CountQueuingStrategyMethods;
 use crate::dom::bindings::codegen::Bindings::CountQueuingStrategyBinding::CountQueuingStrategyBinding::CountQueuingStrategyMethods;
 
-use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategyInit;
-use super::bindings::error::Fallible;
+use super::bindings::codegen::Bindings::QueuingStrategyBinding::{
+    QueuingStrategy, QueuingStrategyInit,
+};
+use super::bindings::error::{Error, Fallible};
 use super::bindings::root::DomRoot;
 use super::types::GlobalScope;
+
 #[dom_struct]
 pub struct CountQueuingStrategy {
     reflector_: Reflector,
@@ -39,8 +42,28 @@ impl CountQueuingStrategy {
         }
     }
 
-    pub fn new(global: &GlobalScope,init: f64) -> DomRoot<Self> {
+    pub fn new(global: &GlobalScope, init: f64) -> DomRoot<Self> {
         let count_queuing_strategy = Self::new_inherited(init);
         reflect_dom_object(Box::new(count_queuing_strategy), global)
     }
+}
+
+// Streams Spec: 7.4
+// https://streams.spec.whatwg.org/#validate-and-normalize-high-water-mark
+pub fn extract_highwatermark(strategy: &QueuingStrategy, defaultHWM: f64) -> Fallible<f64> {
+    // Step 1.
+    if strategy.highWaterMark.is_none() {
+        return Ok(defaultHWM);
+    }
+
+    // Step 2.
+    let highwatermark: f64 = strategy.highWaterMark.unwrap();
+
+    // Step 3.
+    if highwatermark.is_nan() || highwatermark.is_sign_negative() {
+        return Err(Error::Range("Invalid highWaterMark".to_string()));
+    }
+
+    // Step 4.
+    return Ok(highwatermark);
 }

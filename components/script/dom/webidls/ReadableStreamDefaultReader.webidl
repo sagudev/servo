@@ -23,7 +23,7 @@ interface ReadableStreamDefaultReader {
   constructor(ReadableStream stream);
 
   [Throws]
-  Promise<ReadableStreamDefaultReadResult> read();
+  Promise<ReadableStreamReadResult> read();
 
   [Throws]
   undefined releaseLock();
@@ -31,7 +31,7 @@ interface ReadableStreamDefaultReader {
 ReadableStreamDefaultReader includes ReadableStreamGenericReader;
 
 
-dictionary ReadableStreamDefaultReadResult {
+dictionary ReadableStreamReadResult {
  any value;
  boolean done;
 };
