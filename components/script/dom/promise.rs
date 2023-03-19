@@ -23,7 +23,7 @@ use crate::script_runtime::JSContext as SafeJSContext;
 use crate::script_thread::ScriptThread;
 use dom_struct::dom_struct;
 use js::conversions::ToJSValConvertible;
-use js::jsapi::{AddRawValueRoot, CallArgs, GetFunctionNativeReserved};
+use js::jsapi::{AddRawValueRoot, CallArgs, GetFunctionNativeReserved, UndefinedHandleValue};
 use js::jsapi::{Heap, JS_ClearPendingException};
 use js::jsapi::{JSAutoRealm, JSContext, JSObject, JS_GetFunctionObject};
 use js::jsapi::{JS_NewFunction, NewFunctionWithReserved};
@@ -160,8 +160,7 @@ impl Promise {
         global: &GlobalScope,
         cx: SafeJSContext,
     ) -> Fallible<Rc<Promise>> {
-        rooted!(in(cx) let value = UndefinedValue());
-        Promise::new_resolved(global, cx, value.handle())
+        Promise::new_resolved(global, cx, UndefinedHandleValue)
     }
 
     #[allow(unrooted_must_root, unsafe_code)]

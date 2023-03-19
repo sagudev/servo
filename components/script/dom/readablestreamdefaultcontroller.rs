@@ -3,23 +3,25 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use std::cell::Cell;
+use std::collections::VecDeque;
 use std::rc::Rc;
 
 use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultControllerBinding::ReadableStreamDefaultControllerMethods;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
 use crate::script_runtime::JSContext;
 use dom_struct::dom_struct;
-use js::jsapi::JSObject;
-use js::jsval::UndefinedValue;
-use js::rust::{Handle, HandleValue, MutableHandleValue, RootedGuard};
+use js::jsapi::{JSObject, Heap};
+use js::jsval::{UndefinedValue, JSVal};
+use js::rust::{Handle, HandleValue, MutableHandleValue};
 
 use super::bindings::callback::ExceptionHandling;
 use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategySize;
 use super::bindings::codegen::Bindings::ReadableStreamBinding::{
     ReadableStreamController, UnderlyingSource,
 };
+use crate::dom::bindings::cell::DomRefCell;
 use super::bindings::error::Fallible;
-use super::bindings::root::{DomRoot, MutNullableDom};
+use crate::dom::bindings::root::{Dom, DomRoot, MutNullableDom};
 use super::promise::Promise;
 use super::readablestream::ReadableStream;
 use super::types::GlobalScope;
@@ -75,16 +77,18 @@ pub struct ReadableStreamDefaultController {
     /// A boolean flag set to true while the underlying source's pull algorithm is executing and the returned promise has not yet fulfilled, used to prevent reentrant calls
     pulling: Cell<bool>,
     /// A list representing the stream’s internal queue of chunks
-    queue: (),
+    #[ignore_malloc_size_of = "Defined in rust-mozjs"]
+    queue: DomRefCell<VecDeque<Heap<JSVal>>>,
     /// The total size of all the chunks stored in queue (see § 8.1 Queue-with-sizes)
-    queueTotalSize: (),
+    queueTotalSize: Cell<f64>,
     /// A boolean flag indicating whether the underlying source has finished starting
     started: Cell<bool>,
     /// A number supplied to the constructor as part of the stream’s queuing strategy, indicating the point at which the stream will apply backpressure to its underlying source
-    strategyHWM: f64,
+    strategyHWM: Cell<f64>,
     /// An algorithm to calculate the size of enqueued chunks, as part of the stream’s queuing strategy
     ///
     /// If missing use default value (1) per https://streams.spec.whatwg.org/#make-size-algorithm-from-size-function
+    #[ignore_malloc_size_of = "Rc is hard"]
     strategySizeAlgorithm: Option<Rc<QueuingStrategySize>>,
     /// The ReadableStream instance controlled
     stream: MutNullableDom<ReadableStream>,
@@ -112,10 +116,9 @@ impl ReadableStreamDefaultController {
     fn new_inherited() -> Self {
         Self {
             reflector_: Reflector::new(),
-            cancelAlgorithm: todo!(),
+            algorithms: todo!(),
             closeRequested: todo!(),
             pullAgain: todo!(),
-            pullAlgorithm: todo!(),
             pulling: todo!(),
             queue: todo!(),
             queueTotalSize: todo!(),
@@ -131,17 +134,18 @@ impl ReadableStreamDefaultController {
     }
 }
 
-#[derive(JSTraceable)]
+#[derive(JSTraceable, MallocSizeOf)]
 pub struct UnderlyingSourceAlgorithms {
+    #[ignore_malloc_size_of = "idk bindings so unclear ownership semantics"]
     under: UnderlyingSource,
-    global: GlobalScope,
+    //global: GlobalScope,
 }
 
 impl UnderlyingSourceAlgorithms {
-    fn new(global: GlobalScope, underlying_source_dict: UnderlyingSource) -> Self {
+    fn new(global: &GlobalScope, underlying_source_dict: UnderlyingSource) -> Self {
         Self {
             under: underlying_source_dict,
-            global,
+            //global: GlobalScope:,
         }
     }
 }
@@ -158,7 +162,7 @@ impl UnderlyingSourceAlgorithmsBase for UnderlyingSourceAlgorithms {
             val.set(callback.Call__(controller, ExceptionHandling::Rethrow)?);
         }
 
-        retval.set(val);
+        retval.set(val.get());
         Ok(())
     }
 
@@ -171,7 +175,7 @@ impl UnderlyingSourceAlgorithmsBase for UnderlyingSourceAlgorithms {
             return callback.Call__(controller, ExceptionHandling::Rethrow);
         } else {
             // It is optional so return primise with undefined
-            Promise::new_resolved_to_undefined(&self.global, cx)
+            Promise::new_resolved_to_undefined(&GlobalScope::current().expect("No current global"), cx)
         }
     }
 
@@ -180,7 +184,7 @@ impl UnderlyingSourceAlgorithmsBase for UnderlyingSourceAlgorithms {
             return callback.Call__(reason, ExceptionHandling::Rethrow);
         } else {
             // It is optional so return primise with undefined
-            Promise::new_resolved_to_undefined(&self.global, cx)
+            Promise::new_resolved_to_undefined(&GlobalScope::current().expect("No current global"), cx)
         }
     }
 
@@ -203,18 +207,18 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
     size_algorithm: Option<Rc<QueuingStrategySize>>,
 ) -> Fallible<()> {
     // Step 1.
-    let controller: ReadableStreamDefaultController =
-        ReadableStreamDefaultController::new(stream.global());
+    let controller =
+        ReadableStreamDefaultController::new(&*stream.global());
 
     // Step 2 - 7
     let algorithms: UnderlyingSourceAlgorithms =
-        UnderlyingSourceAlgorithms::new(stream.global(), underlying_source_dict);
+        UnderlyingSourceAlgorithms::new(&*stream.global(), underlying_source_dict);
 
     // Step 8:
     SetUpReadableStreamDefaultController(
         cx,
         stream,
-        controller,
+        &*controller,
         algorithms,
         highwatermark,
         size_algorithm,
@@ -225,20 +229,22 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
 fn SetUpReadableStreamDefaultController(
     cx: JSContext,
     stream: DomRoot<ReadableStream>,
-    controller: ReadableStreamDefaultController,
+    controller: &ReadableStreamDefaultController,
     algorithms: UnderlyingSourceAlgorithms,
     highwatermark: f64,
     size_algorithm: Option<Rc<QueuingStrategySize>>,
 ) -> Fallible<()> {
     // Step 1.
-    assert!(stream.controller.is_some());
+    assert!(stream.Controller().is_some());
 
-    let controller = stream.controller.unwrap();
+    let controller = stream.Controller().unwrap();
     // Step 2.
     controller.stream.or_init(|| stream);
 
     // Step 3.
-    ResetQueue(controller);
+    // TODO(streams): Abstract over different controllers and use ResetQueue(controller);
+    controller.queue.borrow_mut().clear();
+    controller.queueTotalSize.set(0.0);
 
     // Step 4.
     controller.started.set(false);
@@ -248,14 +254,14 @@ fn SetUpReadableStreamDefaultController(
 
     // Step 5.
     controller.strategySizeAlgorithm = size_algorithm;
-    controller.strategyHWM = highwatermark;
+    controller.strategyHWM.set(highwatermark);
 
     // Step 6.
     // Step 7.
     controller.algorithms = algorithms;
 
     // Step 8.
-    stream.controller.set(controller);
+    stream.SetController(controller);
 
     // Step 9. Default algorithm returns undefined. See Step 2 of
     // https://streams.spec.whatwg.org/#set-up-readable-stream-default-controller
@@ -264,7 +270,7 @@ fn SetUpReadableStreamDefaultController(
     algorithms.StartCallback(cx, &controller, start_result.handle_mut())?;
 
     // Step 10.
-    let start_promise: Rc<Promise> = Promise::new(stream.global());
+    let start_promise: Rc<Promise> = Promise::new(&*stream.global());
     todo!();
     // get parrent object from stream
     /*if !start_result.is_null() {

@@ -54,7 +54,7 @@ ReadableStreamUnderlyingSourceTraps {
 };*/
 
 /// Stream’s state, used internally;
-#[derive(Clone, JSTraceable, MallocSizeOf, Default)]
+#[derive(Clone, Copy, Debug, Default, JSTraceable, MallocSizeOf, PartialEq)]
 enum ReaderState {
     #[default]
     Readable,
@@ -74,20 +74,20 @@ pub struct ReadableStream {
     //external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
     /// A [ReadableStreamDefaultController] or [ReadableByteStreamController]
     /// created with the ability to control the state and queue of this stream.
-    controller: Option<ReadableStreamController>,
+    controller: DomRefCell<Option<ReadableStreamController>>,
     /// A boolean flag set to `true` when the stream is transferred
-    detached: Cell<bool>,
+    //detached: Cell<bool>,
     /// A boolean flag set to `true` when the stream has been read from or canceled
     disturbute: Cell<bool>,
     /// A [ReadableStreamDefaultReader] or [ReadableStreamBYOBReader] instance,
     /// if the stream is locked to a reader, or `undefined` if it is not
-    reader: MutDom<ReadableStreamDefaultReader>,
+    reader: MutNullableDom<ReadableStreamDefaultReader>,
     /// A enum containing the stream’s current state, used internally
-    state: ReaderState,
+    state: Cell<ReaderState>,
     /// A value indicating how the stream failed, to be given as a failure reason
     /// or exception when trying to operate on an errored stream
     #[ignore_malloc_size_of = "SM handles JS values"]
-    stored_error: Heap<*mut JSObject>,
+    stored_error: Heap<JSVal>,
 }
 
 impl ReadableStreamMethods for ReadableStream {
@@ -102,14 +102,14 @@ impl ReadableStreamMethods for ReadableStream {
     ) -> super::bindings::error::Fallible<Rc<Promise>> {
         use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultReaderBinding::ReadableStreamDefaultReaderMethods;
 
-        self.reader.get().Cancel(cx, reason)
+        self.reader.get().unwrap().Cancel(cx, reason)
     }
 
     fn GetReader(
         &self,
         options: &crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamGetReaderOptions,
     ) -> super::bindings::error::Fallible<DomRoot<super::types::ReadableStreamDefaultReader>> {
-        Ok(self.reader.get())
+        Ok(self.reader.get().unwrap())
     }
 }
 
@@ -152,7 +152,7 @@ impl ReadableStream {
             }
 
             // Step 4.2
-            let highwatermark = extract_highwatermark(strategy, 0)?;
+            let highwatermark = extract_highwatermark(strategy, 0.0)?;
 
             // Step 4.3
             //(void)highWaterMark;
@@ -180,15 +180,24 @@ impl ReadableStream {
 
         return Ok(readable_stream);
     }
+
+    pub fn SetController(&mut self, controller: ReadableStreamController) {
+        *self.controller.borrow_mut()=Some(controller);
+    }
+
+    pub fn Controller(&'_ self) -> std::cell::Ref<'_, Option<ReadableStreamController>> {
+        self.controller.borrow()
+    }
 }
 
+// can new_inherited and new become part of a DomObject trait
 impl ReadableStream {
     fn new_inherited() -> ReadableStream {
         // https://streams.spec.whatwg.org/#initialize-readable-stream
         ReadableStream {
             reflector_: Reflector::new(),
             controller: Default::default(),
-            detached: Default::default(),
+            //detached: Default::default(),
             disturbute: Default::default(),
             reader: Default::default(),
             state: Default::default(),
