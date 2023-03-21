@@ -8,10 +8,13 @@ use std::rc::Rc;
 
 use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultControllerBinding::ReadableStreamDefaultControllerMethods;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
+use crate::dom::promisenativehandler::{Callback, PromiseNativeHandler};
+use crate::realms::{enter_realm, InRealm};
 use crate::script_runtime::JSContext;
+use crate::task::TaskBox;
 use dom_struct::dom_struct;
-use js::jsapi::{JSObject, Heap};
-use js::jsval::{UndefinedValue, JSVal};
+use js::jsapi::{Heap, JSObject};
+use js::jsval::{JSVal, UndefinedValue};
 use js::rust::{Handle, HandleValue, MutableHandleValue};
 
 use super::bindings::callback::ExceptionHandling;
@@ -19,12 +22,12 @@ use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategyS
 use super::bindings::codegen::Bindings::ReadableStreamBinding::{
     ReadableStreamController, UnderlyingSource,
 };
-use crate::dom::bindings::cell::DomRefCell;
 use super::bindings::error::Fallible;
-use crate::dom::bindings::root::{Dom, DomRoot, MutNullableDom};
 use super::promise::Promise;
 use super::readablestream::ReadableStream;
 use super::types::GlobalScope;
+use crate::dom::bindings::cell::DomRefCell;
+use crate::dom::bindings::root::{Dom, DomRoot, MutNullableDom};
 
 pub trait UnderlyingSourceAlgorithmsBase {
     fn StartCallback(
@@ -175,7 +178,10 @@ impl UnderlyingSourceAlgorithmsBase for UnderlyingSourceAlgorithms {
             return callback.Call__(controller, ExceptionHandling::Rethrow);
         } else {
             // It is optional so return primise with undefined
-            Promise::new_resolved_to_undefined(&GlobalScope::current().expect("No current global"), cx)
+            Promise::new_resolved_to_undefined(
+                &GlobalScope::current().expect("No current global"),
+                cx,
+            )
         }
     }
 
@@ -184,7 +190,10 @@ impl UnderlyingSourceAlgorithmsBase for UnderlyingSourceAlgorithms {
             return callback.Call__(reason, ExceptionHandling::Rethrow);
         } else {
             // It is optional so return primise with undefined
-            Promise::new_resolved_to_undefined(&GlobalScope::current().expect("No current global"), cx)
+            Promise::new_resolved_to_undefined(
+                &GlobalScope::current().expect("No current global"),
+                cx,
+            )
         }
     }
 
@@ -207,8 +216,7 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
     size_algorithm: Option<Rc<QueuingStrategySize>>,
 ) -> Fallible<()> {
     // Step 1.
-    let controller =
-        ReadableStreamDefaultController::new(&*stream.global());
+    let controller = ReadableStreamDefaultController::new(&*stream.global());
 
     // Step 2 - 7
     let algorithms: UnderlyingSourceAlgorithms =
@@ -218,7 +226,7 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
     SetUpReadableStreamDefaultController(
         cx,
         stream,
-        &*controller,
+        &controller,
         algorithms,
         highwatermark,
         size_algorithm,
@@ -237,7 +245,6 @@ fn SetUpReadableStreamDefaultController(
     // Step 1.
     assert!(stream.Controller().is_some());
 
-    let controller = stream.Controller().unwrap();
     // Step 2.
     controller.stream.or_init(|| stream);
 
@@ -270,14 +277,52 @@ fn SetUpReadableStreamDefaultController(
     algorithms.StartCallback(cx, &controller, start_result.handle_mut())?;
 
     // Step 10.
-    let start_promise: Rc<Promise> = Promise::new(&*stream.global());
-    todo!();
-    // get parrent object from stream
-    /*if !start_result.is_null() {
-          pro
-      }
-    start_promise->MaybeResolve(startResult);
+    let global = &*stream.global();
+    let realm = enter_realm(&*global);
+    let comp = InRealm::Entered(&realm);
+    let start_promise: Rc<Promise> = Promise::new_in_current_realm(global, comp);
+    start_promise.resolve(cx, start_result.handle());
+    // Step 11 & 12
+    #[derive(JSTraceable, MallocSizeOf)]
+    struct Handler {
+        #[ignore_malloc_size_of = "Measuring trait objects is hard"]
+        task: DomRefCell<Option<Box<dyn TaskBox>>>,
+    }
 
+    impl Handler {
+        pub fn new(task: Box<dyn TaskBox>) -> Box<dyn Callback> {
+            Box::new(Self {
+                task: DomRefCell::new(Some(task)),
+            })
+        }
+    }
+
+    impl Callback for Handler {
+        fn callback(&self, _cx: JSContext, _v: HandleValue, _realm: InRealm) {
+            let task = self.task.borrow_mut().take().unwrap();
+            task.run_box();
+        }
+    }
+    let handler = PromiseNativeHandler::new(
+        &global,
+        Some(Handler::new(Box::new(task!(start_resolve: move || {
+            // Step 11.1
+          controller.started.set(true);
+
+          // Step 11.2
+          controller.pulling.set(false);
+
+          // Step 11.3
+          controller.pullAgain.set(false);
+
+          // Step 11.4:
+          ReadableStreamDefaultControllerCallPullIfNeeded(
+              cx, &controller)?;
+        })))),
+        Some(todo!()),
+    );
+    start_promise.append_native_handler(&handler, comp);
+    /*
     // Step 11 & 12:
     startPromise->AddCallbacksWithCycleCollectedArgs(
         [](JSContext* aCx, JS::Handle<JS::Value> aValue, ErrorResult& aRv,
@@ -305,4 +350,67 @@ fn SetUpReadableStreamDefaultController(
           ReadableStreamDefaultControllerError(aCx, controller, aValue, aRv);
         },
         RefPtr(controller));*/
+}
+
+// https://streams.spec.whatwg.org/#readable-stream-default-controller-call-pull-if-needed
+fn ReadableStreamDefaultControllerCallPullIfNeeded(
+    cx: JSContext,
+    controller: &ReadableStreamDefaultController,
+) -> Fallible<()> {
+    // Step 1.
+    let should_pull = ReadableStreamDefaultControllerShouldCallPull(controller);
+
+    // Step 2.
+    if !should_pull {
+        return Ok(());
+    }
+    /*
+    // Step 3.
+    if (aController->Pulling()) {
+      // Step 3.1
+      aController->SetPullAgain(true);
+      // Step 3.2
+      return;
+    }
+
+    // Step 4.
+    MOZ_ASSERT(!aController->PullAgain());
+
+    // Step 5.
+    aController->SetPulling(true);
+
+    // Step 6.
+    RefPtr<UnderlyingSourceAlgorithmsBase> algorithms =
+        aController->GetAlgorithms();
+    RefPtr<Promise> pullPromise =
+        algorithms->PullCallback(aCx, *aController, aRv);
+    if (aRv.Failed()) {
+      return;
+    }
+
+    // Step 7 + 8:
+    pullPromise->AddCallbacksWithCycleCollectedArgs(
+        [](JSContext* aCx, JS::Handle<JS::Value> aValue, ErrorResult& aRv,
+           ReadableStreamDefaultController* mController)
+            MOZ_CAN_RUN_SCRIPT_BOUNDARY {
+              // Step 7.1
+              mController->SetPulling(false);
+              // Step 7.2
+              if (mController->PullAgain()) {
+                // Step 7.2.1
+                mController->SetPullAgain(false);
+
+                // Step 7.2.2
+                ErrorResult rv;
+                ReadableStreamDefaultControllerCallPullIfNeeded(
+                    aCx, MOZ_KnownLive(mController), aRv);
+              }
+            },
+        [](JSContext* aCx, JS::Handle<JS::Value> aValue, ErrorResult& aRv,
+           ReadableStreamDefaultController* mController) {
+          // Step 8.1
+          ReadableStreamDefaultControllerError(aCx, mController, aValue, aRv);
+        },
+        RefPtr(aController));*/
+    Ok(())
 }

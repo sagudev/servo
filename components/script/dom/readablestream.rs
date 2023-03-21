@@ -182,7 +182,7 @@ impl ReadableStream {
     }
 
     pub fn SetController(&mut self, controller: ReadableStreamController) {
-        *self.controller.borrow_mut()=Some(controller);
+        *self.controller.borrow_mut() = Some(controller);
     }
 
     pub fn Controller(&'_ self) -> std::cell::Ref<'_, Option<ReadableStreamController>> {
