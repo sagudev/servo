@@ -12,37 +12,22 @@ jobs:
   build-linux:
     # This job is only useful when run on upstream servo.
     if: github.repository == 'servo/servo' || github.event_name == 'workflow_dispatch'
-    name: Build on Linux
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-      - name: Bootstrap
-        run: |
-          python3 -m pip install --upgrade pip virtualenv
-          sudo apt update
-          python3 ./mach bootstrap
-      - name: Release build (Layout 2013)
-        run: python3 ./mach build --release
-      - name: Lockfile check
-        run: ./etc/ci/lockfile_changed.sh
-      - name: Package binary (Layout 2013)
-        run: tar -czf target.tar.gz target/release/servo resources
-      - name: Archive binary (Layout 2013)
-        uses: actions/upload-artifact@v3
-        with:
-          name: layout-2013-release-binary
-          path: target.tar.gz
-      - name: Release build (Layout 2020)
-        run: python3 ./mach build --release --with-layout-2020
-      - name: Package binary (Layout 2020)
-        run: tar -czf target.tar.gz target/release/servo resources
-      - name: Archive binary (Layout 2020)
-        uses: actions/upload-artifact@v3
-        with:
-          name: layout-2020-release-binary
-          path: target.tar.gz
+    name: Linux
+    uses: ./.github/workflows/linux.yml
+    with:
+      layout: '2013'
+      wpt: false
+      unit: false
+  build-linux-2020:
+    # This job is only useful when run on upstream servo.
+    if: github.repository == 'servo/servo' || github.event_name == 'workflow_dispatch'
+    name: Linux (layout-2020)
+    uses: ./.github/workflows/linux.yml
+    with:
+      layout: '2020'
+      wpt: false
+      unit: false
+
 
   linux-wpt:
     # This job is only useful when run on upstream servo.
