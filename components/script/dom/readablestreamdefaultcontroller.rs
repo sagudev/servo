@@ -226,7 +226,7 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
     SetUpReadableStreamDefaultController(
         cx,
         stream,
-        &controller,
+        controller,
         algorithms,
         highwatermark,
         size_algorithm,
@@ -237,7 +237,7 @@ pub fn setup_readable_stream_default_controller_from_underlying_source(
 fn SetUpReadableStreamDefaultController(
     cx: JSContext,
     stream: DomRoot<ReadableStream>,
-    controller: &ReadableStreamDefaultController,
+    controller: DomRoot<ReadableStreamDefaultController>,
     algorithms: UnderlyingSourceAlgorithms,
     highwatermark: f64,
     size_algorithm: Option<Rc<QueuingStrategySize>>,
@@ -285,40 +285,35 @@ fn SetUpReadableStreamDefaultController(
     // Step 11 & 12
     #[derive(JSTraceable, MallocSizeOf)]
     struct Handler {
-        #[ignore_malloc_size_of = "Measuring trait objects is hard"]
-        task: DomRefCell<Option<Box<dyn TaskBox>>>,
+        controller: DomRoot<ReadableStreamDefaultController>,
     }
 
     impl Handler {
-        pub fn new(task: Box<dyn TaskBox>) -> Box<dyn Callback> {
+        pub fn new(controller: DomRoot<ReadableStreamDefaultController>) -> Box<dyn Callback> {
             Box::new(Self {
-                task: DomRefCell::new(Some(task)),
+                controller,
             })
         }
     }
 
     impl Callback for Handler {
-        fn callback(&self, _cx: JSContext, _v: HandleValue, _realm: InRealm) {
-            let task = self.task.borrow_mut().take().unwrap();
-            task.run_box();
+        fn callback(&self, cx: JSContext, _v: HandleValue, _realm: InRealm) {
+            // Step 11.1
+          self.controller.started.set(true);
+
+          // Step 11.2
+          self.controller.pulling.set(false);
+
+          // Step 11.3
+          self.controller.pullAgain.set(false);
+
+          // Step 11.4:
+          ReadableStreamDefaultControllerCallPullIfNeeded(cx, self.controller).unwrap();
         }
     }
     let handler = PromiseNativeHandler::new(
         &global,
-        Some(Handler::new(Box::new(task!(start_resolve: move || {
-            // Step 11.1
-          controller.started.set(true);
-
-          // Step 11.2
-          controller.pulling.set(false);
-
-          // Step 11.3
-          controller.pullAgain.set(false);
-
-          // Step 11.4:
-          ReadableStreamDefaultControllerCallPullIfNeeded(
-              cx, &controller)?;
-        })))),
+        Some(Handler::new(controller)),
         Some(todo!()),
     );
     start_promise.append_native_handler(&handler, comp);
