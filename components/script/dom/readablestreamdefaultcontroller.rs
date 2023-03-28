@@ -15,7 +15,7 @@ use crate::task::TaskBox;
 use dom_struct::dom_struct;
 use js::jsapi::{Heap, JSObject};
 use js::jsval::{JSVal, UndefinedValue};
-use js::rust::{Handle, HandleValue, MutableHandleValue};
+use js::rust::{Handle, HandleValue, MutableHandleValue, MutableHandle};
 
 use super::bindings::callback::ExceptionHandling;
 use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategySize;
@@ -284,11 +284,11 @@ fn SetUpReadableStreamDefaultController(
     start_promise.resolve(cx, start_result.handle());
     // Step 11 & 12
     #[derive(JSTraceable, MallocSizeOf)]
-    struct Handler {
+    struct ResolveHandler {
         controller: DomRoot<ReadableStreamDefaultController>,
     }
 
-    impl Handler {
+    impl ResolveHandler {
         pub fn new(controller: DomRoot<ReadableStreamDefaultController>) -> Box<dyn Callback> {
             Box::new(Self {
                 controller,
@@ -296,7 +296,7 @@ fn SetUpReadableStreamDefaultController(
         }
     }
 
-    impl Callback for Handler {
+    impl Callback for ResolveHandler {
         fn callback(&self, cx: JSContext, _v: HandleValue, _realm: InRealm) {
             // Step 11.1
           self.controller.started.set(true);
@@ -308,12 +308,12 @@ fn SetUpReadableStreamDefaultController(
           self.controller.pullAgain.set(false);
 
           // Step 11.4:
-          ReadableStreamDefaultControllerCallPullIfNeeded(cx, self.controller).unwrap();
+          ReadableStreamDefaultControllerCallPullIfNeeded(cx, &self.controller).unwrap();
         }
     }
     let handler = PromiseNativeHandler::new(
         &global,
-        Some(Handler::new(controller)),
+        Some(ResolveHandler::new(controller)),
         Some(todo!()),
     );
     start_promise.append_native_handler(&handler, comp);
@@ -408,4 +408,61 @@ fn ReadableStreamDefaultControllerCallPullIfNeeded(
         },
         RefPtr(aController));*/
     Ok(())
+}
+
+// https://streams.spec.whatwg.org/#readable-stream-default-controller-should-call-pull
+fn ReadableStreamDefaultControllerShouldCallPull(
+    controller: &ReadableStreamDefaultController) -> bool {
+  // Step 1.
+  let stream = controller.stream;
+  todo!();
+/*
+  // Step 2.
+  if (!ReadableStreamDefaultControllerCanCloseOrEnqueue(aController)) {
+    return false;
+  }
+
+  // Step 3.
+  if (!aController->Started()) {
+    return false;
+  }
+
+  // Step 4.
+  if (IsReadableStreamLocked(stream) &&
+      ReadableStreamGetNumReadRequests(stream) > 0) {
+    return true;
+  }
+
+  // Step 5.
+  Nullable<double> desiredSize =
+      ReadableStreamDefaultControllerGetDesiredSize(aController);
+
+  // Step 6.
+  MOZ_ASSERT(!desiredSize.IsNull());
+
+  // Step 7 + 8
+  return desiredSize.Value() > 0;*/
+}
+
+// https://streams.spec.whatwg.org/#readable-stream-default-controller-error
+fn ReadableStreamDefaultControllerError(
+    cx: JSContext, controller: ReadableStreamDefaultController,
+     value: Handle<JSVal>) -> Fallible<()> {
+  // Step 1.
+  todo!();
+  /*ReadableStream* stream = aController->Stream();
+
+  // Step 2.
+  if (stream->State() != ReadableStream::ReaderState::Readable) {
+    return;
+  }
+
+  // Step 3.
+  ResetQueue(aController);
+
+  // Step 4.
+  ReadableStreamDefaultControllerClearAlgorithms(aController);
+
+  // Step 5.
+  ReadableStreamError(aCx, stream, aValue, aRv);*/
 }
