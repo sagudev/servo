@@ -13,8 +13,10 @@ use js::jsapi::JSContext;
 use js::rust::HandleValue;
 use malloc_size_of::MallocSizeOf;
 
+use super::bindings::error::ErrorResult;
+
 pub trait Callback: JSTraceable + MallocSizeOf {
-    fn callback(&self, cx: SafeJSContext, v: HandleValue, realm: InRealm);
+    fn callback(&self, cx: SafeJSContext, v: HandleValue, realm: InRealm) -> ErrorResult;
 }
 
 #[dom_struct]
@@ -46,18 +48,20 @@ impl PromiseNativeHandler {
         cx: *mut JSContext,
         v: HandleValue,
         realm: InRealm,
-    ) {
+    ) -> ErrorResult {
         let cx = unsafe { SafeJSContext::from_ptr(cx) };
         if let Some(ref callback) = *callback {
             callback.callback(cx, v, realm)
+        } else {
+            Ok(())
         }
     }
 
-    pub fn resolved_callback(&self, cx: *mut JSContext, v: HandleValue, realm: InRealm) {
+    pub fn resolved_callback(&self, cx: *mut JSContext, v: HandleValue, realm: InRealm) -> ErrorResult {
         PromiseNativeHandler::callback(&self.resolve, cx, v, realm)
     }
 
-    pub fn rejected_callback(&self, cx: *mut JSContext, v: HandleValue, realm: InRealm) {
+    pub fn rejected_callback(&self, cx: *mut JSContext, v: HandleValue, realm: InRealm) -> ErrorResult {
         PromiseNativeHandler::callback(&self.reject, cx, v, realm)
     }
 }
