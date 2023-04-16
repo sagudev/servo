@@ -8,12 +8,13 @@ task:
     use_in_memory_disk: true
   env:
     CIRRUS_CLONE_DEPTH: 2
-    PATH: C:\python\;$PATH
+    PATH: %USERPROFILE%\.cargo\bin;C:\Python\;$PATH
+    PYTHON3: C:\Python\python.exe
 
   rust_script:
     - ps: $ProgressPreference = "SilentlyContinue"; Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe; .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --profile=minimal
   deps_script:
-    - choco install -y python310 --params "/InstallDir:C:\python"
+    - choco install -y python310 --params "/InstallDir:C:\Python"
     - choco install -y openssl.light
   bootstrap_script:
     - python -m pip install --upgrade pip virtualenv
