@@ -2,7 +2,7 @@ task:
   windows_container:
     image: cirrusci/windowsservercore:visualstudio2019
     os_version: 2019
-  env:
+  #env:
     #ANACONDA_LOCATION: $USERPROFILE\anaconda
     #PATH: $ANACONDA_LOCATION;$ANACONDA_LOCATION\Scripts;$ANACONDA_LOCATION\Library\bin;$PATH
 
