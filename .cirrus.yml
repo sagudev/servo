@@ -4,11 +4,16 @@ task:
     image: cirrusci/windowsservercore:visualstudio2019
     os_version: 2019
     cpu: 8
-    memory: 24GB
+    memory: 32GB
     use_in_memory_disk: true
+  env:
+    CIRRUS_CLONE_DEPTH: 2
+    PATH: C:\python\;$PATH
 
-  script:
-    - choco install -y python
+  system_script:
+    - choco install -y python310 --params "/InstallDir:C:\python"
+    - choco install -y openssl.light
+  install_script:
     - python -m pip install --upgrade pip virtualenv
     - python mach fetch
     - python mach build --release --media-stack=dummy
