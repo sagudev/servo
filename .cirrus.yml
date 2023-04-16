@@ -12,6 +12,7 @@ task:
     PYTHON3: C:\Python\python.exe
 
   rust_script:
+    - git config --system core.longpaths true  # Fix for windows git checkout problems
     - ps: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
     - ps: $ProgressPreference = "SilentlyContinue"; Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe; .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --profile=minimal
   deps_script:
