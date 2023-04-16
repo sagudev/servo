@@ -1,17 +1,14 @@
 task:
+  name: Windows
   windows_container:
     image: cirrusci/windowsservercore:visualstudio2019
     os_version: 2019
-  #env:
-    #ANACONDA_LOCATION: $USERPROFILE\anaconda
-    #PATH: $ANACONDA_LOCATION;$ANACONDA_LOCATION\Scripts;$ANACONDA_LOCATION\Library\bin;$PATH
+    cpu: 8
+    memory: 24GB
+    use_in_memory_disk: true
 
-  install_python:
+  script:
     - choco install -y python
-
-  bootstrap:
     - python -m pip install --upgrade pip virtualenv
     - python mach fetch
-    
-  build:
     - python mach build --release --media-stack=dummy
