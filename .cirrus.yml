@@ -8,7 +8,7 @@ task:
     use_in_memory_disk: true
   env:
     CIRRUS_CLONE_DEPTH: 2
-    PATH: %USERPROFILE%\.cargo\bin;C:\Python\;$PATH
+    PATH: $USERPROFILE\.cargo\bin;C:\Python\;$PATH
     PYTHON3: C:\Python\python.exe
 
   rust_script:
