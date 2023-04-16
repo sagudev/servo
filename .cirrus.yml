@@ -13,6 +13,7 @@ task:
 
   win_paths_workarounds_script:
     - fsutil behavior set disable8dot3 0
+    - fsutil file setshortname "C:/Program Files (x86)/" PROGRA~2
     - fsutil file setshortname "C:/Program Files (x86)/Windows Kits/" wk~1
     - fsutil file setshortname "C:/Program Files (x86)/Microsoft Visual Studio" msvs
     - git config --system core.longpaths true  # Fix for windows git checkout problems
