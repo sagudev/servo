@@ -12,7 +12,9 @@ task:
     PYTHON3: C:\Python\python.exe
 
   win_paths_workarounds_script:
-    - fsutil.exe behavior set disable8dot3 0
+    - fsutil behavior set disable8dot3 0
+    - fsutil file setshortname "C:/Program Files (x86)/Windows Kits/" wk~1
+    - fsutil file setshortname "C:/Program Files (x86)/Microsoft Visual Studio" msvs
     - git config --system core.longpaths true  # Fix for windows git checkout problems
     - ps: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
   rust_script:
