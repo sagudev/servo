@@ -1,0 +1,19 @@
+win_task:
+  auto_cancellation: true
+
+  windows_container:
+    image: cirrusci/windowsservercore:visualstudio2019
+    os_version: 2019
+  env:
+    #ANACONDA_LOCATION: $USERPROFILE\anaconda
+    #PATH: $ANACONDA_LOCATION;$ANACONDA_LOCATION\Scripts;$ANACONDA_LOCATION\Library\bin;$PATH
+
+  install_python:
+    - choco install -y python
+
+  bootstrap:
+    - python -m pip install --upgrade pip virtualenv
+    - python mach fetch
+    
+  build:
+    - python mach build --release --media-stack=dummy
