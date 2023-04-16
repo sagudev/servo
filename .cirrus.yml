@@ -1,6 +1,4 @@
-win_task:
-  auto_cancellation: true
-
+task:
   windows_container:
     image: cirrusci/windowsservercore:visualstudio2019
     os_version: 2019
