@@ -27,4 +27,6 @@ task:
     - python -m pip install --upgrade pip virtualenv
     - python mach fetch
   build_script:
-    - python mach build --release --media-stack=dummy -j 10
+    - python mach build --release --media-stack=dummy -j 16
+  timings_artifacts:
+    path: "target\cargo-timings\*"
