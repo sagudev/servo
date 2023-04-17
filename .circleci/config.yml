@@ -6,6 +6,7 @@ jobs:
     executor: win/server-2019
     steps:
       - checkout
+      - run: $ProgressPreference = "SilentlyContinue"; Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe; .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --profile=minimal
       - run: python -m pip install --upgrade pip virtualenv
       - run: python mach fetch
       - run: python mach build --release --media-stack=dummy
