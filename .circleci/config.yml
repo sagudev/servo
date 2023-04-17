@@ -3,7 +3,9 @@ orbs:
   win: circleci/windows@5.0
 jobs:
   build:
-    executor: win/server-2019
+    executor:
+      name: win/server-2019
+      size: medium # 8 vCPU, 16GB ram
     environment:
       CARGO_NET_GIT_FETCH_WITH_CLI: true
       PYTHON3: C:\tools\miniconda3\python.exe
