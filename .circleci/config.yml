@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Build
           no_output_timeout: 2h # we will never hit that
-          command: python mach build --release --media-stack=dummy
+          command: python mach build --release --media-stack=dummy -j16
 workflows:
   my-workflow:
     jobs:
