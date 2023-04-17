@@ -39,5 +39,5 @@ task:
     - python mach smoketest --angle
   package_script:
     - python mach package --release
-  package_artifacts:
+  win_artifacts:
     path: "target/release/msi/Servo.exe"
