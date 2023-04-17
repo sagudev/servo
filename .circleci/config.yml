@@ -6,6 +6,7 @@ jobs:
     executor: win/server-2019
     environment:
       CARGO_NET_GIT_FETCH_WITH_CLI: true
+      PYTHON3: C:\tools\miniconda3\python.exe
     steps:
       - checkout
       - run: $ProgressPreference = "SilentlyContinue"; Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe; .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --profile=minimal
