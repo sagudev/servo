@@ -24,8 +24,8 @@ task:
     - ps: Start-BitsTransfer -Source https://gstreamer.freedesktop.org/data/pkg/windows/1.16.0/gstreamer-1.0-devel-msvc-x86_64-1.16.0.msi
     - ps: Start-Process msiexec.exe -Wait -ArgumentList "/i gstreamer-1.0-devel-msvc-x86_64-1.16.0.msi /quiet /qn /norestart ADDLOCAL=ALL"
   wix311_binaries_script:
-    - ps: Start-BitsTransfer -Source https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip -Destination C:\\wix311-binaries.zip
-    - ps: Expand-Archive C:\\wix311-binaries.zip -DestinationPath C:\\wix
+    - ps: Start-BitsTransfer -Source https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip -Destination C:\wix311-binaries.zip
+    - ps: Expand-Archive C:\wix311-binaries.zip -DestinationPath C:\wix
   rust_script:
     - ps: $ProgressPreference = "SilentlyContinue"; Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe; .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --profile=minimal
   deps_script:
