@@ -5,6 +5,7 @@ jobs:
   build:
     executor: win/server-2019
     steps:
+      - run: git clone --depth 2 "$CIRCLE_REPOSITORY_URL" --branch "$CIRCLE_BRANCH"
       - run: python -m pip install --upgrade pip virtualenv
       - run: python mach fetch
       - run: python mach build --release --media-stack=dummy
