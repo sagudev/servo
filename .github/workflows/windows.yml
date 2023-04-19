@@ -74,7 +74,7 @@ jobs:
           python mach fetch
       - name: Release build
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
-        run: python mach build --release --with-${{ env.LAYOUT }}
+        run: ccache python mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: python mach smoketest --angle
