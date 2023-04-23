@@ -1,4 +1,4 @@
 # Runtime dependencies
 
 brew "gnutls"
-brew "openssl"
+brew "openssl@3"

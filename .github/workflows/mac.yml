@@ -75,11 +75,10 @@ jobs:
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile-build
       - name: Release build
         run: |
-          export OPENSSL_INCLUDE_DIR="$(brew --prefix openssl)/include"
-          export OPENSSL_LIB_DIR="$(brew --prefix openssl)/lib"
+          export PATH="/Library/Frameworks/GStreamer.framework/Versions/1.0/bin${PATH:+:$PATH}"
+          export OPENSSL_DIR="$(brew --prefix openssl)"
           export PKG_CONFIG_PATH="$(brew --prefix libffi)/lib/pkgconfig/"
           export PKG_CONFIG_PATH="$(brew --prefix zlib)/lib/pkgconfig/:$PKG_CONFIG_PATH"
-          export PATH="/Library/Frameworks/GStreamer.framework/Versions/1.0/bin${PATH:+:$PATH}"
           python3 ./mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
         run: python3 ./mach smoketest
