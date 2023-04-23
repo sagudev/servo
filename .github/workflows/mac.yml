@@ -73,9 +73,6 @@ jobs:
           sudo installer -pkg gstreamer-devel.pkg -target /
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile-build
-          rm -rf /usr/local/etc/openssl
-          rm -rf /usr/local/etc/openssl@1.1
-          brew install openssl@1.1 gnu-tar
       - name: Release build
         run: |
           export OPENSSL_INCLUDE_DIR="$(brew --prefix openssl)/include"
