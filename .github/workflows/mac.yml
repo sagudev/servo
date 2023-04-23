@@ -43,6 +43,7 @@ env:
   RUSTC_WRAPPER: "sccache"
   CCACHE: "sccache"
   CARGO_INCREMENTAL: 0
+  GSTREAMER_VERSION: 1.22.2
 
 jobs:
   build-mac:
@@ -66,6 +67,10 @@ jobs:
       - name: Bootstrap
         run: |
           python3 -m pip install --upgrade pip virtualenv
+          curl -s https://gstreamer.freedesktop.org/data/pkg/osx/1.22.2/gstreamer-1.0-${{ ENV.GSTREAMER_VERSION }}-universal.pkg -o gstreamer.pkg
+          sudo installer -pkg gstreamer.pkg -target /
+          curl -s https://gstreamer.freedesktop.org/data/pkg/osx/1.22.2/gstreamer-1.0-devel-${{ env.GSTREAMER_VERSION }}-universal.pkg -o gstreamer-devel.pkg
+          sudo installer -pkg gstreamer-devel.pkg -target /
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile-build
           rm -rf /usr/local/etc/openssl
@@ -77,6 +82,7 @@ jobs:
           export OPENSSL_LIB_DIR="$(brew --prefix openssl)/lib"
           export PKG_CONFIG_PATH="$(brew --prefix libffi)/lib/pkgconfig/"
           export PKG_CONFIG_PATH="$(brew --prefix zlib)/lib/pkgconfig/:$PKG_CONFIG_PATH"
+          export PATH="/Library/Frameworks/GStreamer.framework/Versions/1.0/bin${PATH:+:$PATH}"
           python3 ./mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
         run: python3 ./mach smoketest
