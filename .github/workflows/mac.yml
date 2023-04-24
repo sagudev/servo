@@ -76,7 +76,8 @@ jobs:
       - name: Release build
         run: |
           export PATH="/Library/Frameworks/GStreamer.framework/Versions/1.0/bin${PATH:+:$PATH}"
-          export OPENSSL_DIR="$(brew --prefix openssl)"
+          export OPENSSL_DIR="$(brew --prefix openssl@1.1)"
+          echo $OPENSSL_DIR
           export PKG_CONFIG_PATH="$(brew --prefix libffi)/lib/pkgconfig/"
           export PKG_CONFIG_PATH="$(brew --prefix zlib)/lib/pkgconfig/:$PKG_CONFIG_PATH"
           python3 ./mach build --release --with-${{ env.LAYOUT }}
