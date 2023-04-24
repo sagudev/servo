@@ -148,6 +148,8 @@ def macos_plugins():
     ]
 
     def plugin_path(plugin):
+        if os.getenv("GSTREAMER") is not None:
+            return os.path.join(os.getenv("GSTREAMER"), 'Library', f"lib{plugin}.dylib")
         return os.path.join(macos_lib_dir(), 'gstreamer-1.0', f"lib{plugin}.dylib")
 
     # These plugins depend on the particular version of GStreamer that is installed

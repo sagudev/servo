@@ -75,6 +75,7 @@ jobs:
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile-build
       - name: Release build
         run: |
+          export GSTREAMER="/Library/Frameworks/GStreamer.framework/Versions/1.0/"
           export PATH="/Library/Frameworks/GStreamer.framework/Versions/1.0/bin${PATH:+:$PATH}"
           export OPENSSL_DIR="$(brew --prefix openssl@1.1)"
           echo $OPENSSL_DIR
