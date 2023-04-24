@@ -122,6 +122,8 @@ def windows_plugins(uwp):
 
 
 def macos_lib_dir():
+    if os.getenv("GSTREAMER") is not None:
+        return os.path.normpath(os.getenv("GSTREAMER"))
     # homebrew use /opt/homebrew on macos ARM, use /usr/local on Intel
     if platform.machine() == 'arm64':
         return os.path.join('/', 'opt', 'homebrew', 'lib')
