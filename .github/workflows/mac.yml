@@ -83,6 +83,7 @@ jobs:
           export PKG_CONFIG_PATH="$(brew --prefix zlib)/lib/pkgconfig/:$PKG_CONFIG_PATH"
           python3 ./mach build --release --with-${{ env.LAYOUT }}
           ls /Users/runner/work/servo/servo/target/release
+          otool -l /Users/runner/work/servo/servo/target/release/servo
       - name: Smoketest
         run: python3 ./mach smoketest
       - name: Unit tests
