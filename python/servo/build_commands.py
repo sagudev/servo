@@ -802,21 +802,12 @@ def package_gstreamer_dylibs(servo_exe_dir):
             if os.path.isfile(dest_path):
                 os.remove(dest_path)
             shutil.copy(gst_lib, servo_exe_dir)
-            if os.getenv("GSTREAMER") is not None:
-                subprocess.call(["install_name_tool", "-change", lib,
-                                 f"@executable_path/{lib}", f"{servo_exe_dir}/servo"])
         except Exception as e:
             print(e)
             missing += [str(gst_lib)]
 
     if os.getenv("GSTREAMER") is not None:
-        # simulate osxrelocator.py
-        for gst_lib in gst_dylibs:
-            lib = os.path.basename(gst_lib)
-            for gst_lib2 in gst_dylibs:
-                lib2 = os.path.basename(gst_lib2)
-                subprocess.call(["install_name_tool", "-change", lib,
-                                 f"@executable_path/{lib}", f"{servo_exe_dir}/{lib2}"])
+        subprocess.call(["install_name_tool", "-add_rpath", "@executable_path/.", f"{servo_exe_dir}/servo"])
 
     for gst_lib in missing:
         print("ERROR: could not find required GStreamer DLL: " + gst_lib)
