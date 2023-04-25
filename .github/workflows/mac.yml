@@ -76,8 +76,12 @@ jobs:
           echo "/Library/Frameworks/GStreamer.framework/Versions/1.0/bin" >> $GITHUB_PATH
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile
           brew bundle install --verbose --no-upgrade --file=etc/homebrew/Brewfile-build
+          rm -rf /usr/local/etc/openssl
+          rm -rf /usr/local/etc/openssl@1.1
+          brew install openssl@1.1 gnu-tar
       - name: Release build
         run: |
+          export OPENSSL_LIB_DIR="$(brew --prefix openssl@1.1)/lib"
           export OPENSSL_DIR="$(brew --prefix openssl@1.1)"
           export PKG_CONFIG_PATH="$(brew --prefix libffi)/lib/pkgconfig/"
           export PKG_CONFIG_PATH="$(brew --prefix zlib)/lib/pkgconfig/:$PKG_CONFIG_PATH"
