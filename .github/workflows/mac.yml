@@ -48,7 +48,7 @@ env:
 jobs:
   build-mac:
     name: Build
-    runs-on: macos-12-xl
+    runs-on: macos-12
     env:
       GSTREAMER: "/Library/Frameworks/GStreamer.framework/Versions/1.0/Libraries"
     steps:
