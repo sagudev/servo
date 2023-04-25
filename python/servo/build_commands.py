@@ -797,10 +797,14 @@ def package_gstreamer_dylibs(servo_exe_dir):
     gst_dylibs = macos_dylibs() + macos_plugins()
     for gst_lib in gst_dylibs:
         try:
-            dest_path = os.path.join(servo_exe_dir, os.path.basename(gst_lib))
+            lib = os.path.basename(gst_lib)
+            dest_path = os.path.join(servo_exe_dir, lib)
             if os.path.isfile(dest_path):
                 os.remove(dest_path)
             shutil.copy(gst_lib, servo_exe_dir)
+            if os.getenv("GSTREAMER") is not None:
+                subprocess.call(["install_name_tool", "-change", lib,
+                                 f"@executable_path/{lib}", f"{servo_exe_dir}/servo"])
         except Exception as e:
             print(e)
             missing += [str(gst_lib)]
