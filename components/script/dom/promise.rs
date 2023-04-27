@@ -156,6 +156,14 @@ impl Promise {
     }
 
     #[allow(unrooted_must_root, unsafe_code)]
+    pub fn new_resolved_to_undefined(
+        global: &GlobalScope,
+        cx: SafeJSContext,
+    ) -> Fallible<Rc<Promise>> {
+        Promise::new_resolved(global, cx, HandleValue::undefined())
+    }
+
+    #[allow(unrooted_must_root, unsafe_code)]
     pub fn new_rejected(
         global: &GlobalScope,
         cx: SafeJSContext,

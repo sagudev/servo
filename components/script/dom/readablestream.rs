@@ -2,14 +2,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+use super::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategy;
+use super::bindings::error::Fallible;
+use crate::dom::bindings::cell::DomRefCell;
+use crate::dom::bindings::codegen::Bindings::QueuingStrategyBinding::QueuingStrategySize;
+use crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamMethods;
+use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultReaderBinding::ReadableStreamType;
 use crate::dom::bindings::conversions::{ConversionBehavior, ConversionResult};
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::settings_stack::{AutoEntryScript, AutoIncumbentScript};
 use crate::dom::bindings::utils::get_dictionary_property;
+use crate::dom::countqueuingstrategy::extract_highwatermark;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::promise::Promise;
+use crate::dom::readablestreamdefaultcontroller::setup_readable_stream_default_controller_from_underlying_source;
 use crate::js::conversions::FromJSValConvertible;
 use crate::realms::{enter_realm, InRealm};
 use crate::script_runtime::JSContext as SafeJSContext;
@@ -18,17 +26,10 @@ use js::glue::{
     CreateReadableStreamUnderlyingSource, DeleteReadableStreamUnderlyingSource,
     ReadableStreamUnderlyingSourceTraps,
 };
-use js::jsapi::{
-    AutoRequireNoGC, IsReadableStream, JS_GetArrayBufferViewData,
-    NewReadableExternalSourceStreamObject, ReadableStreamClose, ReadableStreamDefaultReaderRead,
-    ReadableStreamError, ReadableStreamGetReader, ReadableStreamIsDisturbed,
-    ReadableStreamIsLocked, ReadableStreamIsReadable, ReadableStreamReaderMode,
-    ReadableStreamReaderReleaseLock, ReadableStreamUnderlyingSource,
-    ReadableStreamUpdateDataAvailableFromSource, UnwrapReadableStream,
-};
+use js::jsapi::{AutoRequireNoGC, JS_GetArrayBufferViewData};
 use js::jsapi::{HandleObject, HandleValue, Heap, JSContext, JSObject};
-use js::jsval::JSVal;
 use js::jsval::UndefinedValue;
+use js::jsval::{JSVal, ObjectValue};
 use js::rust::HandleValue as SafeHandleValue;
 use js::rust::IntoHandle;
 use std::cell::{Cell, RefCell};
@@ -36,52 +37,179 @@ use std::os::raw::c_void;
 use std::ptr::{self, NonNull};
 use std::rc::Rc;
 use std::slice;
+//use super::underlyingsource::UnderlyingSource;
+use super::bindings::codegen::Bindings::ReadableStreamBinding::{
+    ReadableStreamController, UnderlyingSource,
+};
+use super::bindings::root::{MutDom, MutNullableDom};
+use super::types::{ReadableStreamDefaultController, ReadableStreamDefaultReader};
+/*static UNDERLYING_SOURCE_TRAPS: ReadableStreamUnderlyingSourceTraps =
+ReadableStreamUnderlyingSourceTraps {
+    requestData: Some(request_data),
+    writeIntoReadRequestBuffer: Some(write_into_read_request_buffer),
+    cancel: Some(cancel),
+    onClosed: Some(close),
+    onErrored: Some(error),
+    finalize: Some(finalize),
+};*/
 
-static UNDERLYING_SOURCE_TRAPS: ReadableStreamUnderlyingSourceTraps =
-    ReadableStreamUnderlyingSourceTraps {
-        requestData: Some(request_data),
-        writeIntoReadRequestBuffer: Some(write_into_read_request_buffer),
-        cancel: Some(cancel),
-        onClosed: Some(close),
-        onErrored: Some(error),
-        finalize: Some(finalize),
-    };
+/// Stream’s state, used internally;
+#[derive(Clone, Copy, Debug, Default, JSTraceable, MallocSizeOf, PartialEq)]
+enum ReaderState {
+    #[default]
+    Readable,
+    Closed,
+    Errored,
+}
 
 #[dom_struct]
 pub struct ReadableStream {
     reflector_: Reflector,
+    //#[ignore_malloc_size_of = "SM handles JS values"]
+    //js_stream: Heap<*mut JSObject>,
+    //#[ignore_malloc_size_of = "SM handles JS values"]
+    //js_reader: Heap<*mut JSObject>,
+    //has_reader: Cell<bool>,
+    //#[ignore_malloc_size_of = "Rc is hard"]
+    //external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
+    /// A [ReadableStreamDefaultController] or [ReadableByteStreamController]
+    /// created with the ability to control the state and queue of this stream.
+    controller: DomRefCell<Option<ReadableStreamController>>,
+    /// A boolean flag set to `true` when the stream is transferred
+    //detached: Cell<bool>,
+    /// A boolean flag set to `true` when the stream has been read from or canceled
+    disturbute: Cell<bool>,
+    /// A [ReadableStreamDefaultReader] or [ReadableStreamBYOBReader] instance,
+    /// if the stream is locked to a reader, or `undefined` if it is not
+    reader: MutNullableDom<ReadableStreamDefaultReader>,
+    /// A enum containing the stream’s current state, used internally
+    state: Cell<ReaderState>,
+    /// A value indicating how the stream failed, to be given as a failure reason
+    /// or exception when trying to operate on an errored stream
     #[ignore_malloc_size_of = "SM handles JS values"]
-    js_stream: Heap<*mut JSObject>,
-    #[ignore_malloc_size_of = "SM handles JS values"]
-    js_reader: Heap<*mut JSObject>,
-    has_reader: Cell<bool>,
-    #[ignore_malloc_size_of = "Rc is hard"]
-    external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
+    stored_error: Heap<JSVal>,
 }
 
+impl ReadableStreamMethods for ReadableStream {
+    fn Locked(&self) -> bool {
+        todo!()
+    }
+
+    fn Cancel(
+        &self,
+        cx: SafeJSContext,
+        reason: SafeHandleValue,
+    ) -> super::bindings::error::Fallible<Rc<Promise>> {
+        use crate::dom::bindings::codegen::Bindings::ReadableStreamDefaultReaderBinding::ReadableStreamDefaultReaderMethods;
+
+        self.reader.get().unwrap().Cancel(cx, reason)
+    }
+
+    fn GetReader(
+        &self,
+        options: &crate::dom::bindings::codegen::Bindings::ReadableStreamBinding::ReadableStreamGetReaderOptions,
+    ) -> super::bindings::error::Fallible<DomRoot<super::types::ReadableStreamDefaultReader>> {
+        Ok(self.reader.get().unwrap())
+    }
+}
+
+#[allow(non_snake_case)]
 impl ReadableStream {
-    fn new_inherited(
-        external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
-    ) -> ReadableStream {
+    //https://streams.spec.whatwg.org/#rs-constructor
+    pub fn Constructor(
+        cx: SafeJSContext,
+        global: &GlobalScope,
+        underlying_source: Option<*mut JSObject>,
+        strategy: &QueuingStrategy,
+    ) -> Fallible<DomRoot<Self>> {
+        // Step 1
+        rooted!(in(*cx) let underlying_source_obj = underlying_source.unwrap_or(0 as *mut JSObject));
+        // Step 2 (TODO: error handling https://phabricator.services.mozilla.com/D122643#change-B79HNAkmIxym)
+        let underlying_source_dict = if !underlying_source_obj.is_null() {
+            rooted!(in(*cx) let obj_val = ObjectValue(underlying_source_obj.get()));
+            match UnderlyingSource::new(global.get_cx(), obj_val.handle().into()) {
+                Ok(ConversionResult::Success(underlying_source_dict)) => underlying_source_dict,
+                Ok(ConversionResult::Failure(error)) => {
+                    return Err(Error::Type(error.into_owned()))
+                },
+                Err(_) => return Err(Error::Type(String::from("TODO"))),
+            }
+        } else {
+            UnderlyingSource::empty()
+        };
+        // Step 3
+        let readable_stream = ReadableStream::new(&global);
+
+        // Step 4.
+        if underlying_source_dict.type_.is_some() {
+            // Implicit assertion on above check.
+            assert!(underlying_source_dict.type_.unwrap() == ReadableStreamType::Bytes);
+            // Step 4.1
+            if strategy.size.is_some() {
+                return Err(Error::Range(
+                    "Implementation preserved member 'size'".to_string(),
+                ));
+            }
+
+            // Step 4.2
+            let highwatermark = extract_highwatermark(strategy, 0.0)?;
+
+            // Step 4.3
+            //(void)highWaterMark;
+            error!("Byte Streams Not Yet Implemented");
+
+            return Ok(readable_stream);
+        }
+
+        // Step 5.1 (implicit in above check)
+        // Step 5.2. Extract callback. (missing algo is replaced in caller)
+        let size_algorithm: Option<Rc<QueuingStrategySize>> = strategy.size;
+
+        // Step 5.3
+        let highwatermark = extract_highwatermark(strategy, 1.0)?;
+
+        // Step 5.4.
+        setup_readable_stream_default_controller_from_underlying_source(
+            global.get_cx(),
+            readable_stream,
+            underlying_source_obj.handle(),
+            underlying_source_dict,
+            highwatermark,
+            size_algorithm,
+        )?;
+
+        return Ok(readable_stream);
+    }
+
+    pub fn SetController(&mut self, controller: ReadableStreamController) {
+        *self.controller.borrow_mut() = Some(controller);
+    }
+
+    pub fn Controller(&'_ self) -> std::cell::Ref<'_, Option<ReadableStreamController>> {
+        self.controller.borrow()
+    }
+}
+
+// can new_inherited and new become part of a DomObject trait
+impl ReadableStream {
+    fn new_inherited() -> ReadableStream {
+        // https://streams.spec.whatwg.org/#initialize-readable-stream
         ReadableStream {
             reflector_: Reflector::new(),
-            js_stream: Heap::default(),
-            js_reader: Heap::default(),
-            has_reader: Default::default(),
-            external_underlying_source: external_underlying_source,
+            controller: Default::default(),
+            //detached: Default::default(),
+            disturbute: Default::default(),
+            reader: Default::default(),
+            state: Default::default(),
+            stored_error: Default::default(),
         }
     }
 
-    fn new(
-        global: &GlobalScope,
-        external_underlying_source: Option<Rc<ExternalUnderlyingSourceController>>,
-    ) -> DomRoot<ReadableStream> {
-        reflect_dom_object(
-            Box::new(ReadableStream::new_inherited(external_underlying_source)),
-            global,
-        )
+    fn new(global: &GlobalScope) -> DomRoot<ReadableStream> {
+        reflect_dom_object(Box::new(ReadableStream::new_inherited()), global)
     }
 
+    /*
     /// Used from RustCodegen.py
     #[allow(unsafe_code)]
     pub unsafe fn from_js(
@@ -314,7 +442,7 @@ impl ReadableStream {
         }
 
         locked_or_disturbed
-    }
+    }*/
 }
 
 #[allow(unsafe_code)]
@@ -372,11 +500,6 @@ unsafe extern "C" fn error(
     _stream: HandleObject,
     _reason: HandleValue,
 ) {
-}
-
-#[allow(unsafe_code)]
-unsafe extern "C" fn finalize(source: *mut ReadableStreamUnderlyingSource) {
-    DeleteReadableStreamUnderlyingSource(source);
 }
 
 pub enum ExternalUnderlyingSource {
@@ -440,12 +563,12 @@ impl ExternalUnderlyingSourceController {
         }
         unsafe {
             let mut readable = false;
-            if !ReadableStreamIsReadable(*cx, stream, &mut readable) {
+            /*if !ReadableStreamIsReadable(*cx, stream, &mut readable) {
                 return;
             }
             if readable {
                 ReadableStreamUpdateDataAvailableFromSource(*cx, stream, available as u32);
-            }
+            }*/
         }
     }
 
@@ -454,12 +577,12 @@ impl ExternalUnderlyingSourceController {
     fn maybe_close_js_stream(&self, cx: SafeJSContext, stream: HandleObject) {
         unsafe {
             let mut readable = false;
-            if !ReadableStreamIsReadable(*cx, stream, &mut readable) {
+            /*if !ReadableStreamIsReadable(*cx, stream, &mut readable) {
                 return;
             }
             if readable {
                 ReadableStreamClose(*cx, stream);
-            }
+            }*/
         }
     }
 
