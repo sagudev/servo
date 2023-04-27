@@ -2220,7 +2220,14 @@ class CGImports(CGWrapper):
         descriptorProvider = config.getDescriptorProvider()
         extras = []
         for t in types:
-            # Importing these types in the same module that defines them is an error.
+            # TODO: Investigate why it is failing?
+            # we get another round of errors that are again due to those callbacks
+            blacklist = {"QueuingStrategySize",
+                         "UnderlyingSourceStartCallback",
+                         "UnderlyingSourcePullCallback",
+                         "UnderlyingSourceCancelCallback"}
+            if t.__str__() in blacklist:
+                continue
             if t in dictionaries or t in enums:
                 continue
             if t.isInterface() or t.isNamespace():
@@ -7567,7 +7574,7 @@ class CallbackMember(CGNativeMember):
                                 visibility=visibility)
         # We have to do all the generation of our body now, because
         # the caller relies on us throwing if we can't manage it.
-        self.exceptionCode = "return Err(JSFailed);"
+        self.exceptionCode = "return Err(JSFailed);\n"
         self.body = self.getImpl()
 
     def getImpl(self):
@@ -7703,7 +7710,7 @@ class CallbackMember(CGNativeMember):
             "}\n")
 
     def getArgcDecl(self):
-        if self.argCount <= 1:
+        if self.argCount < 1:
             return CGGeneric("let argc = %s;" % self.argCountStr)
         return CGGeneric("let mut argc = %s;" % self.argCountStr)
 
