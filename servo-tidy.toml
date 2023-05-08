@@ -33,7 +33,6 @@ packages = [
   "image",
   "itoa",
   "libloading",
-  "metal",
   "miniz_oxide",
   "num-rational",
   "parking_lot",
@@ -70,8 +69,17 @@ packages = [
   "digest",
   "generic-array",
 
-  # Duplicated by winit/surfman update.
-  "raw-window-handle",
+  # Duplicated by surfman/wgpu update.
+  "bitflags",
+  "windows-sys",
+  "windows-targets",
+  "windows_aarch64_gnullvm",
+  "windows_aarch64_msvc",
+  "windows_i686_gnu",
+  "windows_i686_msvc",
+  "windows_x86_64_gnu",
+  "windows_x86_64_msvc",
+  "windows_x86_64_gnullvm",
 ]
 # Files that are ignored for all tidy and lint checks.
 files = [

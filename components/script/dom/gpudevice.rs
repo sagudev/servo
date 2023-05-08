@@ -676,12 +676,6 @@ impl GPUDeviceMethods for GPUDevice {
         &self,
         descriptor: RootedTraceableBox<GPUShaderModuleDescriptor>,
     ) -> DomRoot<GPUShaderModule> {
-        let program: Vec<u32> = match &descriptor.code {
-            Uint32ArrayOrString::Uint32Array(program) => program.to_vec(),
-            Uint32ArrayOrString::String(program) => {
-                program.chars().map(|c| c as u32).collect::<Vec<u32>>()
-            },
-        };
         let program_id = self
             .global()
             .wgpu_id_hub()
@@ -696,7 +690,8 @@ impl GPUDeviceMethods for GPUDevice {
                 WebGPURequest::CreateShaderModule {
                     device_id: self.device.0,
                     program_id,
-                    program,
+                    program: descriptor.code.0.clone(),
+                    label: None,
                 },
             ))
             .expect("Failed to create WebGPU ShaderModule");
