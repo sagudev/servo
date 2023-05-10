@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::codegen::Bindings::GPUAdapterBinding::{
-    GPUAdapterMethods, GPUDeviceDescriptor, GPUExtensionName, GPULimits,
+    GPUAdapterMethods, GPUDeviceDescriptor, GPUFeatureName, GPULimits,
 };
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
@@ -82,10 +82,30 @@ impl GPUAdapterMethods for GPUAdapter {
         let sender = response_async(&promise, self);
         let mut features = wgt::Features::empty();
         for &ext in descriptor.extensions.iter() {
-            if ext == GPUExtensionName::Depth_clamping {
-                features.insert(wgt::Features::DEPTH_CLAMPING);
-            } else if ext == GPUExtensionName::Texture_compression_bc {
-                features.insert(wgt::Features::TEXTURE_COMPRESSION_BC)
+            match ext {
+                GPUFeatureName::Depth_clip_control => {
+                    features.insert(wgt::Features::DEPTH_CLIP_CONTROL)
+                },
+                GPUFeatureName::Depth24unorm_stencil8 => { /* not implemented in wgpu */ },
+                GPUFeatureName::Depth32float_stencil8 => {
+                    features.insert(wgt::Features::DEPTH32FLOAT_STENCIL8)
+                },
+                GPUFeatureName::Pipeline_statistics_query => {
+                    features.insert(wgt::Features::PIPELINE_STATISTICS_QUERY)
+                },
+                GPUFeatureName::Texture_compression_bc => {
+                    features.insert(wgt::Features::TEXTURE_COMPRESSION_BC)
+                },
+                GPUFeatureName::Texture_compression_etc2 => {
+                    features.insert(wgt::Features::TEXTURE_COMPRESSION_ETC2)
+                },
+                GPUFeatureName::Texture_compression_astc => {
+                    features.insert(wgt::Features::TEXTURE_COMPRESSION_ASTC)
+                },
+                GPUFeatureName::Timestamp_query => features.insert(wgt::Features::TIMESTAMP_QUERY),
+                GPUFeatureName::Indirect_first_instance => {
+                    features.insert(wgt::Features::INDIRECT_FIRST_INSTANCE)
+                },
             }
         }
 
@@ -115,7 +135,7 @@ impl GPUAdapterMethods for GPUAdapter {
                 max_uniform_buffer_binding_size: descriptor.limits.maxUniformBufferBindingSize,
                 ..Default::default()
             },
-            shader_validation: true,
+            label: None,
         };
         let id = self
             .global()

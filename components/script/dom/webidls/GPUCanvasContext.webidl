@@ -5,13 +5,26 @@
 // https://gpuweb.github.io/gpuweb/#gpucanvascontext
 [Exposed=(Window, DedicatedWorker), Pref="dom.webgpu.enabled"]
 interface GPUCanvasContext {
-    GPUSwapChain configureSwapChain(GPUSwapChainDescriptor descriptor);
+    readonly attribute (HTMLCanvasElement or OffscreenCanvas) canvas;
 
-    //Promise<GPUTextureFormat> getSwapChainPreferredFormat(GPUDevice device);
+    // Calling configure() a second time invalidates the previous one,
+    // and all of the textures it's produced.
+    undefined configure(GPUCanvasConfiguration descriptor);
+    undefined unconfigure();
+
+    [Throws]
+    GPUTexture getCurrentTexture();
 };
 
-dictionary GPUSwapChainDescriptor : GPUObjectDescriptorBase {
+enum GPUCanvasCompositingAlphaMode {
+    "opaque",
+    "premultiplied",
+};
+
+dictionary GPUCanvasConfiguration {
     required GPUDevice device;
     required GPUTextureFormat format;
-    GPUTextureUsageFlags usage = 0x10;  // GPUTextureUsage.OUTPUT_ATTACHMENT
+    GPUTextureUsageFlags usage = 0x10; //GPUTextureUsage.OUTPUT_ATTACHMENT
+    //GPUPredefinedColorSpace colorSpace = "srgb"; //TODO
+    GPUCanvasCompositingAlphaMode compositingAlphaMode = "opaque";
 };
