@@ -21,6 +21,8 @@ use webgpu::{
     wgt, WebGPU, WebGPURequest,
 };
 
+use super::bindings::codegen::Bindings::GPURenderPipelineBinding::GPUIndexFormat;
+
 #[dom_struct]
 pub struct GPURenderPassEncoder {
     reflector_: Reflector,
@@ -125,7 +127,7 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-setblendcolor
-    fn SetBlendColor(&self, color: GPUColor) {
+    fn SetBlendConstant(&self, color: GPUColor) {
         if let Some(render_pass) = self.render_pass.borrow_mut().as_mut() {
             let colors = match color {
                 GPUColor::GPUColorDict(d) => wgt::Color {
@@ -147,7 +149,7 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
                     }
                 },
             };
-            wgpu_render::wgpu_render_pass_set_blend_color(render_pass, &colors);
+            wgpu_render::wgpu_render_pass_set_blend_constant(render_pass, &colors);
         }
     }
 
@@ -185,14 +187,28 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
         }
     }
 
-    /// https://gpuweb.github.io/gpuweb/#dom-gpurenderencoderbase-setindexbuffer
-    fn SetIndexBuffer(&self, buffer: &GPUBuffer, offset: u64, size: u64) {
+    /// https://gpuweb.github.io/gpuweb/#dom-gpurendercommandsmixin-setindexbuffer
+    fn SetIndexBuffer(
+        &self,
+        buffer: &GPUBuffer,
+        index_format: GPUIndexFormat,
+        offset: u64,
+        size: Option<u64>,
+    ) {
         if let Some(render_pass) = self.render_pass.borrow_mut().as_mut() {
             wgpu_render::wgpu_render_pass_set_index_buffer(
                 render_pass,
                 buffer.id().0,
+                match index_format {
+                    GPUIndexFormat::Uint16 => wgt::IndexFormat::Uint16,
+                    GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
+                },
                 offset,
-                wgt::BufferSize::new(size),
+                if let Some(size) = size {
+                    wgt::BufferSize::new(size)
+                } else {
+                    None
+                },
             );
         }
     }

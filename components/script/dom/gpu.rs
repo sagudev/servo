@@ -105,7 +105,7 @@ impl GPUMethods for GPU {
         let power_preference = match options.powerPreference {
             Some(GPUPowerPreference::Low_power) => PowerPreference::LowPower,
             Some(GPUPowerPreference::High_performance) => PowerPreference::HighPerformance,
-            None => PowerPreference::Default,
+            None => PowerPreference::default(),
         };
         let ids = global.wgpu_id_hub().lock().create_adapter_ids();
 
@@ -116,6 +116,7 @@ impl GPUMethods for GPU {
                 wgpu::instance::RequestAdapterOptions {
                     power_preference,
                     compatible_surface: None,
+                    force_fallback_adapter: false,
                 },
                 ids,
             ))
