@@ -4,7 +4,7 @@
 
 #![allow(dead_code)]
 
-use crate::dom::bindings::codegen::Bindings::GPUDeviceLostInfoBinding::GPUDeviceLostInfoMethods;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUDeviceLostInfoMethods;
 use crate::dom::bindings::reflector::{reflect_dom_object, Reflector};
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;

@@ -3,12 +3,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUBufferBinding::GPUSize64;
-use crate::dom::bindings::codegen::Bindings::GPUCommandEncoderBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUSize64;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUTextureCopyView, GPUTextureDataLayout,
 };
-use crate::dom::bindings::codegen::Bindings::GPUQueueBinding::GPUQueueMethods;
-use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::GPUExtent3D;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUQueueMethods;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUExtent3D;
 use crate::dom::bindings::codegen::UnionTypes::ArrayBufferViewOrArrayBuffer as BufferSource;
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::reflector::{reflect_dom_object, Reflector};

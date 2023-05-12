@@ -3,12 +3,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUCanvasContextBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUCanvasContextMethods, GPUSwapChainDescriptor,
 };
-use crate::dom::bindings::codegen::Bindings::GPUDeviceBinding::GPUDeviceBinding::GPUDeviceMethods;
-use crate::dom::bindings::codegen::Bindings::GPUObjectBaseBinding::GPUObjectDescriptorBase;
-use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUDeviceMethods;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUObjectDescriptorBase;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUExtent3D, GPUExtent3DDict, GPUTextureDescriptor, GPUTextureDimension, GPUTextureFormat,
 };
 use crate::dom::bindings::inheritance::Castable;

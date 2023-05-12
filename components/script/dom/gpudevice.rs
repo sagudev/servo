@@ -7,37 +7,37 @@
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::EventBinding::EventInit;
 use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTargetMethods;
-use crate::dom::bindings::codegen::Bindings::GPUAdapterBinding::GPULimits;
-use crate::dom::bindings::codegen::Bindings::GPUBindGroupBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPULimits;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUBindGroupDescriptor, GPUBindingResource,
 };
-use crate::dom::bindings::codegen::Bindings::GPUBindGroupLayoutBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUBindGroupLayoutDescriptor, GPUBindingType,
 };
-use crate::dom::bindings::codegen::Bindings::GPUBufferBinding::GPUBufferDescriptor;
-use crate::dom::bindings::codegen::Bindings::GPUComputePipelineBinding::GPUComputePipelineDescriptor;
-use crate::dom::bindings::codegen::Bindings::GPUDeviceBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUBufferDescriptor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUComputePipelineDescriptor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUCommandEncoderDescriptor, GPUDeviceMethods,
 };
-use crate::dom::bindings::codegen::Bindings::GPUObjectBaseBinding::GPUObjectDescriptorBase;
-use crate::dom::bindings::codegen::Bindings::GPUPipelineLayoutBinding::GPUPipelineLayoutDescriptor;
-use crate::dom::bindings::codegen::Bindings::GPURenderBundleEncoderBinding::GPURenderBundleEncoderDescriptor;
-use crate::dom::bindings::codegen::Bindings::GPURenderPipelineBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUObjectDescriptorBase;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUPipelineLayoutDescriptor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPURenderBundleEncoderDescriptor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUBlendDescriptor, GPUBlendFactor, GPUBlendOperation, GPUCullMode, GPUFrontFace,
     GPUIndexFormat, GPUInputStepMode, GPUPrimitiveTopology, GPURenderPipelineDescriptor,
     GPUStencilOperation, GPUVertexFormat,
 };
-use crate::dom::bindings::codegen::Bindings::GPUSamplerBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUAddressMode, GPUCompareFunction, GPUFilterMode, GPUSamplerDescriptor,
 };
-use crate::dom::bindings::codegen::Bindings::GPUShaderModuleBinding::GPUShaderModuleDescriptor;
-use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUShaderModuleDescriptor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUExtent3D, GPUExtent3DDict, GPUTextureComponentType, GPUTextureDescriptor,
     GPUTextureDimension, GPUTextureFormat,
 };
-use crate::dom::bindings::codegen::Bindings::GPUTextureViewBinding::GPUTextureViewDimension;
-use crate::dom::bindings::codegen::Bindings::GPUUncapturedErrorEventBinding::GPUUncapturedErrorEventInit;
-use crate::dom::bindings::codegen::Bindings::GPUValidationErrorBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUTextureViewDimension;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUUncapturedErrorEventInit;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUError, GPUErrorFilter,
 };
 use crate::dom::bindings::codegen::UnionTypes::Uint32ArrayOrString;

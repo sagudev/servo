@@ -3,8 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUCommandEncoderBinding::GPUColor;
-use crate::dom::bindings::codegen::Bindings::GPURenderPassEncoderBinding::GPURenderPassEncoderMethods;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUColor;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPURenderPassEncoderMethods;
 use crate::dom::bindings::num::Finite;
 use crate::dom::bindings::reflector::{reflect_dom_object, Reflector};
 use crate::dom::bindings::root::{Dom, DomRoot};

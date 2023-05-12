@@ -3,13 +3,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUBufferBinding::GPUSize64;
-use crate::dom::bindings::codegen::Bindings::GPUCommandEncoderBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUSize64;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUBufferCopyView, GPUCommandBufferDescriptor, GPUCommandEncoderMethods,
     GPUComputePassDescriptor, GPUOrigin3D, GPURenderPassDescriptor, GPUStencilLoadValue,
     GPUStoreOp, GPUTextureCopyView, GPUTextureDataLayout,
 };
-use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::GPUExtent3D;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUExtent3D;
 use crate::dom::bindings::codegen::UnionTypes::{
     GPULoadOpOrDoubleSequenceOrGPUColorDict as GPUColorLoad, GPULoadOpOrFloat,
 };

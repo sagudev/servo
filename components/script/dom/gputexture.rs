@@ -3,10 +3,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUExtent3DDict, GPUTextureDimension, GPUTextureFormat, GPUTextureMethods,
 };
-use crate::dom::bindings::codegen::Bindings::GPUTextureViewBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUTextureAspect, GPUTextureViewDescriptor,
 };
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};

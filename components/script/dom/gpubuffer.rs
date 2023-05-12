@@ -3,8 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::Bindings::GPUBufferBinding::{GPUBufferMethods, GPUSize64};
-use crate::dom::bindings::codegen::Bindings::GPUMapModeBinding::GPUMapModeConstants;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{GPUBufferMethods, GPUSize64};
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUMapModeConstants;
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::bindings::reflector::{reflect_dom_object, Reflector};

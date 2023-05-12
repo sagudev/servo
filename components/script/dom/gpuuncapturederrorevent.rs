@@ -3,10 +3,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::codegen::Bindings::EventBinding::EventBinding::EventMethods;
-use crate::dom::bindings::codegen::Bindings::GPUUncapturedErrorEventBinding::{
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUUncapturedErrorEventInit, GPUUncapturedErrorEventMethods,
 };
-use crate::dom::bindings::codegen::Bindings::GPUValidationErrorBinding::GPUError;
+use crate::dom::bindings::codegen::Bindings::WebGPUBinding::GPUError;
 use crate::dom::bindings::reflector::reflect_dom_object;
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;
