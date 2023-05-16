@@ -7,7 +7,6 @@
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::EventBinding::EventInit;
 use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTargetMethods;
-use crate::dom::bindings::codegen::Bindings::GPUAdapterBinding::GPULimits;
 use crate::dom::bindings::codegen::Bindings::GPUBindGroupBinding::{
     GPUBindGroupDescriptor, GPUBindingResource,
 };
@@ -21,24 +20,22 @@ use crate::dom::bindings::codegen::Bindings::GPUObjectBaseBinding::GPUObjectDesc
 use crate::dom::bindings::codegen::Bindings::GPUPipelineLayoutBinding::GPUPipelineLayoutDescriptor;
 use crate::dom::bindings::codegen::Bindings::GPURenderBundleEncoderBinding::GPURenderBundleEncoderDescriptor;
 use crate::dom::bindings::codegen::Bindings::GPURenderPipelineBinding::{
-    GPUBlendDescriptor, GPUBlendFactor, GPUBlendOperation, GPUCullMode, GPUFrontFace,
-    GPUIndexFormat, GPUInputStepMode, GPUPrimitiveTopology, GPURenderPipelineDescriptor,
-    GPUStencilOperation, GPUVertexFormat,
+    GPUBlendFactor, GPUBlendOperation, GPUCullMode, GPUFrontFace, GPUIndexFormat,
+    GPUPrimitiveTopology, GPURenderPipelineDescriptor, GPUStencilOperation, GPUVertexFormat,
 };
 use crate::dom::bindings::codegen::Bindings::GPUSamplerBinding::{
     GPUAddressMode, GPUCompareFunction, GPUFilterMode, GPUSamplerDescriptor,
 };
 use crate::dom::bindings::codegen::Bindings::GPUShaderModuleBinding::GPUShaderModuleDescriptor;
+use crate::dom::bindings::codegen::Bindings::GPUSupportedLimitsBinding::GPUSupportedLimitsBinding::GPUSupportedLimitsMethods;
 use crate::dom::bindings::codegen::Bindings::GPUTextureBinding::{
-    GPUExtent3D, GPUExtent3DDict, GPUTextureComponentType, GPUTextureDescriptor,
-    GPUTextureDimension, GPUTextureFormat,
+    GPUExtent3D, GPUExtent3DDict, GPUTextureDescriptor, GPUTextureDimension, GPUTextureFormat,
 };
 use crate::dom::bindings::codegen::Bindings::GPUTextureViewBinding::GPUTextureViewDimension;
 use crate::dom::bindings::codegen::Bindings::GPUUncapturedErrorEventBinding::GPUUncapturedErrorEventInit;
 use crate::dom::bindings::codegen::Bindings::GPUValidationErrorBinding::{
     GPUError, GPUErrorFilter,
 };
-use crate::dom::bindings::codegen::UnionTypes::Uint32ArrayOrString;
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject};
 use crate::dom::bindings::root::{Dom, DomRoot};
@@ -83,6 +80,12 @@ use webgpu::{self, identity::WebGPUOpResult, wgt, ErrorScopeId, WebGPU, WebGPURe
 use super::bindings::codegen::Bindings::GPUBindGroupLayoutBinding::{
     GPUBufferBindingType, GPUSamplerBindingType, GPUStorageTextureAccess, GPUTextureSampleType,
 };
+use super::bindings::codegen::Bindings::GPURenderPipelineBinding::{
+    GPUBlendComponent, GPUPrimitiveState, GPUVertexStepMode,
+};
+use super::bindings::codegen::UnionTypes::GPUPipelineLayoutOrGPUAutoLayoutMode;
+use super::bindings::error::Fallible;
+use super::gpusupportedlimits::GPUSupportedLimits;
 
 #[derive(JSTraceable, MallocSizeOf)]
 struct ErrorScopeInfo {
@@ -115,8 +118,7 @@ pub struct GPUDevice {
     adapter: Dom<GPUAdapter>,
     #[ignore_malloc_size_of = "mozjs"]
     extensions: Heap<*mut JSObject>,
-    #[ignore_malloc_size_of = "Because it is non-owning"]
-    limits: GPULimits,
+    limits: Dom<GPUSupportedLimits>,
     label: DomRefCell<Option<USVString>>,
     device: webgpu::WebGPUDevice,
     default_queue: Dom<GPUQueue>,
@@ -130,7 +132,7 @@ impl GPUDevice {
         channel: WebGPU,
         adapter: &GPUAdapter,
         extensions: Heap<*mut JSObject>,
-        limits: GPULimits,
+        limits: &GPUSupportedLimits,
         device: webgpu::WebGPUDevice,
         queue: &GPUQueue,
         label: Option<String>,
@@ -140,7 +142,7 @@ impl GPUDevice {
             channel,
             adapter: Dom::from_ref(adapter),
             extensions,
-            limits,
+            limits: Dom::from_ref(limits),
             label: DomRefCell::new(label.map(|l| USVString::from(l))),
             device,
             default_queue: Dom::from_ref(queue),
@@ -158,15 +160,16 @@ impl GPUDevice {
         channel: WebGPU,
         adapter: &GPUAdapter,
         extensions: Heap<*mut JSObject>,
-        limits: GPULimits,
+        limits: wgt::Limits,
         device: webgpu::WebGPUDevice,
         queue: webgpu::WebGPUQueue,
         label: Option<String>,
     ) -> DomRoot<Self> {
         let queue = GPUQueue::new(global, channel.clone(), queue);
+        let limits = GPUSupportedLimits::new(global, limits);
         let device = reflect_dom_object(
             Box::new(GPUDevice::new_inherited(
-                channel, adapter, extensions, limits, device, &queue, label,
+                channel, adapter, extensions, &limits, device, &queue, label,
             )),
             global,
         );
@@ -178,10 +181,6 @@ impl GPUDevice {
 impl GPUDevice {
     pub fn id(&self) -> webgpu::WebGPUDevice {
         self.device
-    }
-
-    pub fn limits(&self) -> &GPULimits {
-        &self.limits
     }
 
     pub fn handle_server_msg(&self, scope: Option<ErrorScopeId>, result: WebGPUOpResult) {
@@ -292,13 +291,13 @@ impl GPUDevice {
 
     fn get_pipeline_layout_data(
         &self,
-        layout: &Option<DomRoot<GPUPipelineLayout>>,
+        layout: &GPUPipelineLayoutOrGPUAutoLayoutMode,
     ) -> (
         Option<PipelineLayoutId>,
         Option<(PipelineLayoutId, Vec<BindGroupLayoutId>)>,
         Vec<webgpu::WebGPUBindGroupLayout>,
     ) {
-        if let Some(ref layout) = layout {
+        if let GPUPipelineLayoutOrGPUAutoLayoutMode::GPUPipelineLayout(ref layout) = layout {
             (Some(layout.id().0), None, layout.bind_group_layouts())
         } else {
             let layout_id = self
@@ -306,7 +305,7 @@ impl GPUDevice {
                 .wgpu_id_hub()
                 .lock()
                 .create_pipeline_layout_id(self.device.0.backend());
-            let max_bind_grps = self.limits.maxBindGroups;
+            let max_bind_grps = self.limits.MaxBindGroups();
             let mut bgls = Vec::with_capacity(max_bind_grps as usize);
             let mut bgl_ids = Vec::with_capacity(max_bind_grps as usize);
             for _ in 0..max_bind_grps {
@@ -324,27 +323,13 @@ impl GPUDevice {
 }
 
 impl GPUDeviceMethods for GPUDevice {
-    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-adapter
-    fn Adapter(&self) -> DomRoot<GPUAdapter> {
-        DomRoot::from_ref(&self.adapter)
-    }
-
-    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-extensions
-    fn Extensions(&self, _cx: SafeJSContext) -> NonNull<JSObject> {
-        NonNull::new(self.extensions.get()).unwrap()
-    }
-
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-limits
-    fn Limits(&self, cx: SafeJSContext) -> NonNull<JSObject> {
-        rooted!(in (*cx) let mut limits = ptr::null_mut::<JSObject>());
-        unsafe {
-            self.limits.to_jsobject(*cx, limits.handle_mut());
-        }
-        NonNull::new(limits.get()).unwrap()
+    fn Limits(&self) -> DomRoot<GPUSupportedLimits> {
+        DomRoot::from_ref(&self.limits)
     }
 
-    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-defaultqueue
-    fn DefaultQueue(&self) -> DomRoot<GPUQueue> {
+    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-queue
+    fn GetQueue(&self) -> DomRoot<GPUQueue> {
         DomRoot::from_ref(&self.default_queue)
     }
 
@@ -359,14 +344,14 @@ impl GPUDeviceMethods for GPUDevice {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-lost
-    fn Lost(&self, comp: InRealm) -> Rc<Promise> {
+    fn GetLost(&self, comp: InRealm) -> Fallible<Rc<Promise>> {
         let promise = Promise::new_in_current_realm(comp);
         *self.lost_promise.borrow_mut() = Some(promise.clone());
-        promise
+        Ok(promise)
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-createbuffer
-    fn CreateBuffer(&self, descriptor: &GPUBufferDescriptor) -> DomRoot<GPUBuffer> {
+    fn CreateBuffer(&self, descriptor: &GPUBufferDescriptor) -> Fallible<DomRoot<GPUBuffer>> {
         let desc =
             wgt::BufferUsages::from_bits(descriptor.usage).map(|usg| wgpu_res::BufferDescriptor {
                 label: convert_label(&descriptor.parent),
@@ -418,7 +403,7 @@ impl GPUDeviceMethods for GPUDevice {
             state = GPUBufferState::Unmapped;
         }
 
-        GPUBuffer::new(
+        Ok(GPUBuffer::new(
             &self.global(),
             self.channel.clone(),
             buffer,
@@ -427,7 +412,7 @@ impl GPUDeviceMethods for GPUDevice {
             descriptor.size,
             map_info,
             descriptor.parent.label.as_ref().cloned(),
-        )
+        ))
     }
 
     /// https://gpuweb.github.io/gpuweb/#GPUDevice-createBindGroupLayout
@@ -448,7 +433,7 @@ impl GPUDeviceMethods for GPUDevice {
                         wgt::ShaderStages::empty()
                     },
                 };
-                let ty = if let Some(buffer) = bind.buffer {
+                let ty = if let Some(buffer) = &bind.buffer {
                     wgt::BindingType::Buffer {
                         ty: match buffer.type_ {
                             GPUBufferBindingType::Uniform => wgt::BufferBindingType::Uniform,
@@ -462,7 +447,7 @@ impl GPUDeviceMethods for GPUDevice {
                         has_dynamic_offset: buffer.hasDynamicOffset,
                         min_binding_size: NonZeroU64::new(buffer.minBindingSize),
                     }
-                } else if let Some(sampler) = bind.sampler {
+                } else if let Some(sampler) = &bind.sampler {
                     wgt::BindingType::Sampler(match sampler.type_ {
                         GPUSamplerBindingType::Filtering => wgt::SamplerBindingType::Filtering,
                         GPUSamplerBindingType::Non_filtering => {
@@ -470,7 +455,7 @@ impl GPUDeviceMethods for GPUDevice {
                         },
                         GPUSamplerBindingType::Comparison => wgt::SamplerBindingType::Comparison,
                     })
-                } else if let Some(storage) = bind.storageTexture {
+                } else if let Some(storage) = &bind.storageTexture {
                     wgt::BindingType::StorageTexture {
                         access: match storage.access {
                             GPUStorageTextureAccess::Write_only => {
@@ -480,7 +465,7 @@ impl GPUDeviceMethods for GPUDevice {
                         format: convert_texture_format(storage.format),
                         view_dimension: convert_view_dimension(storage.viewDimension),
                     }
-                } else if let Some(texture) = bind.texture {
+                } else if let Some(texture) = &bind.texture {
                     wgt::BindingType::Texture {
                         sample_type: match texture.sampleType {
                             GPUTextureSampleType::Float => {
@@ -615,7 +600,7 @@ impl GPUDeviceMethods for GPUDevice {
                     GPUBindingResource::GPUTextureView(ref t) => {
                         wgpu_bind::BindingResource::TextureView(t.id().0)
                     },
-                    GPUBindingResource::GPUBufferBindings(ref b) => {
+                    GPUBindingResource::GPUBufferBinding(ref b) => {
                         wgpu_bind::BindingResource::Buffer(wgpu_bind::BufferBinding {
                             buffer_id: b.buffer.id().0,
                             offset: b.offset,
@@ -667,12 +652,12 @@ impl GPUDeviceMethods for GPUDevice {
         &self,
         descriptor: RootedTraceableBox<GPUShaderModuleDescriptor>,
     ) -> DomRoot<GPUShaderModule> {
-        let program: Vec<u32> = match &descriptor.code {
-            Uint32ArrayOrString::Uint32Array(program) => program.to_vec(),
-            Uint32ArrayOrString::String(program) => {
-                program.chars().map(|c| c as u32).collect::<Vec<u32>>()
-            },
-        };
+        let program: Vec<u32> = descriptor
+            .code
+            .0
+            .chars()
+            .map(|c| c as u32)
+            .collect::<Vec<u32>>();
         let program_id = self
             .global()
             .wgpu_id_hub()
@@ -719,8 +704,8 @@ impl GPUDeviceMethods for GPUDevice {
             label: convert_label(&descriptor.parent.parent),
             layout,
             stage: wgpu_pipe::ProgrammableStageDescriptor {
-                module: descriptor.computeStage.module.id().0,
-                entry_point: Cow::Owned(descriptor.computeStage.entryPoint.to_string()),
+                module: descriptor.compute.module.id().0,
+                entry_point: Cow::Owned(descriptor.compute.entryPoint.to_string()),
             },
         };
 
@@ -901,15 +886,13 @@ impl GPUDeviceMethods for GPUDevice {
         &self,
         descriptor: &GPURenderPipelineDescriptor,
     ) -> DomRoot<GPURenderPipeline> {
-        let ref rs_desc = descriptor.rasterizationState;
-        let ref vs_desc = descriptor.vertexState;
         let scope_id = self.use_current_scope();
         let mut valid = true;
-        let color_states = Cow::Owned(
+        /*let color_states = Cow::Owned(
             descriptor
                 .colorStates
                 .iter()
-                .map(|state| wgt::ColorStateDescriptor {
+                .map(|state| wgt::ColorTargetState {
                     format: convert_texture_format(state.format),
                     alpha_blend: convert_blend_descriptor(&state.alphaBlend),
                     color_blend: convert_blend_descriptor(&state.colorBlend),
@@ -922,23 +905,77 @@ impl GPUDeviceMethods for GPUDevice {
                     },
                 })
                 .collect::<Vec<_>>(),
-        );
+        );*/
         let (layout, implicit_ids, bgls) = self.get_pipeline_layout_data(&descriptor.parent.layout);
 
         let desc = if valid {
             Some(wgpu_pipe::RenderPipelineDescriptor {
                 label: convert_label(&descriptor.parent.parent),
                 layout,
-                vertex: wgpu_pipe::ProgrammableStageDescriptor {
-                    module: descriptor.vertexStage.module.id().0,
-                    entry_point: Cow::Owned(descriptor.vertexStage.entryPoint.to_string()),
+                vertex: wgpu_pipe::VertexState {
+                    stage: wgpu_pipe::ProgrammableStageDescriptor {
+                        module: descriptor.vertex.parent.module.id().0,
+                        entry_point: Cow::Owned(descriptor.vertex.parent.entryPoint.to_string()),
+                    },
+                    buffers: Cow::Owned(
+                        descriptor
+                            .vertex
+                            .buffers
+                            .iter()
+                            .map(|buffer| wgpu_pipe::VertexBufferLayout {
+                                array_stride: buffer.arrayStride,
+                                step_mode: match buffer.stepMode {
+                                    GPUVertexStepMode::Vertex => wgt::VertexStepMode::Vertex,
+                                    GPUVertexStepMode::Instance => wgt::VertexStepMode::Instance,
+                                },
+                                attributes: Cow::Owned(
+                                    buffer
+                                        .attributes
+                                        .iter()
+                                        .map(|att| wgt::VertexAttribute {
+                                            format: convert_vertex_format(att.format),
+                                            offset: att.offset,
+                                            shader_location: att.shaderLocation,
+                                        })
+                                        .collect::<Vec<_>>(),
+                                ),
+                            })
+                            .collect::<Vec<_>>(),
+                    ),
                 },
-                fragment: descriptor.fragmentStage.as_ref().map(|stage| {
-                    wgpu_pipe::ProgrammableStageDescriptor {
-                        module: stage.module.id().0,
-                        entry_point: Cow::Owned(stage.entryPoint.to_string()),
-                    }
-                }),
+                fragment: descriptor
+                    .fragment
+                    .as_ref()
+                    .map(|stage| wgpu_pipe::FragmentState {
+                        stage: wgpu_pipe::ProgrammableStageDescriptor {
+                            module: stage.parent.module.id().0,
+                            entry_point: Cow::Owned(stage.parent.entryPoint.to_string()),
+                        },
+                        targets: Cow::Owned(
+                            stage
+                                .targets
+                                .iter()
+                                .map(|state| {
+                                    Some(wgt::ColorTargetState {
+                                        format: convert_texture_format(state.format),
+                                        write_mask: match wgt::ColorWrites::from_bits(
+                                            state.writeMask,
+                                        ) {
+                                            Some(mask) => mask,
+                                            None => {
+                                                valid = false;
+                                                wgt::ColorWrites::empty()
+                                            },
+                                        },
+                                        blend: state.blend.as_ref().map(|blend| wgt::BlendState {
+                                            color: convert_blend_component(&blend.color),
+                                            alpha: convert_blend_component(&blend.alpha),
+                                        }),
+                                    })
+                                })
+                                .collect::<Vec<_>>(),
+                        ),
+                    }),
                 /*rasterization_state: Some(wgt::RasterizationStateDescriptor {
                     front_face: match rs_desc.frontFace {
                         GPUFrontFace::Ccw => wgt::FrontFace::Ccw,
@@ -955,15 +992,15 @@ impl GPUDeviceMethods for GPUDevice {
                     depth_bias_clamp: *rs_desc.depthBiasClamp,
                     ..Default::default()
                 }),*/
-                primitive: convert_primitive_topology(descriptor.primitiveTopology),
+                primitive: convert_primitive_state(&descriptor.primitive),
                 //color: color_state,
-                depth_stencil: descriptor.depthStencilState.as_ref().map(|dss_desc| {
-                    wgt::DepthStencilStateDescriptor {
+                depth_stencil: descriptor.depthStencil.as_ref().map(|dss_desc| {
+                    wgt::DepthStencilState {
                         format: convert_texture_format(dss_desc.format),
                         depth_write_enabled: dss_desc.depthWriteEnabled,
                         depth_compare: convert_compare_function(dss_desc.depthCompare),
-                        stencil: wgt::StencilStateDescriptor {
-                            front: wgt::StencilStateFaceDescriptor {
+                        stencil: wgt::StencilState {
+                            front: wgt::StencilFaceState {
                                 compare: convert_compare_function(dss_desc.stencilFront.compare),
                                 fail_op: convert_stencil_op(dss_desc.stencilFront.failOp),
                                 depth_fail_op: convert_stencil_op(
@@ -971,7 +1008,7 @@ impl GPUDeviceMethods for GPUDevice {
                                 ),
                                 pass_op: convert_stencil_op(dss_desc.stencilFront.passOp),
                             },
-                            back: wgt::StencilStateFaceDescriptor {
+                            back: wgt::StencilFaceState {
                                 compare: convert_compare_function(dss_desc.stencilBack.compare),
                                 fail_op: convert_stencil_op(dss_desc.stencilBack.failOp),
                                 depth_fail_op: convert_stencil_op(dss_desc.stencilBack.depthFailOp),
@@ -980,42 +1017,17 @@ impl GPUDeviceMethods for GPUDevice {
                             read_mask: dss_desc.stencilReadMask,
                             write_mask: dss_desc.stencilWriteMask,
                         },
+                        bias: wgt::DepthBiasState {
+                            constant: dss_desc.depthBias,
+                            slope_scale: *dss_desc.depthBiasSlopeScale,
+                            clamp: *dss_desc.depthBiasClamp,
+                        },
                     }
                 }),
-                /*vertex_state: wgpu_pipe::VertexStateDescriptor {
-                    index_format: match vs_desc.indexFormat {
-                        GPUIndexFormat::Uint16 => wgt::IndexFormat::Uint16,
-                        GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
-                    },
-                    vertex_buffers: Cow::Owned(
-                        vs_desc
-                            .vertexBuffers
-                            .iter()
-                            .map(|buffer| wgpu_pipe::VertexBufferDescriptor {
-                                stride: buffer.arrayStride,
-                                step_mode: match buffer.stepMode {
-                                    GPUInputStepMode::Vertex => wgt::InputStepMode::Vertex,
-                                    GPUInputStepMode::Instance => wgt::InputStepMode::Instance,
-                                },
-                                attributes: Cow::Owned(
-                                    buffer
-                                        .attributes
-                                        .iter()
-                                        .map(|att| wgt::VertexAttributeDescriptor {
-                                            format: convert_vertex_format(att.format),
-                                            offset: att.offset,
-                                            shader_location: att.shaderLocation,
-                                        })
-                                        .collect::<Vec<_>>(),
-                                ),
-                            })
-                            .collect::<Vec<_>>(),
-                    ),
-                },*/
                 multisample: wgt::MultisampleState {
-                    count: descriptor.samleCount,
-                    mask: descriptor.sampleMask,
-                    alpha_to_coverage_enabled: descriptor.alphaToCoverageEnabled,
+                    count: descriptor.multisample.count,
+                    mask: descriptor.multisample.mask as u64,
+                    alpha_to_coverage_enabled: descriptor.multisample.alphaToCoverageEnabled,
                 },
                 multiview: None,
             })
@@ -1078,7 +1090,7 @@ impl GPUDeviceMethods for GPUDevice {
                 stencil_read_only: descriptor.stencilReadOnly,
             }),
             sample_count: descriptor.parent.sampleCount,
-            multiview: None,//TODO(sagudev): verify
+            multiview: None, //TODO(sagudev): verify
         };
 
         // Handle error gracefully
@@ -1146,9 +1158,61 @@ impl GPUDeviceMethods for GPUDevice {
 
     // https://gpuweb.github.io/gpuweb/#dom-gpudevice-onuncapturederror
     event_handler!(uncapturederror, GetOnuncapturederror, SetOnuncapturederror);
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-destroy
+    fn Destroy(&self) {
+        todo!()
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-createcomputepipelineasync
+    fn CreateComputePipelineAsync(&self, descriptor: &GPUComputePipelineDescriptor) -> Rc<Promise> {
+        todo!()
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-createrenderpipelineasync
+    fn CreateRenderPipelineAsync(&self, descriptor: &GPURenderPipelineDescriptor) -> Rc<Promise> {
+        todo!()
+    }
 }
 
-fn convert_primitive_topology(primitive_topology: GPUPrimitiveTopology) -> wgt::PrimitiveTopology {
+fn convert_blend_component(blend_component: &GPUBlendComponent) -> wgt::BlendComponent {
+    wgt::BlendComponent {
+        src_factor: convert_blend_factor(&blend_component.srcFactor),
+        dst_factor: convert_blend_factor(&blend_component.dstFactor),
+        operation: match blend_component.operation {
+            GPUBlendOperation::Add => wgt::BlendOperation::Add,
+            GPUBlendOperation::Subtract => wgt::BlendOperation::Subtract,
+            GPUBlendOperation::Reverse_subtract => wgt::BlendOperation::ReverseSubtract,
+            GPUBlendOperation::Min => wgt::BlendOperation::Min,
+            GPUBlendOperation::Max => wgt::BlendOperation::Max,
+        },
+    }
+}
+
+fn convert_primitive_state(primitive_state: &GPUPrimitiveState) -> wgt::PrimitiveState {
+    wgt::PrimitiveState {
+        topology: convert_primitive_topology(&primitive_state.topology),
+        strip_index_format: primitive_state.stripIndexFormat.map(
+            |index_format| match index_format {
+                GPUIndexFormat::Uint16 => wgt::IndexFormat::Uint16,
+                GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
+            },
+        ),
+        front_face: match primitive_state.frontFace {
+            GPUFrontFace::Ccw => wgt::FrontFace::Ccw,
+            GPUFrontFace::Cw => wgt::FrontFace::Cw,
+        },
+        cull_mode: match primitive_state.cullMode {
+            GPUCullMode::None => None,
+            GPUCullMode::Front => Some(wgt::Face::Front),
+            GPUCullMode::Back => Some(wgt::Face::Back),
+        },
+        unclipped_depth: primitive_state.clampDepth,
+        ..Default::default()
+    }
+}
+
+fn convert_primitive_topology(primitive_topology: &GPUPrimitiveTopology) -> wgt::PrimitiveTopology {
     match primitive_topology {
         GPUPrimitiveTopology::Point_list => wgt::PrimitiveTopology::PointList,
         GPUPrimitiveTopology::Line_list => wgt::PrimitiveTopology::LineList,
@@ -1197,7 +1261,7 @@ fn convert_compare_function(compare: GPUCompareFunction) -> wgt::CompareFunction
     }
 }
 
-fn convert_blend_factor(factor: GPUBlendFactor) -> wgt::BlendFactor {
+fn convert_blend_factor(factor: &GPUBlendFactor) -> wgt::BlendFactor {
     match factor {
         GPUBlendFactor::Zero => wgt::BlendFactor::Zero,
         GPUBlendFactor::One => wgt::BlendFactor::One,
@@ -1315,6 +1379,8 @@ pub fn convert_texture_format(format: GPUTextureFormat) -> wgt::TextureFormat {
         GPUTextureFormat::Bc6h_rgb_ufloat => wgt::TextureFormat::Bc6hRgbUfloat,
         GPUTextureFormat::Bc7_rgba_unorm => wgt::TextureFormat::Bc7RgbaUnorm,
         GPUTextureFormat::Bc7_rgba_unorm_srgb => wgt::TextureFormat::Bc7RgbaUnormSrgb,
+        GPUTextureFormat::Rg11b10float => wgt::TextureFormat::Rg11b10Float,
+        GPUTextureFormat::Bc6h_rgb_float => wgt::TextureFormat::Bc6hRgbFloat,
     }
 }
 
@@ -1336,7 +1402,7 @@ pub fn convert_texture_size_to_dict(size: &GPUExtent3D) -> GPUExtent3DDict {
         GPUExtent3D::GPUExtent3DDict(ref dict) => GPUExtent3DDict {
             width: dict.width,
             height: dict.height,
-            depth: dict.depth,
+            depthOrArrayLayers: dict.depthOrArrayLayers,
         },
         GPUExtent3D::RangeEnforcedUnsignedLongSequence(ref v) => {
             let mut w = v.clone();
@@ -1344,7 +1410,7 @@ pub fn convert_texture_size_to_dict(size: &GPUExtent3D) -> GPUExtent3DDict {
             GPUExtent3DDict {
                 width: w[0],
                 height: w[1],
-                depth: w[2],
+                depthOrArrayLayers: w[2],
             }
         },
     }
@@ -1354,7 +1420,7 @@ pub fn convert_texture_size_to_wgt(size: &GPUExtent3DDict) -> wgt::Extent3d {
     wgt::Extent3d {
         width: size.width,
         height: size.height,
-        depth_or_array_layers: size.depth,
+        depth_or_array_layers: size.depthOrArrayLayers,
     }
 }
 

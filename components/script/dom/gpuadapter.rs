@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use crate::dom::bindings::codegen::Bindings::GPUAdapterBinding::{
-    GPUAdapterMethods, GPUDeviceDescriptor, GPUFeatureName, GPULimits,
+    GPUAdapterMethods, GPUDeviceDescriptor, GPUFeatureName,
 };
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
@@ -18,6 +18,7 @@ use crate::realms::InRealm;
 use crate::script_runtime::JSContext as SafeJSContext;
 use dom_struct::dom_struct;
 use js::jsapi::{Heap, JSObject};
+use std::convert::TryFrom;
 use std::ptr::NonNull;
 use std::rc::Rc;
 use webgpu::{wgt, WebGPU, WebGPUAdapter, WebGPURequest, WebGPUResponse, WebGPUResponseResult};
@@ -66,22 +67,12 @@ impl GPUAdapter {
 }
 
 impl GPUAdapterMethods for GPUAdapter {
-    // https://gpuweb.github.io/gpuweb/#dom-gpuadapter-name
-    fn Name(&self) -> DOMString {
-        self.name.clone()
-    }
-
-    // https://gpuweb.github.io/gpuweb/#dom-gpuadapter-extensions
-    fn Extensions(&self, _cx: SafeJSContext) -> NonNull<JSObject> {
-        NonNull::new(self.extensions.get()).unwrap()
-    }
-
     /// https://gpuweb.github.io/gpuweb/#dom-gpuadapter-requestdevice
     fn RequestDevice(&self, descriptor: &GPUDeviceDescriptor, comp: InRealm) -> Rc<Promise> {
         let promise = Promise::new_in_current_realm(comp);
         let sender = response_async(&promise, self);
         let mut features = wgt::Features::empty();
-        for &ext in descriptor.extensions.iter() {
+        for &ext in descriptor.requiredFeatures.iter() {
             match ext {
                 GPUFeatureName::Depth_clip_control => {
                     features.insert(wgt::Features::DEPTH_CLIP_CONTROL)
@@ -109,34 +100,73 @@ impl GPUAdapterMethods for GPUAdapter {
             }
         }
 
-        let desc = wgt::DeviceDescriptor {
+        let mut desc = wgt::DeviceDescriptor {
             features,
-            limits: wgt::Limits {
-                max_bind_groups: descriptor.limits.maxBindGroups,
-                max_dynamic_uniform_buffers_per_pipeline_layout: descriptor
-                    .limits
-                    .maxDynamicUniformBuffersPerPipelineLayout,
-                max_dynamic_storage_buffers_per_pipeline_layout: descriptor
-                    .limits
-                    .maxDynamicStorageBuffersPerPipelineLayout,
-                max_sampled_textures_per_shader_stage: descriptor
-                    .limits
-                    .maxSampledTexturesPerShaderStage,
-                max_samplers_per_shader_stage: descriptor.limits.maxSamplersPerShaderStage,
-                max_storage_buffers_per_shader_stage: descriptor
-                    .limits
-                    .maxStorageBuffersPerShaderStage,
-                max_storage_textures_per_shader_stage: descriptor
-                    .limits
-                    .maxStorageTexturesPerShaderStage,
-                max_uniform_buffers_per_shader_stage: descriptor
-                    .limits
-                    .maxUniformBuffersPerShaderStage,
-                max_uniform_buffer_binding_size: descriptor.limits.maxUniformBufferBindingSize,
-                ..Default::default()
-            },
+            limits: wgt::Limits::default(),
             label: None,
         };
+        if let Some(lim) = &descriptor.requiredLimits {
+            for (k, v) in (*lim).iter() {
+                let v = u32::try_from(*v).unwrap_or(u32::MAX);
+                match k.as_ref() {
+                    "maxTextureDimension1D" => desc.limits.max_texture_dimension_1d = v,
+                    "maxTextureDimension2D" => desc.limits.max_texture_dimension_2d = v,
+                    "maxTextureDimension3D" => desc.limits.max_texture_dimension_3d = v,
+                    "maxTextureArrayLayers" => desc.limits.max_texture_array_layers = v,
+                    "maxBindGroups" => desc.limits.max_bind_groups = v,
+                    "maxDynamicUniformBuffersPerPipelineLayout" => {
+                        desc.limits.max_dynamic_uniform_buffers_per_pipeline_layout = v
+                    },
+                    "maxDynamicStorageBuffersPerPipelineLayout" => {
+                        desc.limits.max_dynamic_storage_buffers_per_pipeline_layout = v
+                    },
+                    "maxSampledTexturesPerShaderStage" => {
+                        desc.limits.max_sampled_textures_per_shader_stage = v
+                    },
+                    "maxSamplersPerShaderStage" => desc.limits.max_samplers_per_shader_stage = v,
+                    "maxStorageBuffersPerShaderStage" => {
+                        desc.limits.max_storage_buffers_per_shader_stage = v
+                    },
+                    "maxStorageTexturesPerShaderStage" => {
+                        desc.limits.max_storage_textures_per_shader_stage = v
+                    },
+                    "maxUniformBuffersPerShaderStage" => {
+                        desc.limits.max_uniform_buffers_per_shader_stage = v
+                    },
+                    "maxUniformBufferBindingSize" => {
+                        desc.limits.max_uniform_buffer_binding_size = v
+                    },
+                    "maxStorageBufferBindingSize" => {
+                        desc.limits.max_storage_buffer_binding_size = v
+                    },
+                    "minUniformBufferOffsetAlignment" => {
+                        desc.limits.min_uniform_buffer_offset_alignment = v
+                    },
+                    "minStorageBufferOffsetAlignment" => {
+                        desc.limits.min_storage_buffer_offset_alignment = v
+                    },
+                    "maxVertexBuffers" => desc.limits.max_vertex_buffers = v,
+                    "maxVertexAttributes" => desc.limits.max_vertex_attributes = v,
+                    "maxVertexBufferArrayStride" => desc.limits.max_vertex_buffer_array_stride = v,
+                    "maxInterStageShaderComponents" => {
+                        desc.limits.max_inter_stage_shader_components = v
+                    },
+                    "maxComputeWorkgroupStorageSize" => {
+                        desc.limits.max_compute_workgroup_storage_size = v
+                    },
+                    "maxComputeInvocationsPerWorkgroup" => {
+                        desc.limits.max_compute_invocations_per_workgroup = v
+                    },
+                    "maxComputeWorkgroupSizeX" => desc.limits.max_compute_workgroup_size_x = v,
+                    "maxComputeWorkgroupSizeY" => desc.limits.max_compute_workgroup_size_y = v,
+                    "maxComputeWorkgroupSizeZ" => desc.limits.max_compute_workgroup_size_z = v,
+                    "maxComputeWorkgroupsPerDimension" => {
+                        desc.limits.max_compute_workgroups_per_dimension = v
+                    },
+                    _ => { /* no-op */ },
+                }
+            }
+        }
         let id = self
             .global()
             .wgpu_id_hub()
@@ -154,13 +184,41 @@ impl GPUAdapterMethods for GPUAdapter {
                     descriptor: desc,
                     device_id: id,
                     pipeline_id,
-                    label: descriptor.parent.label.as_ref().map(|s| s.to_string()),
+                    label: None, // TODO(sagudev)
                 },
             ))
             .is_err()
         {
             promise.reject_error(Error::Operation);
         }
+        promise
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpuadapter-isfallbackadapter
+    fn IsFallbackAdapter(&self) -> bool {
+        //TODO
+        false
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpuadapter-requestadapterinfo
+    fn RequestAdapterInfo(&self, unmaskHints: Vec<DOMString>, comp: InRealm) -> Rc<Promise> {
+        let promise = Promise::new_in_current_realm(comp);
+        let sender = response_async(&promise, self);
+        todo!("Implemnt WPU adapter info");
+        /*if self
+            .channel
+            .0
+            .send((
+                None,
+                WebGPURequest::RequestAdapterInfo {
+                    sender,
+                    adapter_id: self.adapter,
+                },
+            ))
+            .is_err()
+        {
+            promise.reject_error(Error::Operation);
+        }*/
         promise
     }
 }
@@ -174,35 +232,12 @@ impl AsyncWGPUListener for GPUAdapter {
                 descriptor,
                 label,
             }) => {
-                let limits = GPULimits {
-                    maxBindGroups: descriptor.limits.max_bind_groups,
-                    maxDynamicStorageBuffersPerPipelineLayout: descriptor
-                        .limits
-                        .max_dynamic_storage_buffers_per_pipeline_layout,
-                    maxDynamicUniformBuffersPerPipelineLayout: descriptor
-                        .limits
-                        .max_dynamic_uniform_buffers_per_pipeline_layout,
-                    maxSampledTexturesPerShaderStage: descriptor
-                        .limits
-                        .max_sampled_textures_per_shader_stage,
-                    maxSamplersPerShaderStage: descriptor.limits.max_samplers_per_shader_stage,
-                    maxStorageBuffersPerShaderStage: descriptor
-                        .limits
-                        .max_storage_buffers_per_shader_stage,
-                    maxStorageTexturesPerShaderStage: descriptor
-                        .limits
-                        .max_storage_textures_per_shader_stage,
-                    maxUniformBufferBindingSize: descriptor.limits.max_uniform_buffer_binding_size,
-                    maxUniformBuffersPerShaderStage: descriptor
-                        .limits
-                        .max_uniform_buffers_per_shader_stage,
-                };
                 let device = GPUDevice::new(
                     &self.global(),
                     self.channel.clone(),
                     &self,
                     Heap::default(),
-                    limits,
+                    wgt::Limits::default(), // TODO use real limits
                     device_id,
                     queue_id,
                     label,

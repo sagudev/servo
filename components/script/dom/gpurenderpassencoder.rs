@@ -22,6 +22,7 @@ use webgpu::{
 };
 
 use super::bindings::codegen::Bindings::GPURenderPipelineBinding::GPUIndexFormat;
+use super::bindings::error::Fallible;
 
 #[dom_struct]
 pub struct GPURenderPassEncoder {
@@ -160,8 +161,8 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
         }
     }
 
-    /// https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-endpass
-    fn EndPass(&self) {
+    /// https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-end
+    fn End(&self) -> Fallible<()> {
         let render_pass = self.render_pass.borrow_mut().take();
         self.channel
             .0
@@ -178,6 +179,7 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
             GPUCommandEncoderState::Open,
             GPUCommandEncoderState::EncodingRenderPass,
         );
+        Ok(())
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpurenderencoderbase-setpipeline
@@ -193,7 +195,7 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
         buffer: &GPUBuffer,
         index_format: GPUIndexFormat,
         offset: u64,
-        size: Option<u64>,
+        size: u64,
     ) {
         if let Some(render_pass) = self.render_pass.borrow_mut().as_mut() {
             wgpu_render::wgpu_render_pass_set_index_buffer(
@@ -204,11 +206,7 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
                     GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
                 },
                 offset,
-                if let Some(size) = size {
-                    wgt::BufferSize::new(size)
-                } else {
-                    None
-                },
+                wgt::BufferSize::new(size),
             );
         }
     }

@@ -9,6 +9,8 @@ use crate::dom::bindings::str::DOMString;
 use crate::dom::globalscope::GlobalScope;
 use dom_struct::dom_struct;
 
+use super::bindings::error::Fallible;
+
 #[dom_struct]
 pub struct GPUValidationError {
     reflector_: Reflector,
@@ -29,8 +31,8 @@ impl GPUValidationError {
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpuvalidationerror-gpuvalidationerror
     #[allow(non_snake_case)]
-    pub fn Constructor(global: &GlobalScope, message: DOMString) -> DomRoot<Self> {
-        GPUValidationError::new(global, message)
+    pub fn Constructor(global: &GlobalScope, message: DOMString) -> Fallible<DomRoot<Self>> {
+        Ok(GPUValidationError::new(global, message))
     }
 }
 

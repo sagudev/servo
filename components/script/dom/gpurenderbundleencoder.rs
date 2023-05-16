@@ -108,7 +108,7 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
         buffer: &GPUBuffer,
         index_format: GPUIndexFormat,
         offset: u64,
-        size: Option<u64>,
+        size: u64,
     ) {
         if let Some(encoder) = self.render_bundle_encoder.borrow_mut().as_mut() {
             wgpu_bundle::wgpu_render_bundle_set_index_buffer(
@@ -119,11 +119,7 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
                     GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
                 },
                 offset,
-                if let Some(size) = size {
-                    wgt::BufferSize::new(size)
-                } else {
-                    None
-                },
+                wgt::BufferSize::new(size),
             );
         }
     }

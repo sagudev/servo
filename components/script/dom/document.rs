@@ -2858,10 +2858,11 @@ impl Document {
 
     #[allow(unrooted_must_root)]
     pub fn flush_dirty_webgpu_canvases(&self) {
-        self.dirty_webgpu_contexts
-            .borrow_mut()
-            .drain()
-            .for_each(|(_, context)| context.send_swap_chain_present());
+        //TODO(sagudev)
+        /*self.dirty_webgpu_contexts
+        .borrow_mut()
+        .drain()
+        .for_each(|(_, context)| context.send_swap_chain_present());*/
     }
 
     pub fn id_map(&self) -> Ref<HashMap<Atom, Vec<Dom<Element>>>> {

@@ -4,7 +4,7 @@
 
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::GPUCanvasContextBinding::{
-    GPUCanvasContextMethods, GPUSwapChainDescriptor,
+    GPUCanvasConfiguration, GPUCanvasContextMethods,
 };
 use crate::dom::bindings::codegen::Bindings::GPUDeviceBinding::GPUDeviceBinding::GPUDeviceMethods;
 use crate::dom::bindings::codegen::Bindings::GPUObjectBaseBinding::GPUObjectDescriptorBase;
@@ -15,7 +15,6 @@ use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
 use crate::dom::bindings::root::{Dom, DomRoot, LayoutDom};
 use crate::dom::globalscope::GlobalScope;
-use crate::dom::gpuswapchain::GPUSwapChain;
 use crate::dom::htmlcanvaselement::{HTMLCanvasElement, LayoutCanvasRenderingContextHelpers};
 use crate::dom::node::{document_from_node, Node, NodeDamage};
 use arrayvec::ArrayVec;
@@ -26,24 +25,43 @@ use script_layout_interface::HTMLCanvasDataSource;
 use std::cell::Cell;
 use webgpu::{wgpu::id, wgt, WebGPU, WebGPURequest, PRESENTATION_BUFFER_COUNT};
 
+use super::bindings::codegen::UnionTypes::HTMLCanvasElementOrOffscreenCanvas;
+use super::bindings::error::Fallible;
+use super::gputexture::GPUTexture;
+use super::offscreencanvas::OffscreenCanvas;
+
 #[derive(Clone, Copy, Debug, Eq, Hash, MallocSizeOf, Ord, PartialEq, PartialOrd)]
 pub struct WebGPUContextId(pub u64);
+
+#[derive(Clone, JSTraceable, MallocSizeOf)]
+pub enum Canvas {
+    Elemental(DomRoot<HTMLCanvasElement>),
+    Offscreen(DomRoot<OffscreenCanvas>),
+}
+
+impl From<HTMLCanvasElementOrOffscreenCanvas> for Canvas {
+    fn from(canvas: HTMLCanvasElementOrOffscreenCanvas) -> Self {
+        match canvas {
+            HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(hce) => Self::Elemental(hce),
+            HTMLCanvasElementOrOffscreenCanvas::OffscreenCanvas(oc) => Self::Offscreen(oc),
+        }
+    }
+}
 
 #[dom_struct]
 pub struct GPUCanvasContext {
     reflector_: Reflector,
     #[ignore_malloc_size_of = "channels are hard"]
     channel: WebGPU,
-    canvas: Dom<HTMLCanvasElement>,
+    canvas: Canvas,
     size: Cell<Size2D<u32>>,
-    swap_chain: DomRefCell<Option<Dom<GPUSwapChain>>>,
     #[ignore_malloc_size_of = "Defined in webrender"]
     webrender_image: Cell<Option<webrender_api::ImageKey>>,
     context_id: WebGPUContextId,
 }
 
 impl GPUCanvasContext {
-    fn new_inherited(canvas: &HTMLCanvasElement, size: Size2D<u32>, channel: WebGPU) -> Self {
+    fn new_inherited(canvas: Canvas, size: Size2D<u32>, channel: WebGPU) -> Self {
         let (sender, receiver) = ipc::channel().unwrap();
         if let Err(e) = channel.0.send((None, WebGPURequest::CreateContext(sender))) {
             warn!("Failed to send CreateContext ({:?})", e);
@@ -52,9 +70,8 @@ impl GPUCanvasContext {
         Self {
             reflector_: Reflector::new(),
             channel,
-            canvas: Dom::from_ref(canvas),
+            canvas,
             size: Cell::new(size),
-            swap_chain: DomRefCell::new(None),
             webrender_image: Cell::new(None),
             context_id: WebGPUContextId(external_id.0),
         }
@@ -67,7 +84,11 @@ impl GPUCanvasContext {
         channel: WebGPU,
     ) -> DomRoot<Self> {
         reflect_dom_object(
-            Box::new(GPUCanvasContext::new_inherited(canvas, size, channel)),
+            Box::new(GPUCanvasContext::new_inherited(
+                Canvas::Elemental(DomRoot::from_ref(canvas)),
+                size,
+                channel,
+            )),
             global,
         )
     }
@@ -83,39 +104,16 @@ impl GPUCanvasContext {
         HTMLCanvasDataSource::WebGPU(image_key)
     }
 
-    pub fn send_swap_chain_present(&self) {
-        let texture_id = self.swap_chain.borrow().as_ref().unwrap().texture_id().0;
-        let encoder_id = self
-            .global()
-            .wgpu_id_hub()
-            .lock()
-            .create_command_encoder_id(texture_id.backend());
-        if let Err(e) = self.channel.0.send((
-            None,
-            WebGPURequest::SwapChainPresent {
-                external_id: self.context_id.0,
-                texture_id,
-                encoder_id,
-            },
-        )) {
-            warn!(
-                "Failed to send UpdateWebrenderData({:?}) ({})",
-                self.context_id, e
-            );
-        }
-    }
-
     pub fn context_id(&self) -> WebGPUContextId {
         self.context_id
     }
 
     pub fn mark_as_dirty(&self) {
-        self.canvas
-            .upcast::<Node>()
-            .dirty(NodeDamage::OtherNodeDamage);
-
-        let document = document_from_node(&*self.canvas);
-        document.add_dirty_webgpu_canvas(self);
+        if let Canvas::Elemental(canvas) = &self.canvas {
+            canvas.upcast::<Node>().dirty(NodeDamage::OtherNodeDamage);
+            let document = document_from_node(&**canvas);
+            document.add_dirty_webgpu_canvas(self);
+        }
     }
 }
 
@@ -128,7 +126,7 @@ impl LayoutCanvasRenderingContextHelpers for LayoutDom<'_, GPUCanvasContext> {
 
 impl GPUCanvasContextMethods for GPUCanvasContext {
     /// https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-configureswapchain
-    fn ConfigureSwapChain(&self, descriptor: &GPUSwapChainDescriptor) -> DomRoot<GPUSwapChain> {
+    /*fn ConfigureSwapChain(&self, descriptor: &GPUSwapChainDescriptor) -> DomRoot<GPUSwapChain> {
         if let Some(chain) = &*self.swap_chain.borrow() {
             chain.destroy(self.context_id.0, self.webrender_image.get().unwrap());
             self.webrender_image.set(None);
@@ -218,5 +216,32 @@ impl GPUCanvasContextMethods for GPUCanvasContext {
         );
         *self.swap_chain.borrow_mut() = Some(Dom::from_ref(&*swap_chain));
         swap_chain
+    }*/
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-canvas
+    fn Canvas(&self) -> HTMLCanvasElementOrOffscreenCanvas {
+        match &self.canvas {
+            Canvas::Elemental(hce) => {
+                HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(hce.clone())
+            },
+            Canvas::Offscreen(oc) => {
+                HTMLCanvasElementOrOffscreenCanvas::OffscreenCanvas(oc.clone())
+            },
+        }
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-configure
+    fn Configure(&self, descriptor: &GPUCanvasConfiguration) {
+        todo!()
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-unconfigure
+    fn Unconfigure(&self) {
+        todo!()
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-getcurrenttexture
+    fn GetCurrentTexture(&self) -> Fallible<DomRoot<GPUTexture>> {
+        todo!()
     }
 }
