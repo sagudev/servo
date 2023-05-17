@@ -70,7 +70,7 @@ jobs:
       - name: Release build
         run: python3 ./mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
-        run: xvfb-run python3 ./mach smoketest
+        run: xvfb-run -s '-terminate' python3 ./mach smoketest
       - name: Unit tests
         if: ${{ inputs.unit-tests }}
         run: python3 ./mach test-unit --release --with-${{ env.LAYOUT }}
