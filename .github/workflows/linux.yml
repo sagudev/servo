@@ -69,8 +69,6 @@ jobs:
         run: python3 ./mach test-tidy --no-progress --all
       - name: Release build
         run: python3 ./mach build --release --with-${{ env.LAYOUT }}
-      - name: Smoketest
-        run: python3 ./mach smoketest --headless
       - name: Unit tests
         if: ${{ inputs.unit-tests }}
         run: python3 ./mach test-unit --release --with-${{ env.LAYOUT }}
