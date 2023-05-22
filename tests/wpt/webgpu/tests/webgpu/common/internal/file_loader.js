@@ -52,7 +52,7 @@ import { loadTreeForQuery } from './tree.js';
 
 
 // Base class for DefaultTestFileLoader and FakeTestFileLoader.
-export class TestFileLoader extends EventTarget {
+export class TestFileLoader {
 
 
 
