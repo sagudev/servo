@@ -195,6 +195,20 @@ class MachCommands(CommandBase):
             ["git"] + ["grep"] + params + ['--'] + grep_paths + [':(exclude)*.min.js', ':(exclude)*.min.css'],
             env=self.build_env())
 
+    @Command('vendor-cts',
+             description='vendores webgpu cts',
+             category='devenv')
+    @CommandArgument(
+        '--cts-repo', '-r', default="https://github.com/gpuweb/cts",
+        help='cts repo to vendor from')
+    @CommandArgument(
+        '--cts-checkout', '-c', default="main",
+        help='branch or commit of repo')
+    def cts(self, cts_repo="https://github.com/gpuweb/cts", cts_checkout="main"):
+        return call(
+            ["cargo", "run", "--target-dir", "../../target", '--', cts_repo, cts_checkout],
+            cwd="./support/vendor-webgpu-cts")
+
     @Command('rustup',
              description='Update the Rust version to latest Nightly',
              category='devenv')
