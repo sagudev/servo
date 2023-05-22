@@ -1,0 +1,28 @@
+
+<!doctype html>
+<title>problem</title>
+<meta charset=utf-8>
+
+<script>
+    function refresh() {
+        window.location.reload();
+    }
+</script>
+
+<button onClick="refresh()">Refresh Page</button>
+
+<script>
+    class Klass extends EventTarget {
+        meth() {
+            return true
+        }
+    }
+    console.log("Construct")
+    let a = new Klass();
+    console.log("Test")
+    if (a.meth()) {
+        console.log("PASS")
+    } else {
+        console.log("FAIL")
+    }
+</script>
