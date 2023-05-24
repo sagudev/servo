@@ -227,14 +227,14 @@ fn run(args: CliArgs) -> miette::Result<()> {
     );
     npm_ci_cmd.spawn()?;
 
-    let out_dir = cts_ckt.regen_dir("out", |out_dir| {
+    /*let out_dir = cts_ckt.regen_dir("out", |out_dir| {
         let mut npm_run_standalone_cmd =
             EasyCommand::new(&npm_bin, |cmd| cmd.args(["run", "standalone"]));
         log::info!(
             "generating standalone runner files into {out_dir} with {npm_run_standalone_cmd}…"
         );
         npm_run_standalone_cmd.spawn()
-    })?;
+    })?;*/
 
     let out_wpt_dir = cts_ckt.regen_dir("out-wpt", |out_wpt_dir| {
         let mut npm_run_wpt_cmd = EasyCommand::new(&npm_bin, |cmd| cmd.args(["run", "wpt"]));
@@ -261,7 +261,7 @@ fn run(args: CliArgs) -> miette::Result<()> {
     })
     .spawn()?;
 
-    log::info!("stealing standalone runtime files from {out_dir} for {out_wpt_dir}…");
+    /*log::info!("stealing standalone runtime files from {out_dir} for {out_wpt_dir}…");
     for subdir in [
         &["external"] as &[_],
         &["common", "internal"],
@@ -274,7 +274,7 @@ fn run(args: CliArgs) -> miette::Result<()> {
         log::info!("  …copying from {out_subdir} to {out_wpt_subdir}…");
         copy_dir(out_subdir, out_wpt_subdir)?
     }
-    log::info!("  …done stealing!");
+    log::info!("  …done stealing!");*/
 
     log::info!("analyzing {cts_https_html_path}…");
     let cts_https_html_content = fs::read_to_string(&*cts_https_html_path)?;
