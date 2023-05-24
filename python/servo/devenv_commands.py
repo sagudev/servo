@@ -23,7 +23,8 @@ from mach.decorators import (
 )
 
 from servo.command_base import CommandBase, cd, call
-from servo.util import get_static_rust_lang_org_dist, get_urlopen_kwargs
+from servo.util import get_static_rust_lang_org_dist, get_urlopen_kwargs, delete
+from distutils.dir_util import copy_tree
 
 
 @CommandProvider
@@ -199,15 +200,51 @@ class MachCommands(CommandBase):
              description='vendores webgpu cts',
              category='devenv')
     @CommandArgument(
-        '--cts-repo', '-r', default="https://github.com/gpuweb/cts",
-        help='cts repo to vendor from')
+        '--repo', '-r', default="https://github.com/gpuweb/cts",
+        help='Repo to vendor webgpu cts from')
     @CommandArgument(
-        '--cts-checkout', '-c', default="main",
+        '--checkout', '-c', default="main",
         help='branch or commit of repo')
-    def cts(self, cts_repo="https://github.com/gpuweb/cts", cts_checkout="main"):
-        return call(
-            ["cargo", "run", "--target-dir", "../../target", '--', cts_repo, cts_checkout],
-            cwd="./support/vendor-webgpu-cts")
+    def cts(self, repo="https://github.com/gpuweb/cts", checkout="main"):
+        tdir = path.join(self.context.topdir, "tests/wpt/webgpu/tests")
+        clone_dir = path.join(tdir, "cts_clone")
+        # clone
+        res = call(["git", "clone", "-n", repo, "cts_clone"], cwd=tdir)
+        if res != 0:
+            return res
+        # checkout
+        res = call(["git", "checkout", checkout], cwd=clone_dir)
+        if res != 0:
+            return res
+        # build
+        res = call(["npm", "ci"], cwd=clone_dir)
+        if res != 0:
+            return res
+        res = call(["npm", "run", "wpt"], cwd=clone_dir)
+        if res != 0:
+            return res
+        cts_html = path.join(clone_dir, "out-wpt", "cts.https.html")
+        # patch
+        with open(cts_html, 'r') as file:
+            filedata = file.read()
+        # files are mounted differently
+        filedata = filedata.replace('src=/webgpu/common/runtime/wpt.js', 'src=../webgpu/common/runtime/wpt.js')
+        # https://github.com/gpuweb/cts/pull/2627
+        filedata = filedata.replace("<meta name=variant content='webgpu", "<meta name=variant content='?q=webgpu")
+        # Write the file out again
+        with open(cts_html, 'w') as file:
+            file.write(filedata)
+        # copy
+        delete(path.join(tdir, "webgpu"))
+        copy_tree(path.join(clone_dir, "out-wpt"), path.join(tdir, "webgpu"))
+        # update commit
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()
+        with open(path.join(tdir, "checkout_commit.txt"), 'w') as file:
+            file.write(commit)
+        # clean up
+        delete(clone_dir)
+        print("Success!")
+        print("Now run `./mach update-manifest` and then update test expectations")
 
     @Command('rustup',
              description='Update the Rust version to latest Nightly',
