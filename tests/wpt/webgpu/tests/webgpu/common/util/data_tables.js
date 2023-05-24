@@ -1,13 +1,13 @@
 /**
-* AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
-**/
+ * AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
+ **/
 
 export function keysOf(obj) {
   return Object.keys(obj);
 }
 
 export function numericKeysOf(obj) {
-  return Object.keys(obj).map((n) => Number(n));
+  return Object.keys(obj).map(n => Number(n));
 }
 
 /**
@@ -15,17 +15,7 @@ export function numericKeysOf(obj) {
  *
  * Note: Using `as const` on the arguments to this function is necessary to infer the correct type.
  */
-export function makeTable(
-
-
-
-
-members,
-defaults,
-table)
-
-
-{
+export function makeTable(members, defaults, table) {
   const result = {};
   for (const [k, v] of Object.entries(table)) {
     const item = {};
@@ -37,4 +27,3 @@ table)
 
   return result;
 }
-//# sourceMappingURL=data_tables.js.map

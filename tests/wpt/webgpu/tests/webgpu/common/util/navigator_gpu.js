@@ -1,6 +1,6 @@
 /**
-* AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
-**/ /// <reference types="@webgpu/types" />
+ * AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
+ **/ /// <reference types="@webgpu/types" />
 import { assert } from './util.js';
 /**
  * Finds and returns the `navigator.gpu` object (or equivalent, for non-browser implementations).
@@ -8,8 +8,9 @@ import { assert } from './util.js';
  */
 function defaultGPUProvider() {
   assert(
-  typeof navigator !== 'undefined' && navigator.gpu !== undefined,
-  'No WebGPU implementation found');
+    typeof navigator !== 'undefined' && navigator.gpu !== undefined,
+    'No WebGPU implementation found'
+  );
 
   return navigator.gpu;
 }
@@ -18,7 +19,6 @@ function defaultGPUProvider() {
  * GPUProvider is a function that creates and returns a new GPU instance.
  * May throw an exception if a GPU cannot be created.
  */
-
 
 let gpuProvider = defaultGPUProvider;
 
@@ -53,13 +53,10 @@ export function getGPU() {
   impl = gpuProvider();
 
   if (defaultRequestAdapterOptions) {
-
     const oldFn = impl.requestAdapter;
-    impl.requestAdapter = function (
-    options)
-    {
+    impl.requestAdapter = function (options) {
       const promise = oldFn.call(this, { ...defaultRequestAdapterOptions, ...(options || {}) });
-      void promise.then(async (adapter) => {
+      void promise.then(async adapter => {
         if (adapter) {
           const info = await adapter.requestAdapterInfo();
 
@@ -72,4 +69,3 @@ export function getGPU() {
 
   return impl;
 }
-//# sourceMappingURL=navigator_gpu.js.map

@@ -1,25 +1,25 @@
 /**
-* AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
-**/import { SkipTestCase, UnexpectedPassError } from '../../framework/fixture.js';import { globalTestConfig } from '../../framework/test_config.js';import { now, assert } from '../../util/util.js';
+ * AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
+ **/ import { SkipTestCase, UnexpectedPassError } from '../../framework/fixture.js';
+import { globalTestConfig } from '../../framework/test_config.js';
+import { now, assert } from '../../util/util.js';
 
-import { LogMessageWithStack } from './log_message.js';var
-
-
-LogSeverity;(function (LogSeverity) {LogSeverity[LogSeverity["Pass"] = 0] = "Pass";LogSeverity[LogSeverity["Skip"] = 1] = "Skip";LogSeverity[LogSeverity["Warn"] = 2] = "Warn";LogSeverity[LogSeverity["ExpectFailed"] = 3] = "ExpectFailed";LogSeverity[LogSeverity["ValidationFailed"] = 4] = "ValidationFailed";LogSeverity[LogSeverity["ThrewException"] = 5] = "ThrewException";})(LogSeverity || (LogSeverity = {}));
-
-
-
-
-
-
-
+import { LogMessageWithStack } from './log_message.js';
+var LogSeverity;
+(function (LogSeverity) {
+  LogSeverity[(LogSeverity['Pass'] = 0)] = 'Pass';
+  LogSeverity[(LogSeverity['Skip'] = 1)] = 'Skip';
+  LogSeverity[(LogSeverity['Warn'] = 2)] = 'Warn';
+  LogSeverity[(LogSeverity['ExpectFailed'] = 3)] = 'ExpectFailed';
+  LogSeverity[(LogSeverity['ValidationFailed'] = 4)] = 'ValidationFailed';
+  LogSeverity[(LogSeverity['ThrewException'] = 5)] = 'ThrewException';
+})(LogSeverity || (LogSeverity = {}));
 
 const kMaxLogStacks = 2;
 const kMinSeverityForStack = LogSeverity.Warn;
 
 /** Holds onto a LiveTestCaseResult owned by the Logger, and writes the results into it. */
 export class TestCaseRecorder {
-
   inSubCase = false;
   subCaseStatus = LogSeverity.Pass;
   finalCaseStatus = LogSeverity.Pass;
@@ -50,13 +50,13 @@ export class TestCaseRecorder {
 
     // Convert numeric enum back to string (but expose 'exception' as 'fail')
     this.result.status =
-    this.finalCaseStatus === LogSeverity.Pass ?
-    'pass' :
-    this.finalCaseStatus === LogSeverity.Skip ?
-    'skip' :
-    this.finalCaseStatus === LogSeverity.Warn ?
-    'warn' :
-    'fail'; // Everything else is an error
+      this.finalCaseStatus === LogSeverity.Pass
+        ? 'pass'
+        : this.finalCaseStatus === LogSeverity.Skip
+        ? 'skip'
+        : this.finalCaseStatus === LogSeverity.Warn
+        ? 'warn'
+        : 'fail'; // Everything else is an error
 
     this.result.logs = this.logs;
   }
@@ -156,4 +156,3 @@ export class TestCaseRecorder {
     this.logs.push(logMessage);
   }
 }
-//# sourceMappingURL=test_case_recorder.js.map

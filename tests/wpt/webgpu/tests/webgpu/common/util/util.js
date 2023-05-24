@@ -1,6 +1,8 @@
 /**
-* AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
-**/import { Float16Array } from '../../external/petamoriken/float16/float16.js';import { SkipTestCase } from '../framework/fixture.js';import { globalTestConfig } from '../framework/test_config.js';
+ * AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
+ **/ import { Float16Array } from '../../external/petamoriken/float16/float16.js';
+import { SkipTestCase } from '../framework/fixture.js';
+import { globalTestConfig } from '../framework/test_config.js';
 import { Logger } from '../internal/logging/logger.js';
 
 import { keysOf } from './data_tables.js';
@@ -11,22 +13,19 @@ import { timeout } from './timeout.js';
  * The extra data is omitted if not running the test in debug mode (`?debug=1`).
  */
 export class ErrorWithExtra extends Error {
-
-
   /**
    * `extra` function is only called if in debug mode.
    * If an `ErrorWithExtra` is passed, its message is used and its extras are passed through.
    */
-
 
   constructor(baseOrMessage, newExtra) {
     const message = typeof baseOrMessage === 'string' ? baseOrMessage : baseOrMessage.message;
     super(message);
 
     const oldExtras = baseOrMessage instanceof ErrorWithExtra ? baseOrMessage.extra : {};
-    this.extra = Logger.globalDebugMode ?
-    { ...oldExtras, ...newExtra() } :
-    { omitted: 'pass ?debug=1' };
+    this.extra = Logger.globalDebugMode
+      ? { ...oldExtras, ...newExtra() }
+      : { omitted: 'pass ?debug=1' };
   }
 }
 
@@ -55,9 +54,9 @@ export async function assertReject(p, msg) {
     await p;
     unreachable(msg);
   } catch (ex) {
-
     // Assertion OK
-  }}
+  }
+}
 
 /**
  * Assert this code is unreachable. Unconditionally throws an `Error`.
@@ -90,7 +89,7 @@ export function now() {
  * Returns a promise which resolves after the specified time.
  */
 export function resolveOnTimeout(ms) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     timeout(() => {
       resolve();
     }, ms);
@@ -134,15 +133,11 @@ export function raceWithRejectOnTimeout(p, ms, msg) {
  * Takes a promise `p` and returns a new one which rejects if `p` resolves or rejects,
  * and otherwise resolves after the specified time.
  */
-export function assertNotSettledWithinTime(
-p,
-ms,
-msg)
-{
+export function assertNotSettledWithinTime(p, ms, msg) {
   // Rejects regardless of whether p resolves or rejects.
   const rejectWhenSettled = p.then(() => Promise.reject(new Error(msg)));
   // Resolves after `ms` milliseconds.
-  const timeoutPromise = new Promise((resolve) => {
+  const timeoutPromise = new Promise(resolve => {
     const handle = timeout(() => {
       resolve(undefined);
     }, ms);
@@ -197,7 +192,7 @@ export function objectEquals(x, y) {
   const x1 = x;
   const y1 = y;
   const p = Object.keys(x);
-  return Object.keys(y).every((i) => p.indexOf(i) !== -1) && p.every((i) => objectEquals(x1[i], y1[i]));
+  return Object.keys(y).every(i => p.indexOf(i) !== -1) && p.every(i => objectEquals(x1[i], y1[i]));
 }
 
 /**
@@ -223,14 +218,14 @@ export function mapLazy(xs, f) {
       for (const x of xs) {
         yield f(x);
       }
-    }
+    },
   };
 }
 
 const ReorderOrders = {
   forward: true,
   backward: true,
-  shiftByHalf: true
+  shiftByHalf: true,
 };
 
 export const kReorderOrderKeys = keysOf(ReorderOrders);
@@ -241,7 +236,7 @@ export const kReorderOrderKeys = keysOf(ReorderOrders);
  */
 export function shiftByHalf(arr) {
   const len = arr.length;
-  const half = len / 2 | 0;
+  const half = (len / 2) | 0;
   const firstHalf = arr.splice(0, half);
   return [...arr, ...firstHalf];
 }
@@ -255,68 +250,39 @@ export function reorder(order, arr) {
       return arr.slice();
     case 'backward':
       return arr.slice().reverse();
-    case 'shiftByHalf':{
-        // should this be pseudo random?
-        return shiftByHalf(arr);
-      }}
-
+    case 'shiftByHalf': {
+      // should this be pseudo random?
+      return shiftByHalf(arr);
+    }
+  }
 }
 
 const TypedArrayBufferViewInstances = [
-new Uint8Array(),
-new Uint8ClampedArray(),
-new Uint16Array(),
-new Uint32Array(),
-new Int8Array(),
-new Int16Array(),
-new Int32Array(),
-new Float16Array(),
-new Float32Array(),
-new Float64Array()];
+  new Uint8Array(),
+  new Uint8ClampedArray(),
+  new Uint16Array(),
+  new Uint32Array(),
+  new Int8Array(),
+  new Int16Array(),
+  new Int32Array(),
+  new Float16Array(),
+  new Float32Array(),
+  new Float64Array(),
+];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const kTypedArrayBufferViews =
-
-{
+export const kTypedArrayBufferViews = {
   ...(() => {
-
     const result = {};
     for (const v of TypedArrayBufferViewInstances) {
       result[v.constructor.name] = v.constructor;
     }
     return result;
-  })()
+  })(),
 };
 export const kTypedArrayBufferViewKeys = keysOf(kTypedArrayBufferViews);
 export const kTypedArrayBufferViewConstructors = Object.values(kTypedArrayBufferViews);
 
-function subarrayAsU8(
-buf,
-{ start = 0, length })
-{
+function subarrayAsU8(buf, { start = 0, length }) {
   if (buf instanceof ArrayBuffer) {
     return new Uint8Array(buf, start, length);
   } else if (buf instanceof Uint8Array || buf instanceof Uint8ClampedArray) {
@@ -327,9 +293,9 @@ buf,
   }
   const byteOffset = buf.byteOffset + start * buf.BYTES_PER_ELEMENT;
   const byteLength =
-  length !== undefined ?
-  length * buf.BYTES_PER_ELEMENT :
-  buf.byteLength - (byteOffset - buf.byteOffset);
+    length !== undefined
+      ? length * buf.BYTES_PER_ELEMENT
+      : buf.byteLength - (byteOffset - buf.byteOffset);
   return new Uint8Array(buf.buffer, byteOffset, byteLength);
 }
 
@@ -338,10 +304,6 @@ buf,
  *
  * `start`/`length` are in elements (or in bytes, if ArrayBuffer).
  */
-export function memcpy(
-src,
-dst)
-{
+export function memcpy(src, dst) {
   subarrayAsU8(dst.dst, dst).set(subarrayAsU8(src.src, src));
 }
-//# sourceMappingURL=util.js.map

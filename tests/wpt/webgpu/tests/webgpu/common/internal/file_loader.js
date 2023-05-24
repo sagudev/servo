@@ -1,8 +1,7 @@
 /**
-* AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
-**/import { assert } from '../util/util.js';
+ * AUTO-GENERATED - DO NOT EDIT. Source: https://github.com/gpuweb/cts
+ **/ import { assert } from '../util/util.js';
 import { parseQuery } from './query/parseQuery.js';
-
 
 import { loadTreeForQuery } from './tree.js';
 
@@ -10,69 +9,25 @@ import { loadTreeForQuery } from './tree.js';
 // - `src/webgpu/listing.ts` (which is dynamically computed, has a Promise<TestSuiteListing>)
 // - `out/webgpu/listing.js` (which is pre-baked, has a TestSuiteListing)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Base class for DefaultTestFileLoader and FakeTestFileLoader.
-export class TestFileLoader {
-
-
-
+export class TestFileLoader extends EventTarget {
   importSpecFile(suite, path) {
     const url = `${suite}/${path.join('/')}.spec.js`;
-    this.dispatchEvent(
-    new MessageEvent('import', { data: { url } }));
+    this.dispatchEvent(new MessageEvent('import', { data: { url } }));
 
     return this.import(url);
   }
 
   async loadTree(query, subqueriesToExpand = []) {
     const tree = await loadTreeForQuery(
-    this,
-    query,
-    subqueriesToExpand.map((s) => {
-      const q = parseQuery(s);
-      assert(q.level >= 2, () => `subqueriesToExpand entries should not be multi-file:\n  ${q}`);
-      return q;
-    }));
+      this,
+      query,
+      subqueriesToExpand.map(s => {
+        const q = parseQuery(s);
+        assert(q.level >= 2, () => `subqueriesToExpand entries should not be multi-file:\n  ${q}`);
+        return q;
+      })
+    );
 
     this.dispatchEvent(new MessageEvent('finish'));
     return tree;
@@ -93,4 +48,3 @@ export class DefaultTestFileLoader extends TestFileLoader {
     return import(`../../${path}`);
   }
 }
-//# sourceMappingURL=file_loader.js.map
