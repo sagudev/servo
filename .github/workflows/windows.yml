@@ -40,7 +40,6 @@ env:
   LAYOUT: "${{ contains(inputs.layout, '2020') && 'layout-2020' || 'layout-2013' }}"
   PACKAGE: "${{ contains(inputs.layout, '2020') && 'windows-msvc-layout2020' || 'windows-msvc' }}"
   CCACHE: "ccache"
-  CARGO_INCREMENTAL: 0
 
 jobs:
   build-win:
@@ -68,14 +67,14 @@ jobs:
           python mach bootstrap-gstreamer
       - name: Release build
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
-        run: python mach build --release --with-${{ env.LAYOUT }}
+        run: ccache python mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: python mach smoketest --angle
       - name: Unit tests
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         if: ${{ inputs.unit-tests }}
-        run: python mach test-unit --release --with-${{ env.LAYOUT }}
+        run: ccache python mach test-unit --release --with-${{ env.LAYOUT }}
       - name: Package
         working-directory: "C:\\a\\servo\\servo"
         run: python mach package --release
