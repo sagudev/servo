@@ -66,12 +66,14 @@ jobs:
           python mach fetch
           python mach bootstrap-gstreamer
       - name: Release build
+        shell: bash
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: ccache python mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: python mach smoketest --angle
       - name: Unit tests
+        shell: bash
         working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         if: ${{ inputs.unit-tests }}
         run: ccache python mach test-unit --release --with-${{ env.LAYOUT }}
