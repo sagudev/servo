@@ -39,7 +39,7 @@ env:
   SHELL: /bin/bash
   LAYOUT: "${{ contains(inputs.layout, '2020') && 'layout-2020' || 'layout-2013' }}"
   PACKAGE: "${{ contains(inputs.layout, '2020') && 'windows-msvc-layout2020' || 'windows-msvc' }}"
-  CCACHE: "sccache"
+  CCACHE: "C:\\hostedtoolcache\\windows\\sccache\\0.5.0\\x64\\sccache.exe"
 
 jobs:
   build-win:
