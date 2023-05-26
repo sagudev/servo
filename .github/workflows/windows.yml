@@ -49,8 +49,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
-      - name: Copy to C drive
-        run: cp D:\a C:\ -Recurse
       - name: wix311-binaries
         shell: powershell
         run: |
@@ -60,25 +58,20 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
       - name: Bootstrap
-        working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: |
           python -m pip install --upgrade pip virtualenv
           python mach fetch
           python mach bootstrap-gstreamer
       - name: Release build
         shell: bash
-        working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: ccache python mach build --release --with-${{ env.LAYOUT }}
       - name: Smoketest
-        working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: python mach smoketest --angle
       - name: Unit tests
         shell: bash
-        working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         if: ${{ inputs.unit-tests }}
         run: ccache python mach test-unit --release --with-${{ env.LAYOUT }}
       - name: Package
-        working-directory: "C:\\a\\servo\\servo"
         run: python mach package --release
       - name: Upload Package
         uses: actions/upload-artifact@v3
@@ -91,7 +84,6 @@ jobs:
           path: C:\\a\\servo\\servo\\target/release/msi/Servo.exe
       - name: Upload
         if: ${{ inputs.upload }}
-        working-directory: "C:\\a\\${{ github.event.repository.name }}\\${{ github.event.repository.name }}"
         run: |
           python mach upload-nightly ${{ env.PACKAGE }} --secret-from-environment `
             --github-release-id ${{ inputs.github-release-id }}
