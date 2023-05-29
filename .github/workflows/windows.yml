@@ -40,7 +40,6 @@ env:
   LAYOUT: "${{ contains(inputs.layout, '2020') && 'layout-2020' || 'layout-2013' }}"
   PACKAGE: "${{ contains(inputs.layout, '2020') && 'windows-msvc-layout2020' || 'windows-msvc' }}"
   CCACHE: "ccache"
-  CARGO_INCREMENTAL: 0
 
 jobs:
   build-win:
