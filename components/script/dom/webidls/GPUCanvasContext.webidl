@@ -16,7 +16,7 @@ interface GPUCanvasContext {
     GPUTexture getCurrentTexture();
 };
 
-enum GPUCanvasCompositingAlphaMode {
+enum GPUCanvasAlphaMode {
     "opaque",
     "premultiplied",
 };
@@ -24,7 +24,8 @@ enum GPUCanvasCompositingAlphaMode {
 dictionary GPUCanvasConfiguration {
     required GPUDevice device;
     required GPUTextureFormat format;
-    GPUTextureUsageFlags usage = 0x10; //GPUTextureUsage.OUTPUT_ATTACHMENT
-    //GPUPredefinedColorSpace colorSpace = "srgb"; //TODO
-    GPUCanvasCompositingAlphaMode compositingAlphaMode = "opaque";
+    GPUTextureUsageFlags usage = 0x10;  // GPUTextureUsage.RENDER_ATTACHMENT
+    sequence<GPUTextureFormat> viewFormats = [];
+    // PredefinedColorSpace colorSpace = "srgb"; // TODO
+    GPUCanvasAlphaMode alphaMode = "opaque";
 };
