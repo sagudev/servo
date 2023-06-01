@@ -62,12 +62,13 @@ pub struct GPUCanvasContext {
     #[ignore_malloc_size_of = "Defined in webrender"]
     webrender_image: Cell<Option<webrender_api::ImageKey>>,
     context_id: WebGPUContextId,
-    config: MutNullableDom<GPUCanvasConfiguration>,
+    #[ignore_malloc_size_of = "idk"]
+    config: Cell<Option<GPUCanvasConfiguration>>,
     texture: Dom<GPUTexture>,
 }
 
 impl GPUCanvasContext {
-    fn new_inherited(canvas: Canvas, size: Size2D<u32>, channel: WebGPU) -> Self {
+    fn new_inherited(canvas: Canvas, size: Size2D<u32>, channel: WebGPU, texture: &GPUTexture) -> Self {
         let (sender, receiver) = ipc::channel().unwrap();
         if let Err(e) = channel.0.send((None, WebGPURequest::CreateContext(sender))) {
             warn!("Failed to send CreateContext ({:?})", e);
@@ -80,9 +81,8 @@ impl GPUCanvasContext {
             size: Cell::new(size),
             webrender_image: Cell::new(None),
             context_id: WebGPUContextId(external_id.0),
-            config: None,
-            context: todo!(),
-            texture: todo!(),
+            config: Cell::new(None),
+            texture: Dom::from_ref(texture),
         }
     }
 
@@ -91,12 +91,14 @@ impl GPUCanvasContext {
         canvas: &HTMLCanvasElement,
         size: Size2D<u32>,
         channel: WebGPU,
+        texture: &GPUTexture
     ) -> DomRoot<Self> {
         reflect_dom_object(
             Box::new(GPUCanvasContext::new_inherited(
                 Canvas::Elemental(DomRoot::from_ref(canvas)),
                 size,
                 channel,
+                texture,
             )),
             global,
         )
