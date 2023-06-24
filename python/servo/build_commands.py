@@ -15,7 +15,6 @@ import os
 import os.path as path
 import platform
 import shutil
-import stat
 import subprocess
 import sys
 import urllib
@@ -35,7 +34,7 @@ from mach.decorators import (
 from mach.registrar import Registrar
 
 from mach_bootstrap import _get_exec_path
-from servo.command_base import CommandBase, cd, call, check_call
+from servo.command_base import CommandBase, cd, call, check_call, package_msvc_dlls
 from servo.gstreamer import windows_dlls, windows_plugins, macos_plugins
 
 
@@ -435,11 +434,10 @@ class MachCommands(CommandBase):
                 if not dev and not libsimpleservo:
                     call(["editbin", "/nologo", "/subsystem:windows", path.join(servo_exe_dir, "servo.exe")],
                          verbose=verbose)
-                # on msvc, we need to copy in some DLLs in to the servo.exe dir and the directory for unit tests.
+                # on msvc, we need to copy in some DLLs in to the servo.exe dir
                 for ssl_lib in ["libssl.dll", "libcrypto.dll"]:
                     ssl_path = path.join(env['OPENSSL_LIB_DIR'], "../bin", ssl_lib)
                     shutil.copy(ssl_path, servo_exe_dir)
-                    shutil.copy(ssl_path, path.join(servo_exe_dir, "deps"))
 
                 build_path = path.join(servo_exe_dir, "build")
                 assert os.path.exists(build_path)
@@ -858,74 +856,4 @@ def package_gstreamer_dlls(env, servo_exe_dir, target, uwp):
 
     for gst_lib in missing:
         print("ERROR: could not find required GStreamer DLL: " + gst_lib)
-    return not missing
-
-
-def package_msvc_dlls(servo_exe_dir, target, vcinstalldir, vs_version):
-    # copy some MSVC DLLs to servo.exe dir
-    msvc_redist_dir = None
-    vs_platforms = {
-        "x86_64": "x64",
-        "i686": "x86",
-        "aarch64": "arm64",
-    }
-    target_arch = target.split('-')[0]
-    vs_platform = vs_platforms[target_arch]
-    vc_dir = vcinstalldir or os.environ.get("VCINSTALLDIR", "")
-    if not vs_version:
-        vs_version = os.environ.get("VisualStudioVersion", "")
-    msvc_deps = [
-        "msvcp140.dll",
-        "vcruntime140.dll",
-    ]
-    if target_arch != "aarch64" and "uwp" not in target and vs_version in ("14.0", "15.0", "16.0"):
-        msvc_deps += ["api-ms-win-crt-runtime-l1-1-0.dll"]
-
-    # Check if it's Visual C++ Build Tools or Visual Studio 2015
-    vs14_vcvars = path.join(vc_dir, "vcvarsall.bat")
-    is_vs14 = True if os.path.isfile(vs14_vcvars) or vs_version == "14.0" else False
-    if is_vs14:
-        msvc_redist_dir = path.join(vc_dir, "redist", vs_platform, "Microsoft.VC140.CRT")
-    elif vs_version in ("15.0", "16.0"):
-        redist_dir = path.join(vc_dir, "Redist", "MSVC")
-        if os.path.isdir(redist_dir):
-            for p in os.listdir(redist_dir)[::-1]:
-                redist_path = path.join(redist_dir, p)
-                for v in ["VC141", "VC142", "VC150", "VC160"]:
-                    # there are two possible paths
-                    # `x64\Microsoft.VC*.CRT` or `onecore\x64\Microsoft.VC*.CRT`
-                    redist1 = path.join(redist_path, vs_platform, "Microsoft.{}.CRT".format(v))
-                    redist2 = path.join(redist_path, "onecore", vs_platform, "Microsoft.{}.CRT".format(v))
-                    if os.path.isdir(redist1):
-                        msvc_redist_dir = redist1
-                        break
-                    elif os.path.isdir(redist2):
-                        msvc_redist_dir = redist2
-                        break
-                if msvc_redist_dir:
-                    break
-    if not msvc_redist_dir:
-        print("Couldn't locate MSVC redistributable directory")
-        return False
-    redist_dirs = [
-        msvc_redist_dir,
-    ]
-    if "WindowsSdkDir" in os.environ:
-        redist_dirs += [path.join(os.environ["WindowsSdkDir"], "Redist", "ucrt", "DLLs", vs_platform)]
-    missing = []
-    for msvc_dll in msvc_deps:
-        for dll_dir in redist_dirs:
-            dll = path.join(dll_dir, msvc_dll)
-            servo_dir_dll = path.join(servo_exe_dir, msvc_dll)
-            if os.path.isfile(dll):
-                if os.path.isfile(servo_dir_dll):
-                    # avoid permission denied error when overwrite dll in servo build directory
-                    os.chmod(servo_dir_dll, stat.S_IWUSR)
-                shutil.copy(dll, servo_exe_dir)
-                break
-        else:
-            missing += [msvc_dll]
-
-    for msvc_dll in missing:
-        print("DLL file `{}` not found!".format(msvc_dll))
     return not missing

@@ -35,6 +35,14 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       layout: '2013'
+      unit-tests: false
+
+  unit-test-win:
+    name: Windows
+    needs: ["decision"]
+    uses: ./.github/workflows/windows.yml
+    with:
+      layout: '2013'
       unit-tests: true
 
   build-mac:
@@ -71,6 +79,7 @@ jobs:
     needs:
       - "decision"
       - "build-win"
+      - "unit-test-win"
       - "build-mac"
       - "build-linux"
       - "build-linux-layout-2020"

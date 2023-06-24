@@ -44,7 +44,7 @@ env:
 
 jobs:
   build-win:
-    name: Build
+    name: "${{ inputs.unit-tests && 'Unit' || 'Build' }}"
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
@@ -64,10 +64,13 @@ jobs:
           python mach fetch
           python mach bootstrap-gstreamer
       - name: Release build
+        if: ${{ !inputs.unit-tests }}
         run: python mach build --release --with-${{ env.LAYOUT }}
       - name: Copy resources
+        if: ${{ !inputs.unit-tests }}
         run: cp D:\a\servo\servo\resources C:\a\servo\servo -Recurse
       - name: Smoketest
+        if: ${{ !inputs.unit-tests }}
         run: python mach smoketest --angle
       - name: Unit tests
         if: ${{ inputs.unit-tests }}
@@ -81,8 +84,10 @@ jobs:
           # Using a wildcard here ensures that the archive includes the path.
           path: target/cargo-timings-*-${{ env.LAYOUT }}
       - name: Package
+        if: ${{ !inputs.unit-tests }}
         run: python mach package --release
       - name: Upload Package
+        if: ${{ !inputs.unit-tests }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PACKAGE }}
@@ -92,7 +97,7 @@ jobs:
           # Zip: C:\a\servo\servo\target\release\msi\Servo.zip
           path: C:\\a\\servo\\servo\\target/release/msi/Servo.exe
       - name: Upload
-        if: ${{ inputs.upload }}
+        if: ${{ inputs.upload && !inputs.unit-tests }}
         run: |
           python mach upload-nightly ${{ env.PACKAGE }} --secret-from-environment `
             --github-release-id ${{ inputs.github-release-id }}
