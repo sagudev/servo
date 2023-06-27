@@ -33,6 +33,7 @@ use style::stylesheets::{CssRule, CssRules, Origin, Stylesheet, StylesheetConten
 pub struct HTMLMetaElement {
     htmlelement: HTMLElement,
     #[ignore_malloc_size_of = "Arc"]
+    #[no_trace]
     stylesheet: DomRefCell<Option<Arc<Stylesheet>>>,
     cssom_stylesheet: MutNullableDom<CSSStyleSheet>,
 }
