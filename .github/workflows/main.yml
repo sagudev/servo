@@ -34,7 +34,6 @@ jobs:
     needs: ["decision"]
     uses: ./.github/workflows/windows.yml
     with:
-      layout: '2013'
       unit-tests: true
 
   build-mac:
@@ -42,7 +41,6 @@ jobs:
     needs: ["decision"]
     uses: ./.github/workflows/mac.yml
     with:
-      layout: '2013'
       unit-tests: true
 
   build-linux:
@@ -50,16 +48,6 @@ jobs:
     needs: ["decision"]
     uses: ./.github/workflows/linux.yml
     with:
-      layout: '2013'
-      wpt: 'test'
-      unit-tests: true
-
-  build-linux-layout-2020:
-    name: Linux (layout-2020)
-    needs: ["decision"]
-    uses: ./.github/workflows/linux.yml
-    with:
-      layout: '2020'
       wpt: 'test'
       unit-tests: true
 
@@ -73,7 +61,6 @@ jobs:
       - "build-win"
       - "build-mac"
       - "build-linux"
-      - "build-linux-layout-2020"
 
     steps:
       - name: Mark the job as successful

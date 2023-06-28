@@ -103,6 +103,8 @@ def run_tests(**kwargs):
     kwargs.setdefault("binary_args", [])
     if prefs:
         kwargs["binary_args"] += ["--pref=" + pref for pref in prefs]
+    if "layout_2020" not in kwargs:
+        kwargs["binary_args"] += ["--legacy-layout"]
 
     if not kwargs.get("no_default_test_types"):
         test_types = {
