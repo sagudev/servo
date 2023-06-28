@@ -4951,6 +4951,7 @@ pub enum TexSource {
 pub struct WebGLCommandSender {
     #[no_trace]
     sender: WebGLChan,
+    #[no_trace]
     waker: Option<Box<dyn EventLoopWaker>>,
 }
 
@@ -4973,6 +4974,7 @@ pub(crate) struct WebGLMessageSender {
     #[no_trace]
     sender: WebGLMsgSender,
     #[ignore_malloc_size_of = "traits are cumbersome"]
+    #[no_trace]
     waker: Option<Box<dyn EventLoopWaker>>,
 }
 
