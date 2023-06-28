@@ -55,6 +55,7 @@ def create_parser():
 def update_args_for_legacy_layout(kwargs: dict):
     if kwargs.pop("layout_2020"):
         return
+    kwargs["binary_args"] += ["--legacy-layout"]
     kwargs["test_paths"]["/"]["metadata_path"] = os.path.join(
         WPT_PATH, "meta-legacy-layout"
     )
