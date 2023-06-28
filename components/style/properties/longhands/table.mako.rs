@@ -9,7 +9,7 @@
 ${helpers.single_keyword(
     "table-layout",
     "auto fixed",
-    engines="gecko servo-2013",
+    engines="gecko servo",
     gecko_ffi_name="mLayoutStrategy",
     animation_value_type="discrete",
     gecko_enum_prefix="StyleTableLayout",
