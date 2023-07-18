@@ -38,7 +38,9 @@ notify-py == 0.3.42
 
 # A few more requirements for tidy.
 voluptuous == 0.12.1
-PyYAML == 5.4
+pyyaml==5.4
+# Workaround for pyyaml https://github.com/yaml/pyyaml/issues/724
+cython<3.0.0
 
 # For wpt scripts and their tests.
 flask
