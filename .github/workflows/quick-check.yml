@@ -5,7 +5,7 @@ name: Quick check
 on:
   push:
     branches:
-      ["**", "!master", "!auto", "!try", "!try-linux", "!try-mac", "!try-windows", "!try-wpt", "!try-wpt-2020", "!dependabot/**"]
+      ["**", "!master", "!auto", "!try", "!try-linux", "!try-mac", "!try-wpt-mac", "!try-wpt-mac-2020", "!try-windows", "!try-wpt", "!try-wpt-2020", "!dependabot/**"]
 
 jobs:
   build-linux:
