@@ -21,7 +21,7 @@ jobs:
           sudo apt update
           python3 ./mach bootstrap
       - name: Compile docs
-        run: python3 ./mach doc
+        run: python3 ./mach doc --document-private-items
         env:
           RUSTDOCFLAGS: -Z unstable-options --disable-minification
       - name: Upload docs
