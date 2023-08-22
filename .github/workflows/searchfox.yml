@@ -1,0 +1,36 @@
+name: Searchfox index
+
+on:
+  schedule:
+    # Run at 5:30 am, daily.
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+
+env:
+  RUST_BACKTRACE: 1
+  SHELL: /bin/bash
+
+jobs:
+  servo-analysis:
+    # This job is only useful when run on upstream servo.
+    if: github.repository == 'servo/servo' || github.event_name == 'workflow_dispatch'
+    name: Save analysis of servo
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Bootstrap
+        run: |
+          rustup component add rust-analyzer
+          python3 -m pip install --upgrade pip virtualenv
+          sudo apt update
+          python3 ./mach bootstrap
+      - name: Generating mozsearch scip index
+        run: rust-analyzer scip .
+      - name: Upload scip index
+        uses: actions/upload-artifact@v3
+        with:
+          name: index
+          path: index.scip
+      
