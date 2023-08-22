@@ -1,6 +1,7 @@
 name: Searchfox index
 
 on:
+  push:
   schedule:
     # Run at 5:30 am, daily.
     - cron: '15 5 * * *'
@@ -12,8 +13,6 @@ env:
 
 jobs:
   servo-analysis:
-    # This job is only useful when run on upstream servo.
-    if: github.repository == 'servo/servo' || github.event_name == 'workflow_dispatch'
     name: Save analysis of servo
     runs-on: ubuntu-20.04
     steps:
