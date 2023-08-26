@@ -119,3 +119,6 @@ immeta = { git = "https://github.com/fabricedesre/immeta.git" }
 [patch."https://github.com/servo/webrender"]
 webrender = { path = "third_party/webrender/webrender" }
 webrender_api = { path = "third_party/webrender/webrender_api" }
+
+[patch."https://github.com/servo/mozjs"]
+mozjs = { git = "https://github.com/Redfire75369/mozjs", branch="pin-heap" }
