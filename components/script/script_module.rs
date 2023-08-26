@@ -72,6 +72,7 @@ use net_traits::{ResourceFetchTiming, ResourceTimingType};
 use servo_url::ServoUrl;
 use std::collections::{HashMap, HashSet};
 use std::mem;
+use std::pin::Pin;
 use std::ptr;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -88,7 +89,7 @@ unsafe fn gen_type_error(global: &GlobalScope, string: String) -> RethrowError {
 }
 
 #[derive(JSTraceable)]
-pub struct ModuleObject(Box<Heap<*mut JSObject>>);
+pub struct ModuleObject(Pin<Box<Heap<*mut JSObject>>>);
 
 impl ModuleObject {
     #[allow(unsafe_code)]
@@ -465,7 +466,7 @@ impl ModuleTree {
                 module_script.handle().into_handle(),
                 url.clone(),
             )
-            .map(|_| ModuleObject(Heap::boxed(*module_script)))
+            .map(|_| ModuleObject(Heap::pinned(*module_script)))
         }
     }
 

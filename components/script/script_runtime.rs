@@ -271,7 +271,7 @@ unsafe extern "C" fn promise_rejection_tracker(
                 if global
                     .get_uncaught_rejections()
                     .borrow()
-                    .contains(&Heap::boxed(promise.get()))
+                    .contains(&Heap::pinned(promise.get()))
                 {
                     global.remove_uncaught_rejection(promise);
                     return;
@@ -281,7 +281,7 @@ unsafe extern "C" fn promise_rejection_tracker(
                 if !global
                     .get_consumed_rejections()
                     .borrow()
-                    .contains(&Heap::boxed(promise.get()))
+                    .contains(&Heap::pinned(promise.get()))
                 {
                     return;
                 }
