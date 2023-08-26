@@ -248,7 +248,7 @@ pub fn trace_script(tracer: *mut JSTracer, description: &str, script: &Heap<*mut
         trace!("tracing {}", description);
         CallScriptTracer(
             tracer,
-            script.ptr.get() as *mut _,
+            script.get_unsafe() as *mut _,
             GCTraceKindToAscii(TraceKind::Script),
         );
     }
@@ -265,7 +265,7 @@ pub fn trace_jsval(tracer: *mut JSTracer, description: &str, val: &Heap<JSVal>) 
         trace!("tracing value {}", description);
         CallValueTracer(
             tracer,
-            val.ptr.get() as *mut _,
+            val.get_unsafe() as *mut _,
             GCTraceKindToAscii(val.get().trace_kind()),
         );
     }
@@ -284,7 +284,7 @@ pub fn trace_object(tracer: *mut JSTracer, description: &str, obj: &Heap<*mut JS
         trace!("tracing {}", description);
         CallObjectTracer(
             tracer,
-            obj.ptr.get() as *mut _,
+            obj.get_unsafe() as *mut _,
             GCTraceKindToAscii(TraceKind::Object),
         );
     }
@@ -297,7 +297,7 @@ pub fn trace_string(tracer: *mut JSTracer, description: &str, s: &Heap<*mut JSSt
         trace!("tracing {}", description);
         CallStringTracer(
             tracer,
-            s.ptr.get() as *mut _,
+            s.get_unsafe() as *mut _,
             GCTraceKindToAscii(TraceKind::String),
         );
     }
