@@ -25,6 +25,7 @@ use std::default::Default;
 use std::ffi::CString;
 use std::mem::drop;
 use std::ops::Deref;
+use std::pin::Pin;
 use std::ptr;
 use std::rc::Rc;
 
@@ -43,8 +44,8 @@ pub enum ExceptionHandling {
 #[unrooted_must_root_lint::must_root]
 pub struct CallbackObject {
     /// The underlying `JSObject`.
-    callback: Heap<*mut JSObject>,
-    permanent_js_root: Heap<JSVal>,
+    callback: Pin<Box<Heap<*mut JSObject>>>,
+    permanent_js_root: Pin<Box<Heap<JSVal>>>,
 
     /// The ["callback context"], that is, the global to use as incumbent
     /// global when calling the callback.
@@ -71,8 +72,8 @@ impl CallbackObject {
     #[allow(unrooted_must_root)]
     fn new() -> CallbackObject {
         CallbackObject {
-            callback: Heap::default(),
-            permanent_js_root: Heap::default(),
+            callback: Box::pin(Heap::default()),
+            permanent_js_root: Box::pin(Heap::default()),
             incumbent: GlobalScope::incumbent().map(|i| Dom::from_ref(&*i)),
         }
     }
@@ -83,8 +84,8 @@ impl CallbackObject {
 
     #[allow(unsafe_code)]
     unsafe fn init(&mut self, cx: JSContext, callback: *mut JSObject) {
-        self.callback.set(callback);
-        self.permanent_js_root.set(ObjectValue(callback));
+        self.callback.as_ref().set(callback);
+        self.permanent_js_root.as_ref().set(ObjectValue(callback));
         assert!(AddRawValueRoot(
             *cx,
             self.permanent_js_root.get_unsafe(),

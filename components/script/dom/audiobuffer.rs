@@ -24,6 +24,7 @@ use js::rust::HandleObject;
 use js::typedarray::{CreateWith, Float32Array};
 use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 use std::cmp::min;
+use std::pin::Pin;
 use std::ptr::{self, NonNull};
 
 // Spec mandates at least [8000, 96000], we use [8000, 192000] to match Firefox
@@ -31,7 +32,7 @@ use std::ptr::{self, NonNull};
 pub const MIN_SAMPLE_RATE: f32 = 8000.;
 pub const MAX_SAMPLE_RATE: f32 = 192000.;
 
-type JSAudioChannel = Heap<*mut JSObject>;
+type JSAudioChannel = Pin<Box<Heap<*mut JSObject>>>;
 
 /// The AudioBuffer keeps its data either in js_channels
 /// or in shared_channels if js_channels buffers are detached.
@@ -66,7 +67,7 @@ impl AudioBuffer {
     #[allow(unrooted_must_root)]
     #[allow(unsafe_code)]
     pub fn new_inherited(number_of_channels: u32, length: u32, sample_rate: f32) -> AudioBuffer {
-        let vec = (0..number_of_channels).map(|_| Heap::default()).collect();
+        let vec = (0..number_of_channels).map(|_| Box::pin(Heap::default())).collect();
         AudioBuffer {
             reflector_: Reflector::new(),
             js_channels: DomRefCell::new(vec),
@@ -179,7 +180,7 @@ impl AudioBuffer {
                     }
                 }
             }
-            channel.set(array.get());
+            channel.as_ref().set(array.get());
         }
 
         *self.shared_channels.borrow_mut() = None;
@@ -219,7 +220,7 @@ impl AudioBuffer {
                 }
             };
 
-            channel.set(ptr::null_mut());
+            channel.as_ref().set(ptr::null_mut());
 
             // Step 3.
             result.buffers[i] = channel_data;

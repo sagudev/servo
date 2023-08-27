@@ -490,7 +490,7 @@ unsafe impl<T: JSTraceable + 'static> JSTraceable for RootedTraceableBox<T> {
 impl<T: JSTraceable + 'static> RootedTraceableBox<T> {
     /// DomRoot a JSTraceable thing for the life of this RootedTraceableBox
     pub fn new(traceable: T) -> RootedTraceableBox<T> {
-        Self(js::gc::RootedTraceableBox::new(traceable))
+        Self(js::gc::RootedTraceableBox::from_pinned_box(Box::pin(traceable)))
     }
 
     /// Consumes a boxed JSTraceable and roots it for the life of this RootedTraceableBox.
@@ -533,7 +533,7 @@ impl<T: JSTraceable> Deref for RootedTraceableBox<T> {
     }
 }
 
-impl<T: JSTraceable> DerefMut for RootedTraceableBox<T> {
+impl<T: JSTraceable + Unpin> DerefMut for RootedTraceableBox<T> {
     fn deref_mut(&mut self) -> &mut T {
         self.0.deref_mut()
     }

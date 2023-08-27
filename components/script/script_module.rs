@@ -1387,13 +1387,13 @@ fn fetch_an_import_module_script_graph(
 
     let dynamic_module = RootedTraceableBox::new(DynamicModule {
         promise,
-        specifier: Heap::default(),
-        referencing_private: Heap::default(),
+        specifier: Box::pin(Heap::default()),
+        referencing_private: Box::pin(Heap::default()),
         id: dynamic_module_id,
     });
-    dynamic_module.specifier.set(module_request.get());
+    dynamic_module.specifier.as_ref().set(module_request.get());
     dynamic_module
-        .referencing_private
+        .referencing_private.as_ref()
         .set(reference_private.get());
 
     let url = url.unwrap();
@@ -1565,9 +1565,9 @@ struct DynamicModule {
     #[ignore_malloc_size_of = "Rc is hard"]
     promise: Rc<Promise>,
     #[ignore_malloc_size_of = "GC types are hard"]
-    specifier: Heap<*mut JSObject>,
+    specifier: Pin<Box<Heap<*mut JSObject>>>,
     #[ignore_malloc_size_of = "GC types are hard"]
-    referencing_private: Heap<JSVal>,
+    referencing_private: Pin<Box<Heap<JSVal>>>,
     #[ignore_malloc_size_of = "Defined in uuid"]
     id: DynamicModuleId,
 }
