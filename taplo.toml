@@ -2,8 +2,9 @@
 exclude = ["third_party/**", "tests/**"]
 
 [formatting]
+align_comments = false
 array_auto_collapse = false
 array_auto_expand = false
-align_comments = false
 column_width = 120
 indent_string = "    "
+reorder_keys = true
