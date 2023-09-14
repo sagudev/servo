@@ -4115,8 +4115,8 @@ class FPAbstractTraits extends FPTraits {
 
   tanInterval = this.unimplementedScalarToInterval.bind(this);
   tanhInterval = this.unimplementedScalarToInterval.bind(this);
-  transposeInterval = this.unimplementedMatrixToMatrix.bind(this);
-  truncInterval = this.unimplementedScalarToInterval.bind(this);
+  transposeInterval = this.transposeIntervalImpl.bind(this);
+  truncInterval = this.truncIntervalImpl.bind(this);
 }
 
 // Pre-defined values that get used multiple times in _constants' initializers. Cannot use FPTraits members, since this
@@ -4397,7 +4397,7 @@ class F16Traits extends FPTraits {
   radiansInterval = this.unimplementedScalarToInterval.bind(this);
   reflectInterval = this.unimplementedVectorPairToVector.bind(this);
   refractInterval = this.unimplementedRefract.bind(this);
-  remainderInterval = this.unimplementedScalarPairToInterval.bind(this);
+  remainderInterval = this.remainderIntervalImpl.bind(this);
   roundInterval = this.roundIntervalImpl.bind(this);
   saturateInterval = this.unimplementedScalarToInterval.bind(this);
   signInterval = this.signIntervalImpl.bind(this);
@@ -4410,8 +4410,8 @@ class F16Traits extends FPTraits {
   subtractionMatrixMatrixInterval = this.unimplementedMatrixPairToMatrix.bind(this);
   tanInterval = this.unimplementedScalarToInterval.bind(this);
   tanhInterval = this.unimplementedScalarToInterval.bind(this);
-  transposeInterval = this.unimplementedMatrixToMatrix.bind(this);
-  truncInterval = this.unimplementedScalarToInterval.bind(this);
+  transposeInterval = this.transposeIntervalImpl.bind(this);
+  truncInterval = this.truncIntervalImpl.bind(this);
 
   /** quantizeToF16 has no f16 overload. */
   quantizeToF16IntervalNotAvailable(n) {
