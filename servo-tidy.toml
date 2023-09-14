@@ -1,8 +1,8 @@
 [configs]
-skip-check-length = false
-skip-check-licenses = false
 check-alphabetical-order = true
 check-ordered-json-keys = ["./resources/prefs.json"]
+skip-check-length = false
+skip-check-licenses = false
 
 # Packages which we avoid using in Servo.
 # For each blocked package, we can list the exceptions,

@@ -1,10 +1,10 @@
 [package]
-name = "script"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "script"
 publish = false
+version = "0.0.1"
 
 build = "build.rs"
 
@@ -14,14 +14,14 @@ path = "lib.rs"
 
 [features]
 debugmozjs = ['js/debugmozjs']
-jitspew = ['js/jitspew']
-profilemozjs = ['js/profilemozjs']
-unrooted_must_root_lint = ["script_plugins/unrooted_must_root_lint"]
-trace_in_no_trace_lint = ["script_plugins/trace_in_no_trace_lint"]
 default = ["unrooted_must_root_lint", "trace_in_no_trace_lint"]
-webgl_backtrace = ["canvas_traits/webgl_backtrace"]
+jitspew = ['js/jitspew']
 js_backtrace = []
+profilemozjs = ['js/profilemozjs']
 refcell_backtrace = ["accountable-refcell"]
+trace_in_no_trace_lint = ["script_plugins/trace_in_no_trace_lint"]
+unrooted_must_root_lint = ["script_plugins/unrooted_must_root_lint"]
+webgl_backtrace = ["canvas_traits/webgl_backtrace"]
 xr-profile = ["webxr-api/profile"]
 
 [build-dependencies]

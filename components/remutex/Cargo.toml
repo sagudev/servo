@@ -1,16 +1,16 @@
 [package]
-name = "servo_remutex"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "servo_remutex"
 publish = false
+version = "0.0.1"
 
 [lib]
+doctest = false
 name = "servo_remutex"
 path = "lib.rs"
 test = false
-doctest = false
 
 [dependencies]
 lazy_static = { workspace = true }

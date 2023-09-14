@@ -1,8 +1,8 @@
-language = "C"
-include_guard = "simpleservo_h"
 cpp_compat = true
-tab_width = 4
 documentation_style = "c99"
+include_guard = "simpleservo_h"
+language = "C"
+tab_width = 4
 
 [export]
 exclude = ["OutputDebugStringA"]

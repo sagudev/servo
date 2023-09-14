@@ -1,9 +1,9 @@
 [package]
-name = "style"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
 license = "MPL-2.0"
+name = "style"
 publish = false
+version = "0.0.1"
 
 build = "build.rs"
 edition = "2018"
@@ -12,12 +12,14 @@ edition = "2018"
 links = "servo_style_crate"
 
 [lib]
+doctest = false
 name = "style"
 path = "lib.rs"
-doctest = false
 
 [features]
 gecko = ["style_traits/gecko", "bindgen", "regex", "toml", "num_cpus", "mozbuild"]
+gecko_debug = []
+gecko_refcount_logging = []
 servo = [
     "serde",
     "style_traits/servo",
@@ -32,8 +34,6 @@ servo = [
     "to_shmem/servo",
     "servo_arc/servo",
 ]
-gecko_debug = []
-gecko_refcount_logging = []
 
 [dependencies]
 app_units = "0.7"

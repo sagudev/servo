@@ -1,10 +1,10 @@
 [package]
-name = "canvas"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "canvas"
 publish = false
+version = "0.0.1"
 
 [lib]
 name = "canvas"
@@ -22,8 +22,8 @@ canvas_traits = { path = "../canvas_traits" }
 crossbeam-channel = { workspace = true }
 cssparser = { workspace = true }
 euclid = { workspace = true }
-font-kit = "0.11"
 fnv = { workspace = true }
+font-kit = "0.11"
 gfx = { path = "../gfx" }
 gleam = { workspace = true }
 half = "2"
@@ -45,5 +45,5 @@ webrender = { workspace = true }
 webrender_api = { workspace = true }
 webrender_surfman = { path = "../webrender_surfman" }
 webrender_traits = { path = "../webrender_traits" }
-webxr-api = { git = "https://github.com/servo/webxr", features = ["ipc"] }
 webxr = { git = "https://github.com/servo/webxr", features = ["ipc"] }
+webxr-api = { git = "https://github.com/servo/webxr", features = ["ipc"] }

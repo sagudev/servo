@@ -1,10 +1,10 @@
 [package]
-name = "malloc_size_of"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MIT OR Apache-2.0"
 edition = "2018"
+license = "MIT OR Apache-2.0"
+name = "malloc_size_of"
 publish = false
+version = "0.0.1"
 
 [lib]
 path = "lib.rs"

@@ -1,10 +1,10 @@
 [package]
-name = "webdriver_server"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "webdriver_server"
 publish = false
+version = "0.0.1"
 
 [lib]
 name = "webdriver_server"

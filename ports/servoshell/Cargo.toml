@@ -1,17 +1,17 @@
 [package]
 
-name = "servoshell"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
-edition = "2018"
 build = "build.rs"
+edition = "2018"
+license = "MPL-2.0"
+name = "servoshell"
 publish = false
+version = "0.0.1"
 
 [[bin]]
+bench = false
 name = "servo"
 path = "main.rs"
-bench = false
 
 [build-dependencies]
 vergen = { version = "8.0.0", features = ["git", "gitcl"] }
@@ -48,8 +48,8 @@ arboard = "3"
 backtrace = { workspace = true }
 cfg-if = { workspace = true }
 egui = "0.22.0"
-egui_glow = { version = "0.22.0", features = ["winit"] }
 egui-winit = { version = "0.22.0", default-features = false, features = ["clipboard", "wayland"] }
+egui_glow = { version = "0.22.0", features = ["winit"] }
 euclid = { workspace = true }
 getopts = { workspace = true }
 gleam = { workspace = true }
@@ -64,9 +64,9 @@ servo-media = { git = "https://github.com/servo/media" }
 shellwords = "1.0.0"
 surfman = { workspace = true, features = ["sm-x11", "sm-raw-window-handle"] }
 tinyfiledialogs = "3.0"
+url = { workspace = true }
 webxr = { git = "https://github.com/servo/webxr", features = ["ipc", "glwindow", "headless"] }
 winit = "0.28.6"
-url = { workspace = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "windows"))'.dependencies]
 image = { workspace = true }

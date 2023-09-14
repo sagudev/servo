@@ -1,16 +1,16 @@
 [package]
-name = "msg"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "msg"
 publish = false
+version = "0.0.1"
 
 [lib]
+doctest = false
 name = "msg"
 path = "lib.rs"
 test = false
-doctest = false
 
 [dependencies]
 ipc-channel = { workspace = true }

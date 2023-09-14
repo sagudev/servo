@@ -1,25 +1,25 @@
 [package]
-name = "simpleservo_capi"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "simpleservo_capi"
 publish = false
+version = "0.0.1"
 
 [lib]
-name = "simpleservo"
-crate-type = ["cdylib"]
-test = false
 bench = false
+crate-type = ["cdylib"]
+name = "simpleservo"
+test = false
 
 [dependencies]
 backtrace = { workspace = true }
 env_logger = { workspace = true }
+keyboard-types = { workspace = true }
 lazy_static = { workspace = true }
 log = { workspace = true }
 simpleservo = { path = "../api" }
 surfman = { workspace = true }
-keyboard-types = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 libc = { workspace = true }

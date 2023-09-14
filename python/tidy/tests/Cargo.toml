@@ -1,8 +1,8 @@
 [package]
-name = "test"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
+name = "test"
 publish = false
+version = "0.0.1"
 
 [dependencies]
 test-package = { version = "*" }

@@ -1,10 +1,10 @@
 [package]
-name = "constellation"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "constellation"
 publish = false
+version = "0.0.1"
 
 [lib]
 name = "constellation"
@@ -22,8 +22,8 @@ embedder_traits = { path = "../embedder_traits" }
 euclid = { workspace = true }
 gfx = { path = "../gfx" }
 gfx_traits = { path = "../gfx_traits" }
-http = { workspace = true }
 headers = { workspace = true }
+http = { workspace = true }
 ipc-channel = { workspace = true }
 keyboard-types = { workspace = true }
 layout_traits = { path = "../layout_traits" }

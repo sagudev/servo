@@ -1,17 +1,17 @@
 [package]
-name = "simpleservo_jniapi"
-version = "0.0.1"
-build = "build.rs"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
+build = "build.rs"
 edition = "2018"
+license = "MPL-2.0"
+name = "simpleservo_jniapi"
 publish = false
+version = "0.0.1"
 
 [lib]
-name = "simpleservo"
-crate-type = ["cdylib"]
-test = false
 bench = false
+crate-type = ["cdylib"]
+name = "simpleservo"
+test = false
 
 [dependencies]
 android_injected_glue = "0.2"

@@ -1,16 +1,16 @@
 [package]
-name = "net_traits"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "net_traits"
 publish = false
+version = "0.0.1"
 
 [lib]
+doctest = false
 name = "net_traits"
 path = "lib.rs"
 test = false
-doctest = false
 
 [dependencies]
 content-security-policy = { workspace = true }

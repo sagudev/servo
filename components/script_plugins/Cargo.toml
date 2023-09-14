@@ -1,18 +1,18 @@
 [package]
-name = "script_plugins"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "script_plugins"
 publish = false
+version = "0.0.1"
 
 [lib]
 path = "lib.rs"
 plugin = true
 
 [features]
-unrooted_must_root_lint = []
 trace_in_no_trace_lint = []
+unrooted_must_root_lint = []
 
 [package.metadata.rust-analyzer]
 rustc_private = true

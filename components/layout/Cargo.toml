@@ -1,16 +1,16 @@
 [package]
-name = "layout_2013"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "layout_2013"
 publish = false
+version = "0.0.1"
 
 [lib]
+doctest = false
 name = "layout_2013"
 path = "lib.rs"
 test = false
-doctest = false
 
 [dependencies]
 app_units = { workspace = true }

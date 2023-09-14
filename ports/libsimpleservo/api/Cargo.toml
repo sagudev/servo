@@ -1,10 +1,10 @@
 [package]
-name = "simpleservo"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "simpleservo"
 publish = false
+version = "0.0.1"
 
 [dependencies]
 getopts = { workspace = true }
@@ -42,8 +42,8 @@ js_backtrace = ["libservo/js_backtrace"]
 max_log_level = ["log/release_max_level_info"]
 media-gstreamer = ["libservo/media-gstreamer"]
 native-bluetooth = ["libservo/native-bluetooth"]
-no_static_freetype = ["libservo/no_static_freetype"]
 no-wgl = ["libservo/no-wgl"]
+no_static_freetype = ["libservo/no_static_freetype"]
 profilemozjs = ["libservo/profilemozjs"]
 refcell_backtrace = ["libservo/refcell_backtrace"]
 webdriver = ["libservo/webdriver"]

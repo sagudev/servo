@@ -1,15 +1,15 @@
 [package]
-name = "selectors"
-version = "0.24.0"
 authors = ["The Servo Project Developers"]
-documentation = "https://docs.rs/selectors/"
+build = "build.rs"
 description = "CSS Selectors matching for Rust"
-repository = "https://github.com/servo/servo"
-readme = "README.md"
+documentation = "https://docs.rs/selectors/"
+edition = "2018"
 keywords = ["css", "selectors"]
 license = "MPL-2.0"
-build = "build.rs"
-edition = "2018"
+name = "selectors"
+readme = "README.md"
+repository = "https://github.com/servo/servo"
+version = "0.24.0"
 
 [lib]
 name = "selectors"

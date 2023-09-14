@@ -1,15 +1,15 @@
 [package]
-name = "libservo"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "libservo"
 publish = false
+version = "0.0.1"
 
 [lib]
+crate-type = ["rlib"]
 name = "servo"
 path = "lib.rs"
-crate-type = ["rlib"]
 
 [features]
 debugmozjs = ["script/debugmozjs"]

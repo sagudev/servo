@@ -1,5 +1,6 @@
 [workspace]
-resolver = "2"
+default-members = ["ports/servoshell"]
+exclude = [".cargo"]
 members = [
     "ports/servoshell",
     "ports/gstplugin",
@@ -7,29 +8,28 @@ members = [
     "ports/libsimpleservo/jniapi/",
     "tests/unit/*",
 ]
-default-members = ["ports/servoshell"]
-exclude = [".cargo"]
+resolver = "2"
 
 [workspace.dependencies]
 accountable-refcell = "0.2.0"
 app_units = "0.7"
+arrayvec = "0.7"
 async-tungstenite = { version = "0.22", features = ["tokio-rustls-webpki-roots"] }
 atomic_refcell = "0.1.11"
-arrayvec = "0.7"
 backtrace = "0.3"
 base64 = "0.21.4"
 bitflags = "2.4"
 byteorder = "1.0"
 cfg-if = "1.0.0"
-encoding_rs = "0.8"
-euclid = "0.22"
-cookie = "0.12"
 content-security-policy = { version = "0.5", features = ["serde"] }
+cookie = "0.12"
 crossbeam-channel = "0.5"
 cssparser = "0.29"
 darling = { version = "0.13", default-features = false }
 data-url = "0.1.0"
+encoding_rs = "0.8"
 env_logger = "0.8"
+euclid = "0.22"
 fnv = "1.0"
 fxhash = "0.2"
 getopts = "0.2.11"
@@ -68,13 +68,13 @@ rustls-pemfile = "1.0.3"
 serde = "1.0.60"
 serde_bytes = "0.11"
 serde_json = "1.0"
-syn = { version = "1", default-features = false, features = ["clone-impls", "derive", "parsing"] }
-synstructure = "0.12"
 smallbitvec = "2.3.0"
 smallvec = "1.11"
 sparkle = "0.1.25"
 string_cache = "0.8"
 string_cache_codegen = "0.5"
+syn = { version = "1", default-features = false, features = ["clone-impls", "derive", "parsing"] }
+synstructure = "0.12"
 # NOTE: the sm-angle feature only enables angle on windows, not other platforms!
 surfman = { version = "0.8", features = ["chains", "sm-angle", "sm-angle-default"] }
 thin-slice = "0.1.0"
@@ -87,8 +87,8 @@ unicode-script = "0.5"
 url = "2.4"
 uuid = { version = "1.4.1", features = ["v4"] }
 webdriver = "0.48.0"
-webpki-roots = "0.23"
 webpki = "0.22"
+webpki-roots = "0.23"
 webrender = { git = "https://github.com/servo/webrender", features = ["capture"] }
 webrender_api = { git = "https://github.com/servo/webrender" }
 winapi = "0.3"

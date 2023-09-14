@@ -1,17 +1,17 @@
 [package]
-name = "net"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
-edition = "2018"
-publish = false
 autotests = false # Inhibit lookup for tests/*.rs without [[test]] sections
+edition = "2018"
+license = "MPL-2.0"
+name = "net"
+publish = false
+version = "0.0.1"
 
 [lib]
+doctest = false
 name = "net"
 path = "lib.rs"
 test = false
-doctest = false
 
 [dependencies]
 async-recursion = "0.3.2"
@@ -65,15 +65,15 @@ tokio-stream = "0.1"
 tungstenite = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
-webrender_api = { workspace = true }
 webpki-roots = { workspace = true }
+webrender_api = { workspace = true }
 
 [dev-dependencies]
 futures = { version = "0.3", features = ["compat"] }
-std_test_override = { path = "../std_test_override" }
-tokio-test = "0.4"
-tokio-stream = { version = "0.1", features = ["net"] }
 hyper = { workspace = true, features = ["full"] }
+std_test_override = { path = "../std_test_override" }
+tokio-stream = { version = "0.1", features = ["net"] }
+tokio-test = "0.4"
 
 [[test]]
 name = "main"

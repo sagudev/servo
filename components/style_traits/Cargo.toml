@@ -1,18 +1,18 @@
 [package]
-name = "style_traits"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "style_traits"
 publish = false
+version = "0.0.1"
 
 [lib]
 name = "style_traits"
 path = "lib.rs"
 
 [features]
-servo = ["servo_atoms", "cssparser/serde", "webrender_api", "servo_url", "euclid/serde"]
 gecko = []
+servo = ["servo_atoms", "cssparser/serde", "webrender_api", "servo_url", "euclid/serde"]
 
 [dependencies]
 app_units = "0.7"

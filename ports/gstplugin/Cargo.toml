@@ -1,17 +1,17 @@
 [package]
-name = "servo-gst-plugin"
-description = "A GStreamer plugin that provides servosrc"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
-edition = "2018"
 build = "build.rs"
-repository = "https://github.com/servo/servo/"
+description = "A GStreamer plugin that provides servosrc"
+edition = "2018"
+license = "MPL-2.0"
+name = "servo-gst-plugin"
 publish = false
+repository = "https://github.com/servo/servo/"
+version = "0.0.1"
 
 [lib]
-name = "gstservoplugin"
 crate-type = ["cdylib"]
+name = "gstservoplugin"
 path = "lib.rs"
 
 [dependencies]

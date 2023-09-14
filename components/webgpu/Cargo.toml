@@ -1,10 +1,10 @@
 [package]
-name = "webgpu"
-version = "0.0.1"
 authors = ["The Servo Project Developers"]
-license = "MPL-2.0"
 edition = "2018"
+license = "MPL-2.0"
+name = "webgpu"
 publish = false
+version = "0.0.1"
 
 [lib]
 name = "webgpu"
@@ -27,13 +27,13 @@ wgpu-core = { version = "0.17", features = ["replay", "trace", "serial-pass", "w
 wgpu-types = { version = "0.17" }
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies.wgpu-core]
-version = "0.17"
 features = ["replay", "trace", "serial-pass", "metal"]
+version = "0.17"
 
 [target.'cfg(all(unix, not(target_os = "ios"), not(target_os = "macos")))'.dependencies.wgpu-core]
-version = "0.17"
 features = ["replay", "trace", "serial-pass", "vulkan"]
+version = "0.17"
 
 [target.'cfg(windows)'.dependencies.wgpu-core]
-version = "0.17"
 features = ["replay", "trace", "serial-pass", "dx11", "dx12", "vulkan"]
+version = "0.17"
