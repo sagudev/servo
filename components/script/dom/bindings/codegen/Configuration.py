@@ -236,6 +236,7 @@ class Descriptor(DescriptorProvider):
         self.outerObjectHook = desc.get('outerObjectHook', 'None')
         self.proxy = False
         self.weakReferenceable = desc.get('weakReferenceable', False)
+        self.addDerives = [name for name in desc.get('addDerives', [])]
 
         # If we're concrete, we need to crawl our ancestor interfaces and mark
         # them as having a concrete descendant.

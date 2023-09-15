@@ -40,63 +40,6 @@ use crate::dom::node::{document_from_node, Node, NodeDamage};
 #[derive(Clone, Copy, Debug, Eq, Hash, MallocSizeOf, Ord, PartialEq, PartialOrd)]
 pub struct WebGPUContextId(pub u64);
 
-// TODO: make all this derivables available via new Bindings.conf option
-impl Clone for GPUCanvasConfiguration {
-    fn clone(&self) -> Self {
-        Self {
-            alphaMode: self.alphaMode.clone(),
-            device: self.device.clone(),
-            format: self.format.clone(),
-            usage: self.usage.clone(),
-            viewFormats: self.viewFormats.clone(),
-        }
-    }
-}
-
-impl Clone for HTMLCanvasElementOrOffscreenCanvas {
-    fn clone(&self) -> Self {
-        match self {
-            Self::HTMLCanvasElement(arg0) => Self::HTMLCanvasElement(arg0.clone()),
-            Self::OffscreenCanvas(arg0) => Self::OffscreenCanvas(arg0.clone()),
-        }
-    }
-}
-
-impl malloc_size_of::MallocSizeOf for GPUTextureDescriptor {
-    fn size_of(&self, ops: &mut malloc_size_of::MallocSizeOfOps) -> usize {
-        match self {
-            Self {
-                parent,
-                dimension,
-                format,
-                mipLevelCount,
-                sampleCount,
-                size,
-                usage,
-                viewFormats,
-            } => {
-                parent.size_of(ops) +
-                    dimension.size_of(ops) +
-                    format.size_of(ops) +
-                    mipLevelCount.size_of(ops) +
-                    sampleCount.size_of(ops) +
-                    size.size_of(ops) +
-                    usage.size_of(ops) +
-                    viewFormats.size_of(ops)
-            },
-        }
-    }
-}
-
-impl malloc_size_of::MallocSizeOf for HTMLCanvasElementOrOffscreenCanvas {
-    fn size_of(&self, ops: &mut malloc_size_of::MallocSizeOfOps) -> usize {
-        match self {
-            HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(canvas) => canvas.size_of(ops),
-            HTMLCanvasElementOrOffscreenCanvas::OffscreenCanvas(canvas) => canvas.size_of(ops),
-        }
-    }
-}
-
 #[dom_struct]
 pub struct GPUCanvasContext {
     reflector_: Reflector,

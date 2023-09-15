@@ -4803,8 +4803,9 @@ class CGUnionStruct(CGThing):
             "            %s::%s(ref inner) => inner.to_jsval(cx, rval),"
             % (self.type, v["name"]) for (v, _) in templateVars
         ]
+        derive = ["JSTraceable"] + self.descriptorProvider.getDescriptor(self.type).addDerives
         return ("""\
-#[derive(JSTraceable)]
+#[derive(%s)]
 pub enum %s {
 %s
 }
@@ -4816,7 +4817,7 @@ impl ToJSValConvertible for %s {
         }
     }
 }
-""") % (self.type, "\n".join(enumValues), self.type, "\n".join(enumConversions))
+""") % (', '.join(derive), self.type, "\n".join(enumValues), self.type, "\n".join(enumConversions))
 
 
 class CGUnionConversionStruct(CGThing):
@@ -6840,6 +6841,7 @@ class CGNonNamespacedEnum(CGThing):
 class CGDictionary(CGThing):
     def __init__(self, dictionary, descriptorProvider):
         self.dictionary = dictionary
+        #self.addDrives = descriptorProvider.getDescriptor(str(dictionary.identifier.name)).addDerives
         if all(CGDictionary(d, descriptorProvider).generatable for
                d in CGDictionary.getDictionaryDependencies(dictionary)):
             self.generatable = True
@@ -6876,7 +6878,7 @@ class CGDictionary(CGThing):
                        (self.makeMemberName(m[0].identifier.name), self.getMemberType(m))
                        for m in self.memberInfo]
 
-        derive = ["JSTraceable"]
+        derive = ["JSTraceable"] + self.addDerives
         mustRoot = ""
         if self.membersNeedTracing():
             mustRoot = "#[unrooted_must_root_lint::must_root]\n"
