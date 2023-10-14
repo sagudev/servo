@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from imp import reload
 import os
 import subprocess
 import sys
@@ -20,7 +21,7 @@ PATCHES = [
 ]
 
 # Fix for 'UnicodeDecodeError: 'ascii' codec can't decode byte'
-reload(sys)  
+reload(sys)
 sys.setdefaultencoding('utf8')
 
 def usage():

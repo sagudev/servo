@@ -741,7 +741,7 @@ tests/wpt/mozilla/tests for Servo-only tests""" % reference_path)
                      help='WebGL conformance suite version')
     def update_webgl(self, version=None):
         base_dir = path.abspath(path.join(PROJECT_TOPLEVEL_PATH,
-                                "tests", "wpt", "mozilla", "tests", "webgl"))
+                                "tests", "wpt", "webgl"))
         run_file = path.join(base_dir, "tools", "import-conformance-tests.py")
         dest_folder = path.join(base_dir, "conformance-%s" % version)
         patches_dir = path.join(base_dir, "tools")
