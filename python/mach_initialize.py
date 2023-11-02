@@ -75,32 +75,6 @@ def _activate_python_environment(topsrcdir, get_state_dir):
     mach_environment.activate()
 
 
-def _maybe_activate_mozillabuild_environment():
-    if sys.platform != "win32":
-        return
-
-    mozillabuild = Path(os.environ.get("MOZILLABUILD", r"C:\mozilla-build"))
-    os.environ.setdefault("MOZILLABUILD", str(mozillabuild))
-    assert mozillabuild.exists(), (
-        f'MozillaBuild was not found at "{mozillabuild}".\n'
-        "If it's installed in a different location, please "
-        'set the "MOZILLABUILD" environment variable '
-        "accordingly."
-    )
-
-    use_msys2 = (mozillabuild / "msys2").exists()
-    if use_msys2:
-        mozillabuild_msys_tools_path = mozillabuild / "msys2" / "usr" / "bin"
-    else:
-        mozillabuild_msys_tools_path = mozillabuild / "msys" / "bin"
-
-    paths_to_add = [mozillabuild_msys_tools_path, mozillabuild / "bin"]
-    existing_paths = [Path(p) for p in os.environ.get("PATH", "").split(os.pathsep)]
-    for new_path in paths_to_add:
-        if new_path not in existing_paths:
-            os.environ["PATH"] += f"{os.pathsep}{new_path}"
-
-
 def check_for_spaces(topsrcdir):
     if " " in topsrcdir:
         raise Exception(
@@ -111,26 +85,19 @@ def check_for_spaces(topsrcdir):
 
 
 def initialize(topsrcdir, args=()):
-    # This directory was deleted in bug 1666345, but there may be some ignored
-    # files here. We can safely just delete it for the user so they don't have
-    # to clean the repo themselves.
-    deleted_dir = os.path.join(topsrcdir, "third_party", "python", "psutil")
-    if os.path.exists(deleted_dir):
-        shutil.rmtree(deleted_dir, ignore_errors=True)
-
     # We need the "mach" module to access the logic to parse virtualenv
     # requirements. Since that depends on "packaging", we add it to the path too.
     sys.path[0:0] = [
         os.path.join(topsrcdir, module)
         for module in (
-            os.path.join("python", "mach"),
-            os.path.join("third_party", "python", "packaging"),
+            os.path.join("third_party", "mach"),
+            #os.path.join("third_party", "python", "packaging"),
         )
     ]
 
     from mach.util import get_state_dir, get_virtualenv_base_dir, setenv
 
-    state_dir = _create_state_dir()
+    state_dir = _create_state_dir(topsrcdir)
 
     check_for_spaces(topsrcdir)
 
@@ -159,7 +126,7 @@ def initialize(topsrcdir, args=()):
 
     # the 'clobber' command needs to run in the 'mach' venv, so we
     # don't want to activate any other virtualenv for it.
-    if command_name != "clobber":
+    if command_name != "clobber" and command_name != "clean":
         from mach.site import CommandSiteManager
 
         command_site_manager = CommandSiteManager.from_environment(
@@ -171,82 +138,12 @@ def initialize(topsrcdir, args=()):
 
         command_site_manager.activate()
 
-    # Set a reasonable limit to the number of open files.
-    #
-    # Some linux systems set `ulimit -n` to a very high number, which works
-    # well for systems that run servers, but this setting causes performance
-    # problems when programs close file descriptors before forking, like
-    # Python's `subprocess.Popen(..., close_fds=True)` (close_fds=True is the
-    # default in Python 3), or Rust's stdlib.  In some cases, Firefox does the
-    # same thing when spawning processes.  We would prefer to lower this limit
-    # to avoid such performance problems; processes spawned by `mach` will
-    # inherit the limit set here.
-    #
-    # The Firefox build defaults the soft limit to 1024, except for builds that
-    # do LTO, where the soft limit is 8192.  We're going to default to the
-    # latter, since people do occasionally do LTO builds on their local
-    # machines, and requiring them to discover another magical setting after
-    # setting up an LTO build in the first place doesn't seem good.
-    #
-    # This code mimics the code in taskcluster/scripts/run-task.
-    try:
-        import resource
-
-        # Keep the hard limit the same, though, allowing processes to change
-        # their soft limit if they need to (Firefox does, for instance).
-        (soft, hard) = resource.getrlimit(resource.RLIMIT_NOFILE)
-        # Permit people to override our default limit if necessary via
-        # MOZ_LIMIT_NOFILE, which is the same variable `run-task` uses.
-        limit = os.environ.get("MOZ_LIMIT_NOFILE")
-        if limit:
-            limit = int(limit)
-        else:
-            # If no explicit limit is given, use our default if it's less than
-            # the current soft limit.  For instance, the default on macOS is
-            # 256, so we'd pick that rather than our default.
-            limit = min(soft, 8192)
-        # Now apply the limit, if it's different from the original one.
-        if limit != soft:
-            resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
-    except ImportError:
-        # The resource module is UNIX only.
-        pass
 
     def resolve_repository():
-        import mozversioncontrol
-
-        try:
-            # This API doesn't respect the vcs binary choices from configure.
-            # If we ever need to use the VCS binary here, consider something
-            # more robust.
-            return mozversioncontrol.get_repository_object(path=topsrcdir)
-        except (mozversioncontrol.InvalidRepoPath, mozversioncontrol.MissingVCSTool):
-            return None
+        return None
 
     def pre_dispatch_handler(context, handler, args):
-        # If --disable-tests flag was enabled in the mozconfig used to compile
-        # the build, tests will be disabled. Instead of trying to run
-        # nonexistent tests then reporting a failure, this will prevent mach
-        # from progressing beyond this point.
-        if handler.category == "testing" and not handler.ok_if_tests_disabled:
-            from mozbuild.base import BuildEnvironmentNotFoundException
-
-            try:
-                from mozbuild.base import MozbuildObject
-
-                # all environments should have an instance of build object.
-                build = MozbuildObject.from_environment()
-                if build is not None and not getattr(
-                    build, "substs", {"ENABLE_TESTS": True}
-                ).get("ENABLE_TESTS"):
-                    print(
-                        "Tests have been disabled with --disable-tests.\n"
-                        + "Remove the flag, and re-compile to enable tests."
-                    )
-                    sys.exit(1)
-            except BuildEnvironmentNotFoundException:
-                # likely automation environment, so do nothing.
-                pass
+        return
 
     def post_dispatch_handler(
         context, handler, instance, success, start_time, end_time, depth, args
@@ -256,15 +153,7 @@ def initialize(topsrcdir, args=()):
 
         For now,  we will use this to handle build system telemetry.
         """
-
-        # Don't finalize telemetry data if this mach command was invoked as part of
-        # another mach command.
-        if depth != 1:
-            return
-
-        _finalize_telemetry_glean(
-            context.telemetry, handler.name == "bootstrap", success
-        )
+        return
 
     def populate_context(key=None):
         if key is None:
@@ -288,11 +177,6 @@ def initialize(topsrcdir, args=()):
             return resolve_repository()
 
         raise AttributeError(key)
-
-    # Note which process is top-level so that recursive mach invocations can avoid writing
-    # telemetry data.
-    if "MACH_MAIN_PID" not in os.environ:
-        setenv("MACH_MAIN_PID", str(os.getpid()))
 
     driver = mach.main.Mach(os.getcwd(), command_site_manager)
     driver.populate_context_handler = populate_context
@@ -360,75 +244,15 @@ def initialize(topsrcdir, args=()):
     return driver
 
 
-def _finalize_telemetry_glean(telemetry, is_bootstrap, success):
-    """Submit telemetry collected by Glean.
-
-    Finalizes some metrics (command success state and duration, system information) and
-    requests Glean to send the collected data.
-    """
-
-    from mach.telemetry import MACH_METRICS_PATH
-    from mozbuild.telemetry import (
-        get_cpu_brand,
-        get_distro_and_version,
-        get_psutil_stats,
-        get_shell_info,
-        get_vscode_running,
-    )
-
-    mach_metrics = telemetry.metrics(MACH_METRICS_PATH)
-    mach_metrics.mach.duration.stop()
-    mach_metrics.mach.success.set(success)
-    system_metrics = mach_metrics.mach.system
-    cpu_brand = get_cpu_brand()
-    if cpu_brand:
-        system_metrics.cpu_brand.set(cpu_brand)
-    distro, version = get_distro_and_version()
-    system_metrics.distro.set(distro)
-    system_metrics.distro_version.set(version)
-
-    vscode_terminal, ssh_connection = get_shell_info()
-    system_metrics.vscode_terminal.set(vscode_terminal)
-    system_metrics.ssh_connection.set(ssh_connection)
-    system_metrics.vscode_running.set(get_vscode_running())
-
-    has_psutil, logical_cores, physical_cores, memory_total = get_psutil_stats()
-    if has_psutil:
-        # psutil may not be available (we may not have been able to download
-        # a wheel or build it from source).
-        system_metrics.logical_cores.add(logical_cores)
-        if physical_cores is not None:
-            system_metrics.physical_cores.add(physical_cores)
-        if memory_total is not None:
-            system_metrics.memory.accumulate(
-                int(math.ceil(float(memory_total) / (1024 * 1024 * 1024)))
+def _create_state_dir(topsrcdir):
+    # Global build system and mach state is stored in a central directory.
+    state_dir = os.path.join(topsrcdir, f"_machon{sys.version_info[0]}.{sys.version_info[1]}")
+    if not os.path.exists(state_dir):
+        print(
+            "Creating global state directory from environment variable: {}".format(
+                state_dir
             )
-    telemetry.submit(is_bootstrap)
-
-
-def _create_state_dir():
-    # Global build system and mach state is stored in a central directory. By
-    # default, this is ~/.mozbuild. However, it can be defined via an
-    # environment variable. We detect first run (by lack of this directory
-    # existing) and notify the user that it will be created. The logic for
-    # creation is much simpler for the "advanced" environment variable use
-    # case. For default behavior, we educate users and give them an opportunity
-    # to react.
-    state_dir = os.environ.get("MOZBUILD_STATE_PATH")
-    if state_dir:
-        if not os.path.exists(state_dir):
-            print(
-                "Creating global state directory from environment variable: {}".format(
-                    state_dir
-                )
-            )
-    else:
-        state_dir = os.path.expanduser("~/.mozbuild")
-        if not os.path.exists(state_dir):
-            if not os.environ.get("MOZ_AUTOMATION"):
-                print(STATE_DIR_FIRST_RUN.format(state_dir))
-
-            print("Creating default state directory: {}".format(state_dir))
+        )
 
     os.makedirs(state_dir, mode=0o770, exist_ok=True)
     return state_dir

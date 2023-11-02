@@ -1,7 +1,7 @@
 /.servo
 /.cargo/*
 !/.cargo/config.*
-/.servobuild
+/_machon*
 /.wpt
 /.vs
 /android-toolchains
