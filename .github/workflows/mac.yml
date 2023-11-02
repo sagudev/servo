@@ -75,6 +75,10 @@ jobs:
         with:
           crate: taplo-cli
           locked: true
+      - name: Select Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - name: Bootstrap
         run: |
           python3 -m pip install --upgrade pip virtualenv setuptools
