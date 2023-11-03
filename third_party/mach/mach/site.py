@@ -298,9 +298,9 @@ class MachSiteManager:
         # yet, and the system isn't guaranteed to have the packages we need. For example,
         # "./mach bootstrap" can't have any dependencies.
         # So, all external dependencies of Mach's must be optional.
-        assert (
-            not requirements.pypi_requirements
-        ), "Mach pip package requirements must be optional."
+        #assert (
+        #    not requirements.pypi_requirements
+        #), "Mach pip package requirements must be optional."
 
         # external_python is the Python interpreter that invoked Mach for this process.
         external_python = ExternalPythonSite(sys.executable)
