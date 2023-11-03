@@ -50,7 +50,7 @@ def get_state_dir(
     Returns:
         A path to the state dir (str)
     """
-    state_dir = Path(os.environ.get("MOZBUILD_STATE_PATH", Path.home() / ".mozbuild"))
+    state_dir = "???"
     if not specific_to_topsrcdir:
         return str(state_dir)
 
