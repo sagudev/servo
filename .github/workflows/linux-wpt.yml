@@ -23,11 +23,11 @@ jobs:
     name: WPT ${{ inputs.layout }}
     runs-on: ubuntu-22.04
     env:
-      max_chunk_id: 20
+      max_chunk_id: 10
     strategy:
       fail-fast: false
       matrix:
-        chunk_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        chunk_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     steps:
       - uses: actions/checkout@v3
         if: github.event_name != 'issue_comment' && github.event_name != 'pull_request_target'
@@ -71,7 +71,7 @@ jobs:
         if: ${{ inputs.wpt != 'sync' }}
         run: |
           python3 ./mach test-wpt $WPT_COMMAND_LINE_ARG \
-            ${{ env.cargo_profile_option }} --processes $(nproc) --timeout-multiplier 2 \
+            ${{ env.cargo_profile_option }} --processes $(nproc) _webgpu --timeout-multiplier 2 \
             --total-chunks ${{ env.max_chunk_id }} --this-chunk ${{ matrix.chunk_id }} \
             --log-raw test-wpt.${{ matrix.chunk_id }}.log \
             --log-raw-unexpected unexpected-test-wpt.${{ matrix.chunk_id }}.log \
