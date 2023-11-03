@@ -1,0 +1,35 @@
+# Ensure all versions are pinned for repeatability,
+# since `--system-site-packages` is enabled
+
+pypi:blessings==1.7
+pypi:distro==1.4
+pypi:mozinfo==1.2.1
+pypi:mozlog==7.1.0
+pypi:setuptools==65.5.1
+pypi:toml==0.9.2
+
+# For Python linting
+pypi:flake8==3.8.3
+pypi:pep8==1.5.7
+pypi:pyflakes==2.2.0
+
+# For test-webidl
+pypi:ply==3.8
+
+# For Cross-platform colored terminal text
+pypi:colorama==0.3.7
+
+# For package uploading
+pypi:boto3==1.26.127
+pypi:PyGithub==1.58.1
+
+# For Python3 compatibility
+pypi:six==1.15
+
+# For sending build notifications.
+pypi:notify-py==0.3.42
+
+# For wpt scripts and their tests.
+pypi:flask
+pypi:requests
+pypi:types-requests
