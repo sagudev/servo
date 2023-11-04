@@ -13,7 +13,7 @@ on:
         type: string
 
 env:
-  cargo_profile_option: ${{ inputs.production && '--profile production' || '--release' }}
+  cargo_profile_option: '--profile production'
   RUST_BACKTRACE: 1
   SHELL: /bin/bash
   WPT_COMMAND_LINE_ARG: "${{ inputs.layout == 'layout-2013' && '--legacy-layout' || '' }}"

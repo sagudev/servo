@@ -50,8 +50,8 @@ on:
     branches: ["try-linux", "try-wpt", "try-wpt-2020"]
 
 env:
-  cargo_profile_option: ${{ inputs.production && '--profile production' || '--release' }}
-  cargo_profile_name: ${{ inputs.production && 'production' || 'release' }}
+  cargo_profile_option: '--profile production'
+  cargo_profile_name: 'production'
   RUST_BACKTRACE: 1
   SHELL: /bin/bash
   SCCACHE_GHA_ENABLED: "true"
