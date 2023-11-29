@@ -15,7 +15,7 @@ use crate::dom::bindings::str::USVString;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::gpubindgroup::GPUBindGroup;
 use crate::dom::gpubuffer::GPUBuffer;
-use crate::dom::gpucommandencoder::{GPUCommandEncoder, GPUCommandEncoderState};
+use crate::dom::gpucommandencoder::{GPUCommandEncoder};
 use crate::dom::gpucomputepipeline::GPUComputePipeline;
 
 #[dom_struct]

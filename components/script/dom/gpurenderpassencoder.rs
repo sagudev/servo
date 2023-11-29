@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+use std::cell::Cell;
+
 use dom_struct::dom_struct;
 use js::rust::CustomAutoRooterGuard;
 use js::typedarray::Uint32Array;
@@ -10,6 +12,7 @@ use webgpu::{wgt, WebGPU, WebGPURequest};
 
 use super::bindings::codegen::Bindings::WebGPUBinding::GPUIndexFormat;
 use super::bindings::error::Fallible;
+use super::types::GPUDevice;
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUColor, GPURenderPassEncoderMethods,
@@ -21,7 +24,8 @@ use crate::dom::bindings::str::USVString;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::gpubindgroup::GPUBindGroup;
 use crate::dom::gpubuffer::GPUBuffer;
-use crate::dom::gpucommandencoder::{GPUCommandEncoder, GPUCommandEncoderState};
+use crate::dom::gpucommandencoder::GPUCommandEncoder;
+use crate::dom::gpucommandsmixin::{GPUCommandsMixin, GPUEncoderState};
 use crate::dom::gpurenderbundle::GPURenderBundle;
 use crate::dom::gpurenderpipeline::GPURenderPipeline;
 
@@ -36,6 +40,9 @@ pub struct GPURenderPassEncoder {
     #[no_trace]
     render_pass: DomRefCell<Option<RenderPass>>,
     command_encoder: Dom<GPUCommandEncoder>,
+    state: DomRefCell<GPUEncoderState>,
+    device: Dom<GPUDevice>,
+    valid: Cell<bool>,
 }
 
 impl GPURenderPassEncoder {
@@ -44,6 +51,7 @@ impl GPURenderPassEncoder {
         render_pass: Option<RenderPass>,
         parent: &GPUCommandEncoder,
         label: USVString,
+        device: &GPUDevice,
     ) -> Self {
         Self {
             channel,
@@ -51,6 +59,9 @@ impl GPURenderPassEncoder {
             label: DomRefCell::new(label),
             render_pass: DomRefCell::new(render_pass),
             command_encoder: Dom::from_ref(parent),
+            device: Dom::from_ref(device),
+            state: DomRefCell::new(GPUEncoderState::Open),
+            valid: Cell::new(true),
         }
     }
 
@@ -60,6 +71,7 @@ impl GPURenderPassEncoder {
         render_pass: Option<RenderPass>,
         parent: &GPUCommandEncoder,
         label: USVString,
+        device: &GPUDevice,
     ) -> DomRoot<Self> {
         reflect_dom_object(
             Box::new(GPURenderPassEncoder::new_inherited(
@@ -67,9 +79,24 @@ impl GPURenderPassEncoder {
                 render_pass,
                 parent,
                 label,
+                device,
             )),
             global,
         )
+    }
+}
+
+impl GPUCommandsMixin for GPURenderPassEncoder {
+    fn state(&self) -> DomRefCell<GPUEncoderState> {
+        self.state
+    }
+
+    fn valid(&self) -> std::cell::Cell<bool> {
+        self.valid
+    }
+
+    fn device(&self) -> Dom<GPUDevice> {
+        self.device
     }
 }
 
@@ -92,6 +119,11 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
         bind_group: Option<&GPUBindGroup>,
         dynamic_offsets: Vec<u32>,
     ) {
+        // Step 1
+        if !self.validate() {
+            return;
+        }
+        //
         if let Some(render_pass) = self.render_pass.borrow_mut().as_mut() {
             unsafe {
                 if let Some(bind_group) = bind_group {
@@ -201,8 +233,8 @@ impl GPURenderPassEncoderMethods for GPURenderPassEncoder {
             .expect("Failed to send RunRenderPass");
 
         self.command_encoder.set_state(
-            GPUCommandEncoderState::Open,
-            GPUCommandEncoderState::EncodingRenderPass,
+            GPUEncoderState::Open,
+            GPUEncoderState::EncodingRenderPass,
         );
     }
 

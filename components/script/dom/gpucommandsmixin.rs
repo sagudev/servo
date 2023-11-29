@@ -25,20 +25,20 @@ pub enum GPUEncoderState {
 }
 
 pub trait GPUCommandsMixin {
-    fn state(&self) -> DomRefCell<GPUCommandState>;
+    fn state(&self) -> DomRefCell<GPUEncoderState>;
     fn valid(&self) -> Cell<bool>;
     fn device(&self) -> Dom<GPUDevice>;
 
     /// https://gpuweb.github.io/gpuweb/#abstract-opdef-validate-the-encoder-state
-    pub fn validate(&self) -> bool {
+    fn validate(&self) -> bool {
         let state = self.state().borrow();
         match *state {
-            GPUCommandState::Open => true,
-            GPUCommandState::Locked => {
+            GPUEncoderState::Open => true,
+            GPUEncoderState::Locked => {
                 self.valid().set(false);
                 false
             }
-            GPUCommandState::Ended => {
+            GPUEncoderState::Ended => {
                 let device = self.device();
                 let scope_id = device.use_current_scope();
                 device.handle_server_msg(

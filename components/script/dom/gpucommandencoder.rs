@@ -17,6 +17,7 @@ use super::bindings::codegen::Bindings::WebGPUBinding::{
 };
 use super::bindings::codegen::UnionTypes::DoubleSequenceOrGPUColorDict;
 use super::bindings::error::Fallible;
+use super::gpucommandsmixin::{GPUCommandsMixin, GPUEncoderState};
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUCommandEncoderMethods, GPUComputePassDescriptor, GPUExtent3D, GPUOrigin3D,
@@ -44,7 +45,7 @@ pub struct GPUCommandEncoder {
     #[no_trace]
     encoder: webgpu::WebGPUCommandEncoder,
     buffers: DomRefCell<HashSet<DomRoot<GPUBuffer>>>,
-    state: DomRefCell<GPUCommandState>,
+    state: DomRefCell<GPUEncoderState>,
     device: Dom<GPUDevice>,
     valid: Cell<bool>,
 }
@@ -63,7 +64,7 @@ impl GPUCommandEncoder {
             device: Dom::from_ref(device),
             encoder,
             buffers: DomRefCell::new(HashSet::new()),
-            state: DomRefCell::new(GPUCommandEncoderState::Open),
+            state: DomRefCell::new(GPUEncoderState::Open),
             valid: Cell::new(true),
         }
     }
@@ -91,7 +92,17 @@ impl GPUCommandEncoder {
 }
 
 impl GPUCommandsMixin for GPUCommandEncoder {
+    fn state(&self) -> DomRefCell<GPUEncoderState> {
+        self.state
+    }
 
+    fn valid(&self) -> Cell<bool> {
+        self.valid
+    }
+
+    fn device(&self) -> Dom<GPUDevice> {
+        self.device
+    }
 }
 
 impl GPUCommandEncoderMethods for GPUCommandEncoder {
@@ -216,6 +227,7 @@ impl GPUCommandEncoderMethods for GPUCommandEncoder {
             render_pass,
             &self,
             descriptor.parent.label.clone(),
+            &self.device,
         )
     }
 
@@ -369,7 +381,7 @@ impl GPUCommandEncoderMethods for GPUCommandEncoder {
             ))
             .expect("Failed to send Finish");
 
-        *self.state.borrow_mut() = GPUCommandEncoderState::Ended;
+        *self.state.borrow_mut() = GPUEncoderState::Ended;
         let buffer = webgpu::WebGPUCommandBuffer(self.encoder.0);
         GPUCommandBuffer::new(
             &self.global(),
