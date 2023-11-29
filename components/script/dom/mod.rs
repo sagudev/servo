@@ -333,6 +333,7 @@ pub mod gpucommandencoder;
 pub mod gpucompilationinfo;
 pub mod gpucompilationmessage;
 pub mod gpucomputepassencoder;
+pub(crate) mod gpucommandsmixin;
 pub mod gpucomputepipeline;
 pub mod gpudevice;
 pub mod gpudevicelostinfo;

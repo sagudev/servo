@@ -95,9 +95,11 @@ impl GPUComputePassEncoderMethods for GPUComputePassEncoder {
         }
     }
 
-    /// https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-endpass
+    /// https://gpuweb.github.io/gpuweb/#dom-gpucomputepassencoder-end
     fn End(&self) {
         let compute_pass = self.compute_pass.borrow_mut().take();
+        //if self.state.borow()
+        todo!("handle state");
         self.channel
             .0
             .send((
@@ -108,11 +110,6 @@ impl GPUComputePassEncoderMethods for GPUComputePassEncoder {
                 },
             ))
             .expect("Failed to send RunComputePass"); //TODO: handle error
-
-        self.command_encoder.set_state(
-            GPUCommandEncoderState::Open,
-            GPUCommandEncoderState::EncodingComputePass,
-        );
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpubindingcommandsmixin-setbindgroup
