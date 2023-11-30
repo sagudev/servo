@@ -82,6 +82,7 @@ jobs:
           python mach fetch
           python mach bootstrap-gstreamer
           cargo install --path support/crown
+          cargo test -p crown
       - name: Build (${{ inputs.profile }})
         run: python mach build --${{ inputs.profile }}
       - name: Copy resources
