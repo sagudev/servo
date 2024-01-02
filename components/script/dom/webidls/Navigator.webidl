@@ -14,7 +14,6 @@ Navigator includes NavigatorLanguage;
 //Navigator includes NavigatorStorageUtils;
 Navigator includes NavigatorPlugins;
 Navigator includes NavigatorCookies;
-Navigator includes NavigatorGPU;
 
 // https://html.spec.whatwg.org/multipage/#navigatorid
 [Exposed=(Window,Worker)]
