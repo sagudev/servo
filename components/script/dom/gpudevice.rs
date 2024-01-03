@@ -17,11 +17,13 @@ use webgpu::wgpu::id::{BindGroupLayoutId, PipelineLayoutId};
 use webgpu::wgpu::{
     binding_model as wgpu_bind, command as wgpu_com, pipeline as wgpu_pipe, resource as wgpu_res,
 };
+use webgpu::wgt::{AstcBlock, AstcChannel};
 use webgpu::{self, wgt, ErrorScopeId, WebGPU, WebGPURequest};
 
 use super::bindings::codegen::Bindings::WebGPUBinding::{
-    GPUBlendComponent, GPUBufferBindingType, GPUDeviceLostReason, GPUPrimitiveState,
-    GPUSamplerBindingType, GPUStorageTextureAccess, GPUTextureSampleType, GPUVertexStepMode,
+    GPUBlendComponent, GPUBufferBindingType, GPUDeviceLostReason, GPUMipmapFilterMode,
+    GPUPrimitiveState, GPUSamplerBindingType, GPUStorageTextureAccess, GPUTextureSampleType,
+    GPUVertexStepMode,
 };
 use super::bindings::codegen::UnionTypes::GPUPipelineLayoutOrGPUAutoLayoutMode;
 use super::bindings::error::Fallible;
@@ -33,7 +35,7 @@ use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTargetMeth
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUAddressMode, GPUBindGroupDescriptor, GPUBindGroupLayoutDescriptor, GPUBindingResource,
     GPUBlendFactor, GPUBlendOperation, GPUBufferDescriptor, GPUCommandEncoderDescriptor,
-    GPUCompareFunction, GPUComputePipelineDescriptor, GPUCullMode, GPUDeviceMethods, GPUError,
+    GPUCompareFunction, GPUComputePipelineDescriptor, GPUCullMode, GPUDeviceMethods,
     GPUErrorFilter, GPUExtent3D, GPUExtent3DDict, GPUFilterMode, GPUFrontFace, GPUIndexFormat,
     GPUObjectDescriptorBase, GPUPipelineLayoutDescriptor, GPUPrimitiveTopology,
     GPURenderBundleEncoderDescriptor, GPURenderPipelineDescriptor, GPUSamplerDescriptor,
@@ -42,6 +44,7 @@ use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUUncapturedErrorEventInit, GPUVertexFormat,
 };
 use crate::dom::bindings::error::Error;
+use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::{reflect_dom_object, DomObject};
 use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::str::{DOMString, USVString};
@@ -54,6 +57,7 @@ use crate::dom::gpubindgrouplayout::GPUBindGroupLayout;
 use crate::dom::gpubuffer::{GPUBuffer, GPUBufferMapInfo, GPUBufferState};
 use crate::dom::gpucommandencoder::GPUCommandEncoder;
 use crate::dom::gpucomputepipeline::GPUComputePipeline;
+use crate::dom::gpuerror::GPUError;
 use crate::dom::gpuoutofmemoryerror::GPUOutOfMemoryError;
 use crate::dom::gpupipelinelayout::GPUPipelineLayout;
 use crate::dom::gpuqueue::GPUQueue;
@@ -71,8 +75,7 @@ use crate::realms::InRealm;
 #[derive(JSTraceable, MallocSizeOf)]
 struct ErrorScopeInfo {
     op_count: u64,
-    #[ignore_malloc_size_of = "Because it is non-owning"]
-    error: Option<GPUError>,
+    error: Option<DomRoot<GPUError>>,
     #[ignore_malloc_size_of = "promises are hard"]
     promise: Option<Rc<Promise>>,
 }
@@ -179,14 +182,14 @@ impl GPUDevice {
             WebGPUOpResult::ValidationError(m) => {
                 let val_err = GPUValidationError::new(&self.global(), DOMString::from_string(m));
                 Err((
-                    GPUError::GPUValidationError(val_err),
+                    DomRoot::from_ref(val_err.upcast::<GPUError>()),
                     GPUErrorFilter::Validation,
                 ))
             },
-            WebGPUOpResult::OutOfMemoryError => {
-                let oom_err = GPUOutOfMemoryError::new(&self.global());
+            WebGPUOpResult::OutOfMemoryError(m) => {
+                let oom_err = GPUOutOfMemoryError::new(&self.global(), DOMString::from_string(m));
                 Err((
-                    GPUError::GPUOutOfMemoryError(oom_err),
+                    DomRoot::from_ref(oom_err.upcast::<GPUError>()),
                     GPUErrorFilter::Out_of_memory,
                 ))
             },
@@ -216,7 +219,7 @@ impl GPUDevice {
         }
     }
 
-    fn handle_error(&self, scope: ErrorScopeId, error: GPUError) {
+    fn handle_error(&self, scope: ErrorScopeId, error: DomRoot<GPUError>) {
         let mut context = self.scope_context.borrow_mut();
         if let Some(err_scope) = context.error_scopes.get_mut(&scope) {
             if err_scope.error.is_none() {
@@ -234,7 +237,7 @@ impl GPUDevice {
             if let Some(ref promise) = err_scope.promise {
                 if !promise.is_fulfilled() {
                     if let Some(ref e) = err_scope.error {
-                        promise.resolve_native(e);
+                        promise.resolve_native(&**e);
                     } else if err_scope.op_count == 0 {
                         promise.resolve_native(&None::<GPUError>);
                     }
@@ -251,7 +254,7 @@ impl GPUDevice {
         }
     }
 
-    fn fire_uncaptured_error(&self, err: GPUError) {
+    fn fire_uncaptured_error(&self, err: DomRoot<GPUError>) {
         let ev = GPUUncapturedErrorEvent::new(
             &self.global(),
             DOMString::from("uncapturederror"),
@@ -339,7 +342,7 @@ impl GPUDeviceMethods for GPUDevice {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-queue
-    fn GetQueue(&self) -> DomRoot<GPUQueue> {
+    fn Queue(&self) -> DomRoot<GPUQueue> {
         DomRoot::from_ref(&self.default_queue)
     }
 
@@ -354,14 +357,14 @@ impl GPUDeviceMethods for GPUDevice {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-lost
-    fn GetLost(&self, comp: InRealm) -> Fallible<Rc<Promise>> {
+    fn Lost(&self, comp: InRealm) -> Rc<Promise> {
         let promise = Promise::new_in_current_realm(comp);
         *self.lost_promise.borrow_mut() = Some(promise.clone());
-        Ok(promise)
+        promise
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-createbuffer
-    fn CreateBuffer(&self, descriptor: &GPUBufferDescriptor) -> Fallible<DomRoot<GPUBuffer>> {
+    fn CreateBuffer(&self, descriptor: &GPUBufferDescriptor) -> DomRoot<GPUBuffer> {
         let desc =
             wgt::BufferUsages::from_bits(descriptor.usage).map(|usg| wgpu_res::BufferDescriptor {
                 label: convert_label(&descriptor.parent),
@@ -413,7 +416,7 @@ impl GPUDeviceMethods for GPUDevice {
             state = GPUBufferState::Unmapped;
         }
 
-        Ok(GPUBuffer::new(
+        GPUBuffer::new(
             &self.global(),
             self.channel.clone(),
             buffer,
@@ -421,8 +424,8 @@ impl GPUDeviceMethods for GPUDevice {
             state,
             descriptor.size,
             map_info,
-            descriptor.parent.label.clone().unwrap_or_default(),
-        ))
+            descriptor.parent.label.clone(),
+        )
     }
 
     /// https://gpuweb.github.io/gpuweb/#GPUDevice-createBindGroupLayout
@@ -470,6 +473,12 @@ impl GPUDeviceMethods for GPUDevice {
                         access: match storage.access {
                             GPUStorageTextureAccess::Write_only => {
                                 wgt::StorageTextureAccess::WriteOnly
+                            },
+                            GPUStorageTextureAccess::Read_only => {
+                                wgt::StorageTextureAccess::ReadOnly
+                            },
+                            GPUStorageTextureAccess::Read_write => {
+                                wgt::StorageTextureAccess::ReadWrite
                             },
                         },
                         format: convert_texture_format(storage.format),
@@ -539,11 +548,7 @@ impl GPUDeviceMethods for GPUDevice {
 
         let bgl = webgpu::WebGPUBindGroupLayout(bind_group_layout_id);
 
-        GPUBindGroupLayout::new(
-            &self.global(),
-            bgl,
-            descriptor.parent.label.clone().unwrap_or_default(),
-        )
+        GPUBindGroupLayout::new(&self.global(), bgl, descriptor.parent.label.clone())
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpudevice-createpipelinelayout
@@ -591,7 +596,7 @@ impl GPUDeviceMethods for GPUDevice {
         GPUPipelineLayout::new(
             &self.global(),
             pipeline_layout,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
             bgls,
         )
     }
@@ -653,7 +658,7 @@ impl GPUDeviceMethods for GPUDevice {
             bind_group,
             self.device,
             &*descriptor.layout,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
     }
 
@@ -686,7 +691,7 @@ impl GPUDeviceMethods for GPUDevice {
         GPUShaderModule::new(
             &self.global(),
             shader_module,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
     }
 
@@ -709,7 +714,10 @@ impl GPUDeviceMethods for GPUDevice {
             layout,
             stage: wgpu_pipe::ProgrammableStageDescriptor {
                 module: descriptor.compute.module.id().0,
-                entry_point: Cow::Owned(descriptor.compute.entryPoint.to_string()),
+                // TODO: handle empty
+                entry_point: Cow::Owned(
+                    descriptor.compute.entryPoint.as_ref().unwrap().to_string(),
+                ),
             },
         };
 
@@ -730,7 +738,7 @@ impl GPUDeviceMethods for GPUDevice {
         GPUComputePipeline::new(
             &self.global(),
             compute_pipeline,
-            descriptor.parent.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.parent.label.clone(),
             bgls,
             &self,
         )
@@ -766,7 +774,7 @@ impl GPUDeviceMethods for GPUDevice {
             self.channel.clone(),
             &self,
             encoder,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
     }
 
@@ -832,7 +840,7 @@ impl GPUDeviceMethods for GPUDevice {
             descriptor.dimension,
             descriptor.format,
             descriptor.usage,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
     }
 
@@ -853,7 +861,7 @@ impl GPUDeviceMethods for GPUDevice {
             ],
             mag_filter: convert_filter_mode(descriptor.magFilter),
             min_filter: convert_filter_mode(descriptor.minFilter),
-            mipmap_filter: convert_filter_mode(descriptor.mipmapFilter),
+            mipmap_filter: convert_mipmap_filter_mode(descriptor.mipmapFilter),
             lod_min_clamp: *descriptor.lodMinClamp,
             lod_max_clamp: *descriptor.lodMaxClamp,
             compare: descriptor.compare.map(|c| convert_compare_function(c)),
@@ -881,7 +889,7 @@ impl GPUDeviceMethods for GPUDevice {
             self.device,
             compare_enable,
             sampler,
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
     }
 
@@ -902,7 +910,16 @@ impl GPUDeviceMethods for GPUDevice {
                 vertex: wgpu_pipe::VertexState {
                     stage: wgpu_pipe::ProgrammableStageDescriptor {
                         module: descriptor.vertex.parent.module.id().0,
-                        entry_point: Cow::Owned(descriptor.vertex.parent.entryPoint.to_string()),
+                        // TODO: handle empty entrypoint
+                        entry_point: Cow::Owned(
+                            descriptor
+                                .vertex
+                                .parent
+                                .entryPoint
+                                .as_ref()
+                                .unwrap()
+                                .to_string(),
+                        ),
                     },
                     buffers: Cow::Owned(
                         descriptor
@@ -936,7 +953,10 @@ impl GPUDeviceMethods for GPUDevice {
                     .map(|stage| wgpu_pipe::FragmentState {
                         stage: wgpu_pipe::ProgrammableStageDescriptor {
                             module: stage.parent.module.id().0,
-                            entry_point: Cow::Owned(stage.parent.entryPoint.to_string()),
+                            // TODO: handle empty entrypoint
+                            entry_point: Cow::Owned(
+                                stage.parent.entryPoint.as_ref().unwrap().to_string(),
+                            ),
                         },
                         targets: Cow::Owned(
                             stage
@@ -967,8 +987,9 @@ impl GPUDeviceMethods for GPUDevice {
                 depth_stencil: descriptor.depthStencil.as_ref().map(|dss_desc| {
                     wgt::DepthStencilState {
                         format: convert_texture_format(dss_desc.format),
-                        depth_write_enabled: dss_desc.depthWriteEnabled,
-                        depth_compare: convert_compare_function(dss_desc.depthCompare),
+                        // TODO: recheck the spec
+                        depth_write_enabled: dss_desc.depthWriteEnabled.unwrap_or_default(),
+                        depth_compare: convert_compare_function(dss_desc.depthCompare.unwrap()),
                         stencil: wgt::StencilState {
                             front: wgt::StencilFaceState {
                                 compare: convert_compare_function(dss_desc.stencilFront.compare),
@@ -1033,7 +1054,7 @@ impl GPUDeviceMethods for GPUDevice {
         GPURenderPipeline::new(
             &self.global(),
             render_pipeline,
-            descriptor.parent.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.parent.label.clone(),
             bgls,
             &self,
         )
@@ -1074,7 +1095,7 @@ impl GPUDeviceMethods for GPUDevice {
             render_bundle_encoder,
             &self,
             self.channel.clone(),
-            descriptor.parent.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.parent.label.clone(),
         )
     }
 
@@ -1201,7 +1222,7 @@ fn convert_primitive_state(primitive_state: &GPUPrimitiveState) -> wgt::Primitiv
             GPUCullMode::Front => Some(wgt::Face::Front),
             GPUCullMode::Back => Some(wgt::Face::Back),
         },
-        unclipped_depth: primitive_state.clampDepth,
+        unclipped_depth: primitive_state.unclippedDepth,
         ..Default::default()
     }
 }
@@ -1232,6 +1253,13 @@ fn convert_address_mode(address_mode: GPUAddressMode) -> wgt::AddressMode {
         GPUAddressMode::Clamp_to_edge => wgt::AddressMode::ClampToEdge,
         GPUAddressMode::Repeat => wgt::AddressMode::Repeat,
         GPUAddressMode::Mirror_repeat => wgt::AddressMode::MirrorRepeat,
+    }
+}
+
+fn convert_mipmap_filter_mode(mipmap_filter: GPUMipmapFilterMode) -> wgt::FilterMode {
+    match mipmap_filter {
+        GPUMipmapFilterMode::Nearest => wgt::FilterMode::Nearest,
+        GPUMipmapFilterMode::Linear => wgt::FilterMode::Linear,
     }
 }
 
@@ -1318,6 +1346,7 @@ fn convert_vertex_format(format: GPUVertexFormat) -> wgt::VertexFormat {
         GPUVertexFormat::Sint32x2 => wgt::VertexFormat::Sint32x2,
         GPUVertexFormat::Sint32x3 => wgt::VertexFormat::Sint32x3,
         GPUVertexFormat::Sint32x4 => wgt::VertexFormat::Sint32x4,
+        GPUVertexFormat::Unorm10_10_10_2 => todo!("Not in wgpu yet"),
     }
 }
 
@@ -1373,8 +1402,136 @@ pub fn convert_texture_format(format: GPUTextureFormat) -> wgt::TextureFormat {
         GPUTextureFormat::Bc6h_rgb_ufloat => wgt::TextureFormat::Bc6hRgbUfloat,
         GPUTextureFormat::Bc7_rgba_unorm => wgt::TextureFormat::Bc7RgbaUnorm,
         GPUTextureFormat::Bc7_rgba_unorm_srgb => wgt::TextureFormat::Bc7RgbaUnormSrgb,
-        GPUTextureFormat::Rg11b10float => wgt::TextureFormat::Rg11b10Float,
+        GPUTextureFormat::Rg11b10ufloat => wgt::TextureFormat::Rg11b10Float,
         GPUTextureFormat::Bc6h_rgb_float => wgt::TextureFormat::Bc6hRgbFloat,
+        GPUTextureFormat::Rgb9e5ufloat => wgt::TextureFormat::Rgb9e5Ufloat,
+        GPUTextureFormat::Rgb10a2uint => wgt::TextureFormat::Rgb10a2Uint,
+        GPUTextureFormat::Rg11b10ufloat => wgt::TextureFormat::Rg11b10Float,
+        GPUTextureFormat::Stencil8 => wgt::TextureFormat::Stencil8,
+        GPUTextureFormat::Depth16unorm => wgt::TextureFormat::Depth16Unorm,
+        GPUTextureFormat::Depth32float_stencil8 => wgt::TextureFormat::Depth32FloatStencil8,
+        GPUTextureFormat::Etc2_rgb8unorm => wgt::TextureFormat::Etc2Rgb8Unorm,
+        GPUTextureFormat::Etc2_rgb8unorm_srgb => wgt::TextureFormat::Etc2Rgb8UnormSrgb,
+        GPUTextureFormat::Etc2_rgb8a1unorm => wgt::TextureFormat::Etc2Rgb8A1Unorm,
+        GPUTextureFormat::Etc2_rgb8a1unorm_srgb => wgt::TextureFormat::Etc2Rgb8A1UnormSrgb,
+        GPUTextureFormat::Etc2_rgba8unorm => wgt::TextureFormat::Etc2Rgba8Unorm,
+        GPUTextureFormat::Etc2_rgba8unorm_srgb => wgt::TextureFormat::Etc2Rgba8UnormSrgb,
+        GPUTextureFormat::Eac_r11unorm => wgt::TextureFormat::EacR11Unorm,
+        GPUTextureFormat::Eac_r11snorm => wgt::TextureFormat::EacR11Snorm,
+        GPUTextureFormat::Eac_rg11unorm => wgt::TextureFormat::EacRg11Unorm,
+        GPUTextureFormat::Eac_rg11snorm => wgt::TextureFormat::EacRg11Snorm,
+        GPUTextureFormat::Astc_4x4_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B4x4,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_4x4_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B4x4,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_5x4_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B5x4,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_5x4_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B5x4,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_5x5_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B5x5,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_5x5_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B5x5,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_6x5_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B6x5,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_6x5_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B6x5,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_6x6_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B6x6,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_6x6_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B6x6,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_8x5_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x5,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_8x5_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x5,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_8x6_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x6,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_8x6_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x6,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_8x8_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x8,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_8x8_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B8x8,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_10x5_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x5,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_10x5_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x5,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_10x6_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x6,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_10x6_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x6,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_10x8_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x8,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_10x8_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x8,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_10x10_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x10,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_10x10_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B10x10,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_12x10_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B12x10,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_12x10_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B12x10,
+            channel: AstcChannel::UnormSrgb,
+        },
+        GPUTextureFormat::Astc_12x12_unorm => wgt::TextureFormat::Astc {
+            block: AstcBlock::B12x12,
+            channel: AstcChannel::Unorm,
+        },
+        GPUTextureFormat::Astc_12x12_unorm_srgb => wgt::TextureFormat::Astc {
+            block: AstcBlock::B12x12,
+            channel: AstcChannel::UnormSrgb,
+        },
     }
 }
 
@@ -1419,5 +1576,6 @@ pub fn convert_texture_size_to_wgt(size: &GPUExtent3DDict) -> wgt::Extent3d {
 }
 
 pub fn convert_label(parent: &GPUObjectDescriptorBase) -> Option<Cow<'static, str>> {
-    parent.label.as_ref().map(|s| Cow::Owned(s.to_string()))
+    // TODO: empty string
+    Some(Cow::Owned(parent.label.as_ref().to_string()))
 }

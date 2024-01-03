@@ -96,7 +96,7 @@ impl GPUComputePassEncoderMethods for GPUComputePassEncoder {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-endpass
-    fn End(&self) -> Fallible<()> {
+    fn End(&self) {
         let compute_pass = self.compute_pass.borrow_mut().take();
         self.channel
             .0
@@ -113,18 +113,27 @@ impl GPUComputePassEncoderMethods for GPUComputePassEncoder {
             GPUCommandEncoderState::Open,
             GPUCommandEncoderState::EncodingComputePass,
         );
-        Ok(())
+        ()
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpuprogrammablepassencoder-setbindgroup
     #[allow(unsafe_code)]
-    fn SetBindGroup(&self, index: u32, bind_group: &GPUBindGroup, dynamic_offsets: Vec<u32>) {
+    fn SetBindGroup(
+        &self,
+        index: u32,
+        bind_group: Option<&GPUBindGroup>,
+        dynamic_offsets: Vec<u32>,
+    ) {
+        if bind_group.is_none() {
+            warn!("GPUBindGroup is none, and we are doing nothing about it.");
+            return;
+        }
         if let Some(compute_pass) = self.compute_pass.borrow_mut().as_mut() {
             unsafe {
                 wgpu_comp::wgpu_compute_pass_set_bind_group(
                     compute_pass,
                     index,
-                    bind_group.id().0,
+                    bind_group.unwrap().id().0, // TODO: do remove on empty
                     dynamic_offsets.as_ptr(),
                     dynamic_offsets.len(),
                 )
@@ -137,5 +146,17 @@ impl GPUComputePassEncoderMethods for GPUComputePassEncoder {
         if let Some(compute_pass) = self.compute_pass.borrow_mut().as_mut() {
             wgpu_comp::wgpu_compute_pass_set_pipeline(compute_pass, pipeline.id().0);
         }
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#programmable-passes-bind-groups
+    fn SetBindGroup_(
+        &self,
+        index: u32,
+        bindGroup: Option<&GPUBindGroup>,
+        dynamicOffsetsData: js::rust::CustomAutoRooterGuard<js::typedarray::Uint32Array>,
+        dynamicOffsetsDataStart: u64,
+        dynamicOffsetsDataLength: u32,
+    ) {
+        todo!()
     }
 }

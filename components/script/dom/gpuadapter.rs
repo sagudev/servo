@@ -212,16 +212,13 @@ impl GPUAdapterMethods for GPUAdapter {
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpuadapter-requestadapterinfo
-    fn RequestAdapterInfo(&self, unmask_hints: Vec<DOMString>, comp: InRealm) -> Rc<Promise> {
-        // XXX: Adapter info should be generated here ...
+    fn RequestAdapterInfo(&self, comp: InRealm) -> Rc<Promise> {
         // Step 1
         let promise = Promise::new_in_current_realm(comp);
-        // Step 4
-        if !unmask_hints.is_empty() {
-            todo!("unmaskHints on RequestAdapterInfo");
-        }
+        // XXX: Adapter info should be generated here ...
+        // Step 2&3
         promise.resolve_native(&*self.info);
-        // Step 5
+        // Step 4
         promise
     }
 

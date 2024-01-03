@@ -16,6 +16,7 @@ use webgpu::identity::WebGPUOpResult;
 use webgpu::wgpu::device::HostMap;
 use webgpu::{WebGPU, WebGPUBuffer, WebGPURequest, WebGPUResponse, WebGPUResponseResult};
 
+use super::bindings::codegen::Bindings::WebGPUBinding::GPUBufferMapState;
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUBufferMethods, GPUMapModeConstants, GPUSize64,
@@ -127,22 +128,20 @@ impl GPUBuffer {
 
 impl Drop for GPUBuffer {
     fn drop(&mut self) {
-        if let Err(e) = self.Destroy() {
-            error!("GPUBuffer destruction failed with {e:?}!"); // TODO: should we allow panic here?
-        };
+        self.Destroy()
     }
 }
 
 impl GPUBufferMethods for GPUBuffer {
     #[allow(unsafe_code)]
     /// https://gpuweb.github.io/gpuweb/#dom-gpubuffer-unmap
-    fn Unmap(&self) -> Fallible<()> {
+    fn Unmap(&self) {
         let cx = GlobalScope::get_cx();
         // Step 1
         match self.state.get() {
             GPUBufferState::Unmapped | GPUBufferState::Destroyed => {
                 // TODO: Record validation error on the current scope
-                return Ok(());
+                return;
             },
             // Step 3
             GPUBufferState::Mapped | GPUBufferState::MappedAtCreation => {
@@ -178,17 +177,16 @@ impl GPUBufferMethods for GPUBuffer {
         // Step 4
         self.state.set(GPUBufferState::Unmapped);
         *self.map_info.borrow_mut() = None;
-        Ok(())
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpubuffer-destroy
-    fn Destroy(&self) -> Fallible<()> {
+    fn Destroy(&self) {
         let state = self.state.get();
         match state {
             GPUBufferState::Mapped | GPUBufferState::MappedAtCreation => {
-                self.Unmap()?;
+                self.Unmap();
             },
-            GPUBufferState::Destroyed => return Ok(()),
+            GPUBufferState::Destroyed => return,
             _ => {},
         };
         if let Err(e) = self
@@ -202,7 +200,6 @@ impl GPUBufferMethods for GPUBuffer {
             );
         };
         self.state.set(GPUBufferState::Destroyed);
-        Ok(())
     }
 
     #[allow(unsafe_code)]
@@ -341,6 +338,21 @@ impl GPUBufferMethods for GPUBuffer {
     /// https://gpuweb.github.io/gpuweb/#dom-gpuobjectbase-label
     fn SetLabel(&self, value: USVString) {
         *self.label.borrow_mut() = value;
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpubuffer-size
+    fn Size(&self) -> u64 {
+        self.size
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpubuffer-usage
+    fn Usage(&self) -> u32 {
+        0
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpubuffer-mapstate
+    fn MapState(&self) -> GPUBufferMapState {
+        todo!()
     }
 }
 

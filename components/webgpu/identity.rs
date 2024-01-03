@@ -20,7 +20,7 @@ use crate::{ErrorScopeId, WebGPUDevice, WebGPURequest};
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum WebGPUOpResult {
     ValidationError(String),
-    OutOfMemoryError,
+    OutOfMemoryError(String),
     Success,
 }
 

@@ -3,10 +3,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use dom_struct::dom_struct;
+use js::rust::CustomAutoRooterGuard;
+use js::typedarray::Uint32Array;
 use webgpu::wgpu::command::{bundle_ffi as wgpu_bundle, RenderBundleEncoder};
 use webgpu::{wgt, WebGPU, WebGPURenderBundle, WebGPURequest};
 
 use super::bindings::codegen::Bindings::WebGPUBinding::GPUIndexFormat;
+use super::gpurenderpassencoder::buffer_size;
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPURenderBundleDescriptor, GPURenderBundleEncoderMethods,
@@ -82,13 +85,22 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpuprogrammablepassencoder-setbindgroup
     #[allow(unsafe_code)]
-    fn SetBindGroup(&self, index: u32, bind_group: &GPUBindGroup, dynamic_offsets: Vec<u32>) {
+    fn SetBindGroup(
+        &self,
+        index: u32,
+        bind_group: Option<&GPUBindGroup>,
+        dynamic_offsets: Vec<u32>,
+    ) {
+        if bind_group.is_none() {
+            warn!("GPUBindGroup is none, and we are doing nothing about it.");
+            return;
+        }
         if let Some(encoder) = self.render_bundle_encoder.borrow_mut().as_mut() {
             unsafe {
                 wgpu_bundle::wgpu_render_bundle_set_bind_group(
                     encoder,
                     index,
-                    bind_group.id().0,
+                    bind_group.unwrap().id().0,
                     dynamic_offsets.as_ptr(),
                     dynamic_offsets.len(),
                 )
@@ -109,7 +121,7 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
         buffer: &GPUBuffer,
         index_format: GPUIndexFormat,
         offset: u64,
-        size: u64,
+        size: Option<u64>,
     ) {
         if let Some(encoder) = self.render_bundle_encoder.borrow_mut().as_mut() {
             wgpu_bundle::wgpu_render_bundle_set_index_buffer(
@@ -120,20 +132,30 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
                     GPUIndexFormat::Uint32 => wgt::IndexFormat::Uint32,
                 },
                 offset,
-                wgt::BufferSize::new(size),
+                buffer_size(size),
             );
         }
     }
 
     /// https://gpuweb.github.io/gpuweb/#dom-gpurenderencoderbase-setvertexbuffer
-    fn SetVertexBuffer(&self, slot: u32, buffer: &GPUBuffer, offset: u64, size: u64) {
+    fn SetVertexBuffer(
+        &self,
+        slot: u32,
+        buffer: Option<&GPUBuffer>,
+        offset: u64,
+        size: Option<u64>,
+    ) {
+        if buffer.is_none() {
+            warn!("Buffer is none, and we are doing nothing about it.");
+            return;
+        }
         if let Some(encoder) = self.render_bundle_encoder.borrow_mut().as_mut() {
             wgpu_bundle::wgpu_render_bundle_set_vertex_buffer(
                 encoder,
                 slot,
-                buffer.id().0,
+                buffer.unwrap().id().0,
                 offset,
-                wgt::BufferSize::new(size),
+                buffer_size(size),
             );
         }
     }
@@ -225,7 +247,19 @@ impl GPURenderBundleEncoderMethods for GPURenderBundleEncoder {
             render_bundle,
             self.device.id(),
             self.channel.clone(),
-            descriptor.parent.label.clone().unwrap_or_default(),
+            descriptor.parent.label.clone(),
         )
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#programmable-passes-bind-groups
+    fn SetBindGroup_(
+        &self,
+        index: u32,
+        bindGroup: Option<&GPUBindGroup>,
+        dynamicOffsetsData: CustomAutoRooterGuard<Uint32Array>,
+        dynamicOffsetsDataStart: u64,
+        dynamicOffsetsDataLength: u32,
+    ) {
+        todo!()
     }
 }

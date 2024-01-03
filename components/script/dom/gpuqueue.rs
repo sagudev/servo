@@ -2,15 +2,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+use std::rc::Rc;
+
 use dom_struct::dom_struct;
 use ipc_channel::ipc::IpcSharedMemory;
 use webgpu::identity::WebGPUOpResult;
 use webgpu::{wgt, WebGPU, WebGPUQueue, WebGPURequest};
 
 use super::bindings::codegen::Bindings::WebGPUBinding::{GPUImageCopyTexture, GPUImageDataLayout};
+use super::bindings::codegen::UnionTypes::RangeEnforcedUnsignedLongSequenceOrGPUExtent3DDict;
+use super::promise::Promise;
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
-    GPUExtent3D, GPUQueueMethods, GPUSize64,
+    GPUExtent3D, GPUImageCopyExternalImage, GPUImageCopyTextureTagged, GPUQueueMethods, GPUSize64,
 };
 use crate::dom::bindings::codegen::UnionTypes::ArrayBufferViewOrArrayBuffer as BufferSource;
 use crate::dom::bindings::error::{Error, Fallible};
@@ -164,7 +168,7 @@ impl GPUQueueMethods for GPUQueue {
             return Err(Error::Operation);
         }
 
-        let texture_cv = convert_ic_texture(destination);
+        let texture_cv = convert_ic_texture(destination)?;
         let texture_layout = convert_image_data_layout(data_layout);
         let write_size = convert_texture_size_to_wgt(&convert_texture_size_to_dict(&size));
         let final_data = IpcSharedMemory::from_bytes(&bytes);
@@ -188,5 +192,20 @@ impl GPUQueueMethods for GPUQueue {
         }
 
         Ok(())
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpuqueue-onsubmittedworkdone
+    fn OnSubmittedWorkDone(&self) -> Rc<Promise> {
+        todo!()
+    }
+
+    /// https://gpuweb.github.io/gpuweb/#dom-gpuqueue-copyexternalimagetotexture
+    fn CopyExternalImageToTexture(
+        &self,
+        source: &GPUImageCopyExternalImage,
+        destination: &GPUImageCopyTextureTagged,
+        copySize: RangeEnforcedUnsignedLongSequenceOrGPUExtent3DDict,
+    ) {
+        todo!()
     }
 }
