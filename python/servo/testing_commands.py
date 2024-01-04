@@ -798,6 +798,15 @@ tests/wpt/mozilla/tests for Servo-only tests""" % reference_path)
         res = call(["npm", "ci"], cwd=clone_dir)
         if res != 0:
             return res
+        # patch config
+        with open(path.join(clone_dir, "tools", "gen_wpt_cfg_unchunked.json"), 'w') as file:
+            file.write("""{
+                "suite": "webgpu",
+                "out": "../out-wpt/cts.https.html",
+                "template": "../src/common/templates/cts.https.html",
+                "maxChunkTimeMS": -1,
+                "noLongPathAssert": true
+            }""")
         res = call(["npm", "run", "wpt"], cwd=clone_dir)
         if res != 0:
             return res
