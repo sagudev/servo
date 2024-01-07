@@ -8,3 +8,6 @@ appropriate GPU hardware is not available.
 The contents of this directory are automatically generated from TypeScript
 sources which live upstream in the [WebGPU CTS](https://github.com/gpuweb/cts).
 They are periodically built and pushed to WPT.
+
+In splitted.txt first section contains FAIL/PASS, TIMEOUT, NOTRUN tests
+second section contains remaining TIMEOUT, NOTRUN

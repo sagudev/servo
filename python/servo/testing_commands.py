@@ -805,7 +805,11 @@ tests/wpt/mozilla/tests for Servo-only tests""" % reference_path)
                 "out": "../out-wpt/cts.https.html",
                 "template": "../src/common/templates/cts.https.html",
                 "maxChunkTimeMS": -1,
-                "noLongPathAssert": true
+                "noLongPathAssert": true,
+                "expectations": {
+                    "file": "../splitted.txt";
+                    "prefix": "cts.https.html?q=";
+                },
             }""")
         res = call(["npm", "run", "wpt"], cwd=clone_dir)
         if res != 0:
