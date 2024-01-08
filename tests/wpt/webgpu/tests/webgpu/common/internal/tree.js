@@ -286,6 +286,7 @@ loader,
 queryToLoad,
 {
   subqueriesToExpand,
+  expandAll = false,
   maxChunkTime = Infinity
 })
 {
@@ -302,7 +303,8 @@ queryToLoad,
 
     // If toExpand == subquery, no expansion is needed (but it's still "seen").
     if (ordering === Ordering.Equal) seenSubqueriesToExpand[i] = true;
-    return !(ordering === Ordering.StrictSubset || ordering === Ordering.Equal);
+    if (expandAll) return ordering === Ordering.Unordered;
+    return ordering !== Ordering.StrictSubset;
   });
 
   // L0 = suite-level, e.g. suite:*
