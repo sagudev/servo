@@ -462,7 +462,7 @@
         ]
        ],
        "canvas_image_rendering.https.html": [
-        "f51145645be45edae1636cbd5f8dea69bfb8879c",
+        "6a64b3da5dd10e09792f069dd62f6695dd0a7727",
         [
          null,
          [
@@ -498,11 +498,15 @@
     []
    ],
    "README.md": [
-    "ef0dbfee60ce3e787131ca40e5be64952e578e03",
+    "c98ed8adcbdfe24114ccf0fa90e3146780f5db4c",
     []
    ],
    "checkout_commit.txt": [
-    "bc28bbc4dd3c1fcfce39f3474eac209362d25c92",
+    "885ccef0961463560c9beaf8538c363a0027f8f8",
+    []
+   ],
+   "splitted.txt": [
+    "04ad0b0c3a3f028a252239d3ee3ee4d1c5a7871a",
     []
    ],
    "webgpu": {
@@ -611,7 +615,7 @@
        []
       ],
       "tree.js": [
-       "8f1e6bad662886ceb541ba861255089278bb4190",
+       "04cd39a55dc2aeef65e00e0c1edfd3a22959e576",
        []
       ],
       "util.js": [
@@ -619,7 +623,7 @@
        []
       ],
       "version.js": [
-       "5a6e67c1cbe845222fadd98cbb6a422df81ae305",
+       "7eea5eba31b81e6833d3f0e1037ad4206e3357f6",
        []
       ],
       "websocket_logger.js": [
@@ -3337,7 +3341,7 @@
          []
         ],
         "fragment_builtins.spec.js": [
-         "b7372745597ac034496cea98036e642504f8a61e",
+         "42a6910b707c84f746b31fa24777bfbb8499df30",
          []
         ],
         "shared_structs.spec.js": [
@@ -3969,7 +3973,7 @@
          []
         ],
         "canvas_image_rendering-ref.html": [
-         "f9eca704e8702ea17f22ce0bcd8e65677b93b12f",
+         "56e3453c56146e68b7833dcfbbb821f039f61848",
          []
         ],
         "resize_observer-ref.html": [
@@ -4007,7 +4011,7 @@
   "testharness": {
    "webgpu": {
     "cts.https.html": [
-     "6aeaac3b1da36153990c02ff856774c1c5b7a3d8",
+     "8387e22dcf4e22be04b93573f098cee3212b0904",
      [
       "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestAdapter:requestAdapter:*",
       {}
@@ -4029,7 +4033,47 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"bgra8unorm-storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"depth-clip-control\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"depth32float-stencil8\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"float32-filterable\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"indirect-first-instance\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"rg11b10ufloat-renderable\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"shader-f16\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"texture-compression-astc\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"texture-compression-bc\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"texture-compression-etc2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:features,known:feature=\"timestamp-query\";*",
       {}
      ],
      [
@@ -4041,11 +4085,259 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxBindGroups\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxBindGroupsPlusVertexBuffers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxBindingsPerBindGroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxBufferSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxColorAttachmentBytesPerSample\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxColorAttachments\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeInvocationsPerWorkgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeWorkgroupSizeX\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeWorkgroupSizeY\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeWorkgroupSizeZ\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeWorkgroupStorageSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxComputeWorkgroupsPerDimension\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxDynamicStorageBuffersPerPipelineLayout\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxDynamicUniformBuffersPerPipelineLayout\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxInterStageShaderComponents\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxInterStageShaderVariables\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxSampledTexturesPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxSamplersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxStorageBufferBindingSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxStorageBuffersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxStorageTexturesPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxTextureArrayLayers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxTextureDimension1D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxTextureDimension2D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxTextureDimension3D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxUniformBufferBindingSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxUniformBuffersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxVertexAttributes\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxVertexBufferArrayStride\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"maxVertexBuffers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"minStorageBufferOffsetAlignment\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit=\"minUniformBufferOffsetAlignment\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxBindGroups\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxBindGroupsPlusVertexBuffers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxBindingsPerBindGroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxBufferSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxColorAttachmentBytesPerSample\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxColorAttachments\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeInvocationsPerWorkgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeWorkgroupSizeX\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeWorkgroupSizeY\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeWorkgroupSizeZ\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeWorkgroupStorageSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxComputeWorkgroupsPerDimension\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxDynamicStorageBuffersPerPipelineLayout\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxDynamicUniformBuffersPerPipelineLayout\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxInterStageShaderComponents\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxInterStageShaderVariables\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxSampledTexturesPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxSamplersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxStorageBufferBindingSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxStorageBuffersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxStorageTexturesPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxTextureArrayLayers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxTextureDimension1D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxTextureDimension2D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxTextureDimension3D\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxUniformBufferBindingSize\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxUniformBuffersPerShaderStage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxVertexAttributes\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxVertexBufferArrayStride\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"maxVertexBuffers\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"minStorageBufferOffsetAlignment\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,adapter,requestDevice:limit,out_of_range:limit=\"minUniformBufferOffsetAlignment\";*",
       {}
      ],
      [
@@ -4153,11 +4445,299 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"bgra8unorm\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"bgra8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"r8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg11b10ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rg8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgb10a2uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgb10a2unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgb9e5ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat=\"rgba8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"bgra8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"bgra8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"r8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg11b10ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rg8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgb10a2uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgb10a2unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgb9e5ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat=\"rgba8unorm-srgb\";*",
       {}
      ],
      [
@@ -4177,11 +4757,19 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:mip_levels:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod=\"CopyB2T\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod=\"WriteTexture\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod=\"CopyB2T\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod=\"WriteTexture\";*",
       {}
      ],
      [
@@ -4189,11 +4777,19 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:origins_and_extents:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod=\"CopyB2T\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod=\"WriteTexture\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod=\"CopyB2T\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod=\"WriteTexture\";*",
       {}
      ],
      [
@@ -4201,7 +4797,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:undefined_params:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:undefined_params:initMethod=\"CopyB2T\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:undefined_params:initMethod=\"WriteTexture\";*",
       {}
      ],
      [
@@ -4557,7 +5157,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;*",
       {}
      ],
      [
@@ -4645,7 +5249,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,rendering,draw:arguments:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,rendering,draw:arguments:first=0;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,rendering,draw:arguments:first=3;*",
       {}
      ],
      [
@@ -4757,7 +5365,15 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension=\"1d\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension=\"2d\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension=\"3d\";*",
       {}
      ],
      [
@@ -4885,7 +5501,127 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:*",
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float16x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float16x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float32\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float32x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float32x3\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"float32x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint16x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint16x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint32\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint32x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint32x3\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint32x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint8x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"sint8x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"snorm16x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"snorm16x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"snorm8x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"snorm8x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint16x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint16x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint32\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint32x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint32x3\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint32x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint8x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"uint8x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"unorm10-10-10-2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"unorm16x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"unorm16x4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"unorm8x2\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format=\"unorm8x4\";*",
       {}
      ],
      [
@@ -5781,7 +6517,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:dispatchType=\"direct\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:dispatchType=\"indirect\";*",
       {}
      ],
      [
@@ -6593,7 +7333,15 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,queue,writeTexture:texture_state:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,queue,writeTexture:texture_state:textureState=\"destroyed\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,queue,writeTexture:texture_state:textureState=\"invalid\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,queue,writeTexture:texture_state:textureState=\"valid\";*",
       {}
      ],
      [
@@ -6633,7 +7381,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,color_sparse:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,color_sparse:encoderType=\"render%20bundle\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,color_sparse:encoderType=\"render%20pass\";*",
       {}
      ],
      [
@@ -7153,31 +7905,59 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,computePass,dispatch:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,computePass,dispatch:stage=\"finish\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToBuffer:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,computePass,dispatch:stage=\"submit\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToTexture:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToBuffer:stage=\"finish\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToBuffer:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToBuffer:stage=\"submit\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToTexture:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToTexture:stage=\"finish\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,draw:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyBufferToTexture:stage=\"submit\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,renderBundle:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToBuffer:stage=\"finish\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToBuffer:stage=\"submit\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToTexture:stage=\"finish\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToTexture:stage=\"submit\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,draw:stage=\"finish\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,draw:stage=\"submit\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,renderBundle:stage=\"finish\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,renderBundle:stage=\"submit\";*",
       {}
      ],
      [
@@ -7189,23 +7969,135 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"compareSamp\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"filtSamp\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"nonFiltSamp\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createCommandEncoder:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"readonlyStorageTex\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createComputePipeline:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"readwriteStorageTex\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"sampledTex\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"sampledTexMS\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"storageBuf\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"uniformBuf\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType=\"writeonlyStorageTex\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"buffer\":{\"type\":\"read-only-storage\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"buffer\":{\"type\":\"storage\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"buffer\":{\"type\":\"uniform\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"sampler\":{\"type\":\"comparison\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"sampler\":{\"type\":\"filtering\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"sampler\":{\"type\":\"non-filtering\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"storageTexture\":{\"access\":\"read-only\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"storageTexture\":{\"access\":\"read-write\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"storageTexture\":{\"access\":\"write-only\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"texture\":{\"multisampled\":false,\"sampleType\":\"unfilterable-float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={\"texture\":{\"multisampled\":true,\"sampleType\":\"unfilterable-float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"INDEX\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"INDIRECT\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"MAP_READ\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"MAP_WRITE\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"QUERY_RESOLVE\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"STORAGE\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"UNIFORM\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createBuffer:usageType=\"VERTEX\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createCommandEncoder:awaitLost=false;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createCommandEncoder:awaitLost=true;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createComputePipeline:awaitLost=false;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createComputePipeline:awaitLost=true;*",
       {}
      ],
      [
@@ -7213,7 +8105,47 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"buffer\":{\"type\":\"read-only-storage\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"buffer\":{\"type\":\"storage\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"buffer\":{\"type\":\"uniform\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"sampler\":{\"type\":\"comparison\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"sampler\":{\"type\":\"filtering\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"sampler\":{\"type\":\"non-filtering\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"storageTexture\":{\"access\":\"read-only\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"storageTexture\":{\"access\":\"read-write\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"storageTexture\":{\"access\":\"write-only\",\"format\":\"r32float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"texture\":{\"multisampled\":false,\"sampleType\":\"unfilterable-float\"}};*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createPipelineLayout:entry={\"texture\":{\"multisampled\":true,\"sampleType\":\"unfilterable-float\"}};*",
       {}
      ],
      [
@@ -7221,11 +8153,139 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"bgra8unorm\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderPipeline:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"bgra8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"r8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rg8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgb10a2uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgb10a2unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format=\"rgba8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderPipeline:awaitLost=false;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderPipeline:awaitLost=true;*",
       {}
      ],
      [
@@ -7233,15 +8293,231 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createSampler:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createSampler:awaitLost=false;*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createShaderModule:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createSampler:awaitLost=true;*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createShaderModule:stage=\"COMPUTE\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createShaderModule:stage=\"FRAGMENT\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createShaderModule:stage=\"VERTEX\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x10-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-10x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-12x10-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-12x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-12x12-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-12x12-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-4x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-4x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-5x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-5x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-5x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-5x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-6x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-6x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-6x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-6x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"astc-8x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc1-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc1-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc2-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc2-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc3-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc3-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc4-r-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc4-r-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc5-rg-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc5-rg-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc6h-rgb-float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc6h-rgb-ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc7-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"bc7-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"eac-r11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"eac-r11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"eac-rg11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"eac-rg11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgb8a1unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgb8a1unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgb8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgb8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format=\"etc2-rgba8unorm-srgb\";*",
       {}
      ],
      [
@@ -7249,11 +8525,359 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x10-unorm\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-10x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-12x10-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-12x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-12x12-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-12x12-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-4x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-4x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-5x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-5x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-5x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-5x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-6x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-6x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-6x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-6x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"astc-8x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc1-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc1-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc2-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc2-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc3-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc3-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc4-r-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc4-r-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc5-rg-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc5-rg-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc6h-rgb-float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc6h-rgb-ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc7-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"bc7-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"eac-r11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"eac-r11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"eac-rg11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"eac-rg11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgb8a1unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgb8a1unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgb8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgb8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format=\"etc2-rgba8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"bgra8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"bgra8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"r8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg11b10ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rg8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgb10a2uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgb10a2unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgb9e5ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format=\"rgba8unorm-srgb\";*",
       {}
      ],
      [
@@ -7273,11 +8897,359 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x10-unorm\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:*",
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-10x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-12x10-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-12x10-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-12x12-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-12x12-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-4x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-4x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-5x4-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-5x4-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-5x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-5x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-6x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-6x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-6x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-6x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x5-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x5-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x6-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x6-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x8-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"astc-8x8-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc1-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc1-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc2-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc2-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc3-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc3-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc4-r-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc4-r-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc5-rg-snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc5-rg-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc6h-rgb-float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc6h-rgb-ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc7-rgba-unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"bc7-rgba-unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"eac-r11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"eac-r11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"eac-rg11snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"eac-rg11unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgb8a1unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgb8a1unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgb8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgb8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format=\"etc2-rgba8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"bgra8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"bgra8unorm-srgb\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"r8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg11b10ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rg8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgb10a2uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgb10a2unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgb9e5ufloat\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba16float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba16sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba16uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba32float\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba32sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba32uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba8sint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba8snorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba8uint\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba8unorm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format=\"rgba8unorm-srgb\";*",
       {}
      ],
      [
@@ -10465,7 +12437,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,atomicity:atomicity:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,atomicity:atomicity:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,atomicity:atomicity:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
@@ -10481,47 +12457,91 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corr:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corr:memType=\"atomic_storage\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw1:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corr:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw2:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw1:memType=\"atomic_storage\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:cowr:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw1:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:coww:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw2:memType=\"atomic_storage\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:2_plus_2_write:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:corw2:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:load_buffer:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:cowr:memType=\"atomic_storage\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:message_passing:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:cowr:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:read:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:coww:memType=\"atomic_storage\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,coherence:coww:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store_buffer:*",
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:2_plus_2_write:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:2_plus_2_write:memType=\"atomic_workgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:load_buffer:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:load_buffer:memType=\"atomic_workgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:message_passing:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:message_passing:memType=\"atomic_workgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:read:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:read:memType=\"atomic_workgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store:memType=\"atomic_workgroup\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store_buffer:memType=\"atomic_storage\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,memory_model,weak:store_buffer:memType=\"atomic_workgroup\";*",
       {}
      ],
      [
@@ -10574,6 +12594,10 @@
      ],
      [
       "webgpu/cts.https.html?q=webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_index:*",
       {}
      ],
      [
@@ -12077,7 +14101,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType=\"offscreen\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType=\"onscreen\";*",
       {}
      ],
      [
@@ -12129,11 +14157,19 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha=\"none\";*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha=\"premultiply\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation=\"flipY\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation=\"none\";*",
       {}
      ],
      [
@@ -12141,7 +14177,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageData:from_ImageData:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageData:from_ImageData:srcDoFlipYDuringCopy=false;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,ImageData:from_ImageData:srcDoFlipYDuringCopy=true;*",
       {}
      ],
      [
@@ -12157,7 +14197,11 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType=\"offscreen\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType=\"onscreen\";*",
       {}
      ],
      [
@@ -12169,11 +14213,43 @@
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,image:from_image:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,image:from_image:srcDoFlipYDuringCopy=false;*",
       {}
      ],
      [
-      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:*",
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,image:from_image:srcDoFlipYDuringCopy=true;*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-h264-bt601-rotate-180.mp4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-h264-bt601-rotate-270.mp4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-h264-bt601-rotate-90.mp4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-h264-bt601.mp4\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-theora-bt601.ogv\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-vp8-bt601.webm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-vp9-bt601.webm\";*",
+      {}
+     ],
+     [
+      "webgpu/cts.https.html?q=webgpu:web_platform,copyToTexture,video:copy_from_video:videoName=\"four-colors-vp9-bt709.webm\";*",
       {}
      ],
      [

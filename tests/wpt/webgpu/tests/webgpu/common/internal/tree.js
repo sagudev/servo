@@ -302,7 +302,7 @@ queryToLoad,
 
     // If toExpand == subquery, no expansion is needed (but it's still "seen").
     if (ordering === Ordering.Equal) seenSubqueriesToExpand[i] = true;
-    return ordering !== Ordering.StrictSubset;
+    return !(ordering === Ordering.StrictSubset || ordering === Ordering.Equal);
   });
 
   // L0 = suite-level, e.g. suite:*
