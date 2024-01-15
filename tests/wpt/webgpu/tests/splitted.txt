@@ -19,6 +19,10 @@ cts.https.html?q=webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes
 cts.https.html?q=webgpu:web_platform,copyToTexture,image:from_image:*
 cts.https.html?q=webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:*
 cts.https.html?q=webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*
+cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxDynamicUniformBuffersPerPipelineLayout:createBindGroupLayout,at_over:*
+cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createBindGroupLayout,at_over:*
+cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:configure,at_over:*
+cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createBindGroupLayout,at_over:*
 
 cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,renderPass,renderBundle:*
 cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:*
@@ -57,3 +61,6 @@ cts.https.html?q=webgpu:shader,execution,memory_model,weak:store_buffer:*
 cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:command,copyTextureToBuffer:*
 cts.https.html?q=webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,color_sparse:*
 cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:*
+cts.https.html?q=webgpu:api,validation,createTexture:texture_size,2d_texture,compressed_format:*
+cts.https.html?q=webgpu:api,validation,state,device_lost,destroy:createTexture,2d,uncompressed_format:*
+cts.https.html?q=webgpu:shader,validation,expression,access,vector:vector:*
