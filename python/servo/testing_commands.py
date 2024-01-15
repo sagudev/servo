@@ -805,10 +805,9 @@ tests/wpt/mozilla/tests for Servo-only tests""" % reference_path)
                 "out": "../out-wpt/cts.https.html",
                 "template": "../src/common/templates/cts.https.html",
                 "noLongPathAssert": true,
-                "expectations": {
+                "fullyExpandSubtrees": {
                     "file": "../../splitted.txt",
-                    "prefix": "cts.https.html",
-                    "expandAll": true
+                    "prefix": "cts.https.html"
                 }
             }""")
         res = call(["npm", "run", "wpt"], cwd=clone_dir)
