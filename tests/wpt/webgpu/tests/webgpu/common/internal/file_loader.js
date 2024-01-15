@@ -73,7 +73,6 @@ export class TestFileLoader extends EventTarget {
   query,
   {
     subqueriesToExpand = [],
-    expandAll = false,
     maxChunkTime = Infinity
   } = {})
   {
@@ -83,7 +82,6 @@ export class TestFileLoader extends EventTarget {
         assert(q.level >= 2, () => `subqueriesToExpand entries should not be multi-file:\n  ${q}`);
         return q;
       }),
-      expandAll,
       maxChunkTime
     });
     this.dispatchEvent(new MessageEvent('finish'));
