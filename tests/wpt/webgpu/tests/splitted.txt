@@ -28,3 +28,6 @@ cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxStorageBuffer
 cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createBindGroupLayout,at_over:*
 cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipelineLayout,at_over:*
 cts.https.html?q=webgpu:api,validation,capability_checks,limits,maxBindGroups:setBindGroup,at_over:*
+cts.https.html?q=webgpu:api,validation,createTexture:texture_size,2d_texture,compressed_format:*
+cts.https.html?q=webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:*
+cts.https.html?q=webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,color_sparse:*
