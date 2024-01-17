@@ -78,7 +78,8 @@ jobs:
             --${{ inputs.profile }} --processes $(nproc) --timeout-multiplier 2 \
             --total-chunks ${{ env.max_chunk_id }} --this-chunk ${{ matrix.chunk_id }} \
             --log-raw test-wpt.${{ matrix.chunk_id }}.log \
-            --log-raw-unexpected unexpected-test-wpt.${{ matrix.chunk_id }}.log
+            --log-raw-unexpected unexpected-test-wpt.${{ matrix.chunk_id }}.log \
+            --filter-intermittents filtered-test-wpt.${{ matrix.chunk_id }}.json
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
           INTERMITTENT_TRACKER_DASHBOARD_SECRET: ${{ secrets.INTERMITTENT_TRACKER_DASHBOARD_SECRET }}
