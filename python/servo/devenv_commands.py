@@ -287,7 +287,7 @@ class MachCommands(CommandBase):
         if try_string:
             try_string = " ".join(try_string)
             sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "etc"))
-            from try_parser import Config
+            from python.try_parser import Config
             conf = Config(try_string)
             res = call(["git", "commit", "--allow-empty", "-m", f"{try_string}\n\n{conf.toJSON()}"],
                        env=self.build_env())

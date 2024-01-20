@@ -27,8 +27,8 @@ jobs:
       profile: ${{ inputs.profile }}
       unit-tests: ${{ inputs.unit-tests }}
 
-  mac:
-    if: ${{ inputs.os == 'mac' }}
+  macos:
+    if: ${{ inputs.os == 'macos' }}
     uses: ./.github/workflows/mac.yml
     secrets: inherit
     with:

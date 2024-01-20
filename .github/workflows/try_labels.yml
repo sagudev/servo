@@ -87,23 +87,21 @@ jobs:
 
             return try_string;
       - uses: actions/checkout@v3
-        if: github.event_name != 'issue_comment' && github.event_name != 'pull_request_target'
+        if: github.event_name != 'pull_request_target'
         with:
-          fetch-depth: 2
+          fetch-depth: 1
           sparse-checkout: |
-            etc/try_parser.py
-            third_party/ply
+            python/try_parser.py
           sparse-checkout-cone-mode: false
       # This is necessary to checkout the pull request if this run was triggered
       # via an `issue_comment` action on a pull request.
       - uses: actions/checkout@v3
-        if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_target'
+        if: github.event_name == 'pull_request_target'
         with:
-          ref: refs/pull/${{ github.event.issue.number || github.event.number }}/head
-          fetch-depth: 2
+          ref: refs/pull/${{ github.event.number }}/head
+          fetch-depth: 1
           sparse-checkout: |
-            etc/try_parser.py
-            third_party/ply
+            python/try_parser.py
           sparse-checkout-cone-mode: false
       - name: Parse Try string
         if: ${{ steps.try_string.outputs.result }}
@@ -120,7 +118,7 @@ jobs:
       fail-fast: ${{ fromJson(needs.parse-comment.outputs.configuration).fail_fast }}
       matrix:
         include: ${{ fromJson(needs.parse-comment.outputs.configuration).matrix }}
-    # we need dipatch os because workflows do not support uses: ${}
+    # We need to use `dipatch-os.yml` because workflows do not support using: ${}.
     uses: ./.github/workflows/dispatch-os.yml
     secrets: inherit
     with:
