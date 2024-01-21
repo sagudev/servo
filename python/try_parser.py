@@ -99,12 +99,23 @@ class Config(object):
             self.parse(s)
 
     def parse(self, s: str):
-        s = s.strip()
+        s = s.lower().strip()
 
         if not s:
-            s = "linux macos windows"
+            s = "full"
 
-        for m in s.split(" "):
+        words: list[str] = s.split(" ")
+
+        for m in words:
+            # handle keywords
+            if m in ["fail-fast", "failfast", "fail_fast"]:
+                self.fail_fast = True
+                continue  # skip over keyword
+            if m == "full":
+                words.extend(["linux", "macos", "windows"])
+                continue  # skip over keyword
+
+            # handle presets
             p = preset(m)
             if p is None:
                 print(f"Ignoring wrong preset {m}")
@@ -130,8 +141,8 @@ import logging # noqa
 
 class TestParser(unittest.TestCase):
     def test_string(self):
-        self.assertEqual(Config("linux").toJSON(),
-                         '{"fail_fast": false, "matrix": [\
+        self.assertEqual(Config("linux fail-fast").toJSON(),
+                         '{"fail_fast": true, "matrix": [\
 {"name": "Linux", "os": "linux", "wpt_layout": "none", "profile": "release", \
 "unit_tests": true, "wpt_tests_to_run": ""}]}')
 
