@@ -11,7 +11,7 @@ jobs:
     concurrency:
       group: try-${{ github.event.number }}
     outputs:
-      configuration: ${{ steps.configuration.outputs.result }}
+      configuration: ${{ steps.configuration.outputs.config }}
       try_string: ${{ steps.try_string.outputs.result }}
     steps:
       - name: Get Try string
@@ -107,8 +107,11 @@ jobs:
         if: ${{ steps.try_string.outputs.result }}
         id: configuration
         run: |
-          out=$(python ./etc/try_parser.py ${{ steps.try_string.outputs.result }})
-          echo "result=${out}" >> $GITHUB_OUTPUT
+          out=$(python ./python/try_parser.py ${{ steps.try_string.outputs.result }})
+          echo "config<<EOF"$'\n'"$out"$'\n'EOF >> $GITHUB_OUTPUT
+      - name: Check output var
+        run: echo ${{steps.configuration.outputs.config}}
+
 
   run-try:
     if: ${{ needs.parse-comment.outputs.try_string }}
