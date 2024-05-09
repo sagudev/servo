@@ -34,7 +34,7 @@ class Item:
         self.children = children
 
     @classmethod
-    def from_result(cls, result: dict, title: Optional[str] = None, print_stack=True):
+    def from_result(cls, result: dict, title: Optional[str] = None, print_stack=True, subtest_message=True):
         expected = result["expected"]
         actual = result["actual"]
         title = title if title else f'`{result["path"]}`'
@@ -59,7 +59,9 @@ class Item:
             cls.from_result(
                 subtest_result,
                 f"subtest: `{subtest_result['subtest']}`"
-                + (f" \n```\n{subtest_result['message']}\n```\n" if subtest_result['message'] else ""),
+                + (f" \n```\n{subtest_result['message']}\n```\n"
+                   if subtest_result['message'] and subtest_message else ""),
+                False,
                 False)
             for subtest_result in subtest_results
         ]
@@ -105,7 +107,7 @@ class Item:
         return result
 
 
-def get_results(filenames: list[str], tag: str = "") -> Optional[Item]:
+def get_results(filenames: list[str], tag: str = "", subtests=True) -> Optional[Item]:
     unexpected = []
     for filename in filenames:
         try:
@@ -125,7 +127,7 @@ def get_results(filenames: list[str], tag: str = "") -> Optional[Item]:
         return not is_flaky(result) and not result["issues"]
 
     def add_children(children: List[Item], results: List[dict], filter_func, text):
-        filtered = [Item.from_result(result) for result in
+        filtered = [Item.from_result(result, subtest_message=subtests) for result in
                     filter(filter_func, results)]
         if filtered:
             children.append(Item(f"{text} ({len(filtered)})", "", filtered))
@@ -240,11 +242,16 @@ def main():
         create_check_run("Did not find any unexpected results.", args.tag)
         return
 
+    html_string = ElementTree.tostring(
+        results.to_html(), encoding="unicode")
+    if len(html_string) > 64_000:
+        results = get_results(filenames, args.tag, subtests=False)
+        html_string = ElementTree.tostring(
+            results.to_html(), encoding="unicode")
+
     print(results.to_string())
 
     pr_number = get_pr_number()
-    html_string = ElementTree.tostring(
-        results.to_html(), encoding="unicode")
     create_check_run(html_string, args.tag)
 
     if pr_number:
