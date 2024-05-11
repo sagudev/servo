@@ -135,7 +135,7 @@ xml5ever = "0.18"
 opt-level = 3
 debug-assertions = true
 # Uncomment to profile on Linux:
-# debug = true
+debug = true
 # lto = false
 
 [profile.production]

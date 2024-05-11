@@ -707,9 +707,11 @@ impl WGPU {
                         let result = if cmd_id.is_some() {
                             Err(String::from("Invalid command buffer submitted"))
                         } else {
+                            println!("submit");
                             gfx_select!(queue_id => global.queue_submit(queue_id, &command_buffers))
                                 .map_err(|e| format!("{:?}", e))
                         };
+                        println!("submit done");
                         self.send_result(queue_id.transmute(), scope_id, result);
                     },
                     WebGPURequest::SwapChainPresent {

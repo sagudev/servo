@@ -58,10 +58,12 @@ impl Poller {
                         while !done.load(Ordering::Acquire) {
                             let mut more_work = false;
                             while more_work || work.load(Ordering::Acquire) != 0 {
+                                println!("poll");
                                 match global.poll_all_devices(true) {
                                     Ok(all_queue_empty) => more_work = !all_queue_empty,
                                     Err(e) => warn!("Poller thread got `{e}` on poll_all_devices."),
                                 }
+                                println!("polled");
                             }
                             std::thread::park();
                         }
@@ -111,6 +113,7 @@ pub(crate) struct WorkToken {
 
 impl Drop for WorkToken {
     fn drop(&mut self) {
-        self.work_count.fetch_sub(1, Ordering::AcqRel);
+        let prev = self.work_count.fetch_sub(1, Ordering::AcqRel);
+        debug_assert!(prev > 0);
     }
 }
