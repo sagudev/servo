@@ -2568,6 +2568,7 @@ class IDLType(IDLObject):
         "record",
         "promise",
         "observablearray",
+        "FrozenArray"
     )
 
     __slots__ = (
@@ -2662,6 +2663,9 @@ class IDLType(IDLObject):
         return False
 
     def isSequence(self):
+        return False
+
+    def isFrozenArray(self):
         return False
 
     def isRecord(self):
@@ -2917,6 +2921,9 @@ class IDLNullableType(IDLParametrizedType):
     def isSequence(self):
         return self.inner.isSequence()
 
+    def isFrozenArray(self):
+        return self.inner.isFrozenArray()
+
     def isRecord(self):
         return self.inner.isRecord()
 
@@ -3071,6 +3078,68 @@ class IDLSequenceType(IDLParametrizedType):
 
         self.inner = self.inner.complete(scope)
         self.name = self.inner.name + "Sequence"
+        return self
+
+    def isDistinguishableFrom(self, other):
+        if other.isPromise():
+            return False
+        if other.isUnion():
+            # Just forward to the union; it'll deal
+            return other.isDistinguishableFrom(self)
+        return (
+            other.isUndefined()
+            or other.isPrimitive()
+            or other.isString()
+            or other.isEnum()
+            or other.isInterface()
+            or other.isDictionary()
+            or other.isCallback()
+            or other.isRecord()
+        )
+
+
+class IDLFrozenArrayType(IDLParametrizedType):
+    __slots__ = ("name",)
+
+    def __init__(self, location, parameterType):
+        assert not parameterType.isUndefined()
+
+        IDLParametrizedType.__init__(self, location, parameterType.name, parameterType)
+        # Need to set self.name up front if our inner type is already complete,
+        # since in that case our .complete() won't be called.
+        if self.inner.isComplete():
+            self.name = self.inner.name + "FrozenArray"
+
+    def __hash__(self):
+        return hash(self.inner)
+
+    def __eq__(self, other):
+        return isinstance(other, IDLFrozenArrayType) and self.inner == other.inner
+
+    def __str__(self):
+        return self.inner.__str__() + "FrozenArray"
+
+    def prettyName(self):
+        return "FrozenArray<%s>" % self.inner.prettyName()
+
+    def isFrozenArray(self):
+        return True
+
+    def isJSONType(self):
+        return self.inner.isJSONType()
+
+    def tag(self):
+        return IDLType.Tags.FrozenArray
+
+    def complete(self, scope):
+        if self.inner.isObservableArray():
+            raise WebIDLError(
+                "The inner type of a FrozenArray type must not be an ObservableArray type",
+                [self.location, self.inner.location],
+            )
+
+        self.inner = self.inner.complete(scope)
+        self.name = self.inner.name + "FrozenArray"
         return self
 
     def isDistinguishableFrom(self, other):
@@ -3445,6 +3514,9 @@ class IDLTypedefType(IDLType):
 
     def isSequence(self):
         return self.inner.isSequence()
+
+    def isFrozenArray(self):
+        return self.inner.isFrozenArray()
 
     def isRecord(self):
         return self.inner.isRecord()

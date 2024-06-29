@@ -514,8 +514,7 @@ interface GPUCompilationMessage {
 
 [Exposed=(Window, DedicatedWorker), Pref="dom.webgpu.enabled"]
 interface GPUCompilationInfo {
-    //readonly attribute FrozenArray<GPUCompilationMessage> messages;
-    readonly attribute any messages;
+    readonly attribute FrozenArray<GPUCompilationMessage> messages;
 };
 
 enum GPUAutoLayoutMode {
