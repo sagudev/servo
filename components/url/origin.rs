@@ -3,11 +3,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use std::cell::RefCell;
-use std::rc::Rc;
 
 use malloc_size_of::malloc_size_of_is_0;
 use malloc_size_of_derive::MallocSizeOf;
 use serde::{Deserialize, Serialize};
+use servo_arc::Arc;
 use url::{Host, Origin};
 use uuid::Uuid;
 
@@ -93,13 +93,13 @@ malloc_size_of_is_0!(OpaqueOrigin);
 
 /// A representation of an [origin](https://html.spec.whatwg.org/multipage/#origin-2).
 #[derive(Clone, Debug)]
-pub struct MutableOrigin(Rc<(ImmutableOrigin, RefCell<Option<Host>>)>);
+pub struct MutableOrigin(Arc<(ImmutableOrigin, RefCell<Option<Host>>)>);
 
 malloc_size_of_is_0!(MutableOrigin);
 
 impl MutableOrigin {
     pub fn new(origin: ImmutableOrigin) -> MutableOrigin {
-        MutableOrigin(Rc::new((origin, RefCell::new(None))))
+        MutableOrigin(Arc::new((origin, RefCell::new(None))))
     }
 
     pub fn immutable(&self) -> &ImmutableOrigin {
@@ -144,6 +144,7 @@ impl MutableOrigin {
     }
 
     pub fn set_domain(&self, domain: Host) {
+        // TODO: allow this only on main thread
         *(self.0).1.borrow_mut() = Some(domain);
     }
 

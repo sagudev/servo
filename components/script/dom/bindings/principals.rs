@@ -11,7 +11,10 @@ use js::glue::{
     CreateRustJSPrincipals, DestroyRustJSPrincipals, GetRustJSPrincipalsPrivate,
     JSPrincipalsCallbacks,
 };
-use js::jsapi::{JSPrincipals, JS_DropPrincipals, JS_HoldPrincipals};
+use js::jsapi::{
+    JSContext, JSPrincipals, JSStructuredCloneReader, JSStructuredCloneWriter, JS_DropPrincipals,
+    JS_HoldPrincipals,
+};
 use js::rust::Runtime;
 use servo_url::MutableOrigin;
 
@@ -123,8 +126,43 @@ pub unsafe extern "C" fn destroy_servo_jsprincipal(principals: *mut JSPrincipals
     DestroyRustJSPrincipals(principals);
 }
 
+pub unsafe extern "C" fn read_jsprincipal(
+    _cx: *mut JSContext,
+    reader: *mut JSStructuredCloneReader,
+    principals: *mut *mut JSPrincipals,
+) -> bool {
+    let mut p = Box::new([0u8; 16]).as_mut_ptr() as *mut JSPrincipals;
+    if !js::jsapi::JS_ReadBytes(
+        reader,
+        (*&mut p) as *mut std::ffi::c_void,
+        std::mem::size_of::<*mut std::ffi::c_void>(),
+    ) {
+        return false;
+    }
+    if p.is_null() {
+        return false;
+    }
+    *principals = p;
+    true
+}
+
+pub unsafe extern "C" fn write_jsprincipal(
+    principal: *mut JSPrincipals,
+    _cx: *mut JSContext,
+    writer: *mut JSStructuredCloneWriter,
+) -> bool {
+    if !js::jsapi::JS_WriteBytes(
+        writer,
+        principal as _,
+        std::mem::size_of::<*mut std::ffi::c_void>(),
+    ) {
+        return false;
+    }
+    true
+}
+
 const PRINCIPALS_CALLBACKS: JSPrincipalsCallbacks = JSPrincipalsCallbacks {
-    write: None,
+    write: Some(write_jsprincipal),
     isSystemOrAddonPrincipal: Some(principals_is_system_or_addon_principal),
 };
 
