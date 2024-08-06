@@ -40,19 +40,6 @@ def set_if_none(args: dict, key: str, value):
 
 
 def run_tests(default_binary_path: str, **kwargs):
-    legacy_layout = kwargs.pop("legacy_layout")
-    message = f"Running WPT tests with {default_binary_path}"
-    if legacy_layout:
-        message += " (legacy layout)"
-    print(message)
-
-    # By default, Rayon selects the number of worker threads based on the
-    # available CPU count. This doesn't work very well when running tests on CI,
-    # since we run so many Servo processes in parallel. The result is a lot of
-    # extra timeouts. Instead, force Rayon to assume we are running on a 2 CPU
-    # environment.
-    os.environ["RAYON_RS_NUM_CPUS"] = "2"
-    os.environ["RUST_BACKTRACE"] = "1"
     os.environ["HOST_FILE"] = os.path.join(SERVO_ROOT, "tests", "wpt", "hosts")
 
     set_if_none(kwargs, "product", "servo")
@@ -72,31 +59,47 @@ def run_tests(default_binary_path: str, **kwargs):
     # chunks and leads to more consistent timing on GitHub Actions.
     set_if_none(kwargs, "chunk_type", "id_hash")
 
-    kwargs["user_stylesheets"].append(os.path.join(SERVO_ROOT, "resources", "ahem.css"))
+    # Servo specific settings
+    if "servo" in kwargs.get("product"):
+        legacy_layout = kwargs.pop("legacy_layout")
+        message = f"Running WPT tests with {default_binary_path}"
+        if legacy_layout:
+            message += " (legacy layout)"
+        print(message)
 
-    set_if_none(kwargs, "binary", default_binary_path)
-    set_if_none(kwargs, "webdriver_binary", default_binary_path)
+        # By default, Rayon selects the number of worker threads based on the
+        # available CPU count. This doesn't work very well when running tests on CI,
+        # since we run so many Servo processes in parallel. The result is a lot of
+        # extra timeouts. Instead, force Rayon to assume we are running on a 2 CPU
+        # environment.
+        os.environ["RAYON_RS_NUM_CPUS"] = "2"
+        os.environ["RUST_BACKTRACE"] = "1"
 
-    if kwargs.pop("rr_chaos"):
-        kwargs["debugger"] = "rr"
-        kwargs["debugger_args"] = "record --chaos"
-        kwargs["repeat_until_unexpected"] = True
-        # TODO: Delete rr traces from green test runs?
+        kwargs["user_stylesheets"].append(os.path.join(SERVO_ROOT, "resources", "ahem.css"))
 
-    prefs = kwargs.pop("prefs")
-    kwargs.setdefault("binary_args", [])
-    if prefs:
-        kwargs["binary_args"] += ["--pref=" + pref for pref in prefs]
-    if legacy_layout:
-        kwargs["binary_args"].append("--legacy-layout")
+        set_if_none(kwargs, "binary", default_binary_path)
+        set_if_none(kwargs, "webdriver_binary", default_binary_path)
 
-    if not kwargs.get("no_default_test_types"):
-        test_types = {
-            "servo": ["testharness", "reftest", "wdspec", "crashtest"],
-            "servodriver": ["testharness", "reftest"],
-        }
-        product = kwargs.get("product") or "servo"
-        kwargs["test_types"] = test_types[product]
+        if kwargs.pop("rr_chaos"):
+            kwargs["debugger"] = "rr"
+            kwargs["debugger_args"] = "record --chaos"
+            kwargs["repeat_until_unexpected"] = True
+            # TODO: Delete rr traces from green test runs?
+
+        prefs = kwargs.pop("prefs")
+        kwargs.setdefault("binary_args", [])
+        if prefs:
+            kwargs["binary_args"] += ["--pref=" + pref for pref in prefs]
+        if legacy_layout:
+            kwargs["binary_args"].append("--legacy-layout")
+
+        if not kwargs.get("no_default_test_types"):
+            test_types = {
+                "servo": ["testharness", "reftest", "wdspec", "crashtest"],
+                "servodriver": ["testharness", "reftest"],
+            }
+            product = kwargs.get("product")
+            kwargs["test_types"] = test_types[product]
 
     filter_intermittents_output = kwargs.pop("filter_intermittents", None)
     unexpected_raw_log_output_file = kwargs.pop("log_raw_unexpected", None)
@@ -104,7 +107,7 @@ def run_tests(default_binary_path: str, **kwargs):
 
     wptcommandline.check_args(kwargs)
 
-    if legacy_layout:
+    if "servo" in kwargs.get("product").name and legacy_layout:
         update_args_for_legacy_layout(kwargs)
 
     mozlog.commandline.log_formatters["servo"] = (
