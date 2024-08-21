@@ -3,13 +3,6 @@ name: Windows
 on:
   workflow_call:
     inputs:
-      unique-id:
-        required: false
-        type: string
-      self-hosted-runner:
-        required: false
-        default: false
-        type: boolean
       profile:
         required: false
         default: "release"
@@ -27,13 +20,6 @@ on:
         type: string
   workflow_dispatch:
     inputs:
-      unique-id:
-        required: false
-        type: string
-      self-hosted-runner:
-        required: false
-        default: false
-        type: boolean
       profile:
         required: false
         default: "release"
@@ -63,120 +49,82 @@ env:
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
 
 jobs:
-  build:
-    name: ${{ inputs.unique-id && format('Windows Build [{0}]', inputs.unique-id) || 'Windows Build' }}
-    runs-on: ${{ inputs.self-hosted-runner && 'self-hosted-windows10' || 'windows-2022' }}
+  runner-select:
+    name: Runner select
+    runs-on: ubuntu-latest
+    outputs:
+      unique-id: ${{ steps.select.outputs.id }}
+      runner-label: ${{ steps.select.outputs.label }}
+    concurrency:
+      group: servo-reserve-self-hosted-runner
+      cancel-in-progress: false
+    permissions: write-all
     steps:
-      - if: ${{ ! inputs.self-hosted-runner && github.event_name != 'pull_request_target' }}
-        uses: actions/checkout@v4
-      - if: ${{ ! inputs.self-hosted-runner && github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 2
+      - name: Select and reserve best available runner
+        id: select
+        run: |
+          set -x
 
-      # Faster checkout for self-hosted runner that uses prebaked repo.
-      - if: ${{ inputs.self-hosted-runner && github.event_name != 'pull_request_target' }}
-        run: git fetch --depth=2 origin $env:GITHUB_SHA
-      - if: ${{ inputs.self-hosted-runner && github.event_name == 'pull_request_target' }}
-        run: git fetch --depth=2 origin refs/pull/${{ github.event_number }}/head
-      - if: ${{ inputs.self-hosted-runner }}
-        run: git switch --detach FETCH_HEAD
+          github_hosted_runner_label=windows-2022
+          self_hosted_runner_label=self-hosted-windows10
+          self_hosted_runner_scope=/repos/${{ github.repository }}/actions/runners
+          export GH_TOKEN=${{ secrets.RUNNER_API_TOKEN }}
 
-      - name: ccache
-        # FIXME: “Error: Restoring cache failed: Error: Unable to locate executable file: sh.”
-        if: ${{ ! inputs.self-hosted-runner }}
-        uses: hendrikmuhs/ccache-action@v1.2
+          runners=$(mktemp)
+          gh api "$self_hosted_runner_scope" > $runners
 
-      # Install missing tools in a GitHub-hosted runner.
-      # Workaround for https://github.com/actions/runner-images/issues/10001:
-      - name: Upgrade llvm
-        if: ${{ ! inputs.self-hosted-runner }}
-        run: choco upgrade llvm
-      - name: Install taplo
-        # Already installed in self-hosted runner (also, pwsh command not found).
-        if: ${{ ! inputs.self-hosted-runner }}
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: taplo-cli
-          locked: true
-      - name: Install cargo-deny
-        # Already installed in self-hosted runner (also, pwsh command not found).
-        if: ${{ ! inputs.self-hosted-runner }}
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cargo-deny
-          locked: true
-      - name: Install wixtoolset
-        if: ${{ ! inputs.self-hosted-runner }}
-        run: |
-          choco install wixtoolset
-          echo "C:\\Program Files (x86)\\WiX Toolset v3.11\\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - uses: actions/setup-python@v5
-        if: ${{ ! inputs.self-hosted-runner }}
-        with:
-          python-version: "3.10"
-      - name: Bootstrap
-        if: ${{ ! inputs.self-hosted-runner }}
-        run: |
-          python -m pip install --upgrade pip
-          python mach fetch
-          python mach bootstrap-gstreamer
-          cargo install --path support/crown
-      # For some reason WiX isn't currently on the GitHub runner path. This is a
-      # temporary workaround until that is fixed.
-      - name: Add WiX to Path
-        if: ${{ ! inputs.self-hosted-runner }}
-        run: |
-          "$env:WIX\bin" >> $env:GITHUB_PATH
+          # Generate a unique id that allows the workload job to find the runner
+          # we are reserving for it (via runner labels), and allows the timeout
+          # job to find the workload job run (via the job’s friendly name), even
+          # if there are multiple instances in the workflow call tree.
+          random32=$(LC_ALL=C < /dev/urandom tr -dC 0-9a-f 2> /dev/null | head -c 8)
+          unique_id=${{ github.repository }}/${{ github.run_id }}/$random32
+          echo "id=$unique_id" | tee -a $GITHUB_OUTPUT
 
-      # Configure tools in a self-hosted runner.
-      - name: Add python and wixtoolset to path
-        if: ${{ inputs.self-hosted-runner }}
-        run: |
-          "$env:LOCALAPPDATA\Programs\Python\Python312" >> $env:GITHUB_PATH
-          "C:\Program Files (x86)\WiX Toolset v3.11\bin" >> $env:GITHUB_PATH
+          # Find a runner that is online, not busy, and not already reserved for
+          # any job (label prefix “reserved-for:”).
+          runner_id=$(mktemp)
+          if ! < $runners > $runner_id jq -e '
+            .runners
+            | map(select(.status == "online" and .busy == false))
+            | map(select([.labels[].name] | map(startswith("reserved-for:")) | index(true) | not))
+            | first | .id'; then
+            echo "label=$github_hosted_runner_label" | tee -a $GITHUB_OUTPUT
+            exit 0
+          fi
 
-      - name: Build (${{ inputs.profile }})
+          # Reserve that runner by adding a label containing the unique id.
+          # Job concurrency ensures that runners never get assigned twice.
+          gh api "$self_hosted_runner_scope/$(cat $runner_id)/labels" \
+            --method POST -f "labels[]=reserved-for:$unique_id"
+          echo "label=$self_hosted_runner_label" | tee -a $GITHUB_OUTPUT
+
+  runner-timeout:
+    name: Runner timeout
+    runs-on: ubuntu-latest
+    needs:
+      - runner-select
+    steps:
+      - name: Wait a bit
+        run: sleep 10
+
+      - name: Cancel if workload job is still queued
         run: |
-          python mach build --use-crown --locked --${{ inputs.profile }}
-          cp C:\a\servo\servo\target\cargo-timings C:\a\servo\servo\target\cargo-timings-windows -Recurse
-      - name: Copy resources
-        if: ${{ ! inputs.self-hosted-runner }}
-        # GitHub-hosted runners check out the repo on D: drive.
-        run: cp D:\a\servo\servo\resources C:\a\servo\servo -Recurse
-      - name: Smoketest
-        run: python mach smoketest --${{ inputs.profile }}
-      - name: Unit tests
-        if: ${{ inputs.unit-tests }}
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 30
-          max_attempts: 3 # https://github.com/servo/servo/issues/30683
-          command: python mach test-unit --${{ inputs.profile }} -- -- --test-threads=1
-      - name: Archive build timing
-        uses: actions/upload-artifact@v4
-        with:
-          name: cargo-timings-windows
-          # Using a wildcard here ensures that the archive includes the path.
-          path: C:\\a\\servo\\servo\\target\\cargo-timings-*
-      - name: Build mach package
-        run: python mach package --${{ inputs.profile }}
-      - name: Upload artifact for mach package
-        uses: actions/upload-artifact@v4
-        with:
-          name: win
-          # These files are available
-          # MSI Installer: C:\a\servo\servo\target\${{ inputs.profile }}\msi\Installer.msi
-          # Bundle: C:\a\servo\servo\target\${{ inputs.profile }}\msi\Servo.exe
-          # Zip: C:\a\servo\servo\target\${{ inputs.profile }}\msi\Servo.zip
-          path: C:\\a\\servo\\servo\\target\\${{ inputs.profile }}\\msi\\Servo.exe
-      - name: Upload nightly
-        if: ${{ inputs.upload }}
-        run: |
-          python mach upload-nightly windows-msvc --secret-from-environment `
-            --github-release-id ${{ inputs.github-release-id }}
-        env:
-          S3_UPLOAD_CREDENTIALS: ${{ secrets.S3_UPLOAD_CREDENTIALS }}
-          NIGHTLY_REPO_TOKEN: ${{ secrets.NIGHTLY_REPO_TOKEN }}
-          NIGHTLY_REPO: ${{ github.repository_owner }}/servo-nightly-builds
+          run_url=/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+          if [ "$(gh api "$run_url/jobs" \
+            | jq -er --arg id '${{ needs.runner-select.outputs.unique-id }}' \
+              '.jobs[] | select(.name | contains("[" + $id + "]")) | .status'
+          )" = queued ]; then
+            echo "Timeout waiting for runner assignment! Cancelling workflow run"
+            gh api "$run_url/cancel" --method POST
+          fi
+
+  build:
+    name: Windows Build [${{ needs.runner-select.outputs.unique-id }}]
+    needs:
+      - runner-select
+    runs-on: ${{ needs.runner-select.outputs.runner-label }}
+    steps:
+      - run: echo ok
