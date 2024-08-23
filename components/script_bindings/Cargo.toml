@@ -1,0 +1,21 @@
+[package]
+name = "script_bindings"
+build = "build.rs"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+name = "script_bindings"
+path = "lib.rs"
+
+[build-dependencies]
+phf_codegen = "0.11"
+phf_shared = "0.11"
+serde_json = { workspace = true }
+
+[dependencies]
+js = { package = "mozjs", git = "https://github.com/servo/mozjs", features = ["streams"] }
+style = { git = "https://github.com/servo/stylo", branch = "2024-07-16", features = ["servo"] }
