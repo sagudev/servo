@@ -31,7 +31,7 @@ def main():
         with open(filename, "r", encoding="utf-8") as f:
             parser.parse(f.read(), filename)
 
-    add_css_properties_attributes(css_properties_json, parser)
+    #add_css_properties_attributes(css_properties_json, parser)
     parser_results = parser.finish()
     config = Configuration(config_file, parser_results)
     make_dir(os.path.join(out_dir, "Bindings"))

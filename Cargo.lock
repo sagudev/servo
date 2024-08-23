@@ -5611,6 +5611,7 @@ dependencies = [
  "range",
  "ref_filter_map",
  "regex",
+ "script_bindings",
  "script_layout_interface",
  "script_traits",
  "selectors",
@@ -5643,6 +5644,19 @@ dependencies = [
  "webrender_traits",
  "webxr-api",
  "xml5ever",
+]
+
+[[package]]
+name = "script_bindings"
+version = "0.0.1"
+dependencies = [
+ "mozjs",
+ "phf 0.10.1",
+ "phf_codegen",
+ "phf_shared 0.11.2",
+ "serde_json",
+ "servo_config",
+ "style",
 ]
 
 [[package]]
