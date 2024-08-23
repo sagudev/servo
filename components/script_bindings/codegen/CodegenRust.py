@@ -2602,10 +2602,10 @@ def UnionTypes(descriptors, dictionaries, callbacks, typedefs, config):
     imports = [
         'crate::dom',
         'crate::dom::bindings::import::base::*',
-        'crate::dom::bindings::conversions::windowproxy_from_handlevalue',
+        #'crate::dom::bindings::conversions::windowproxy_from_handlevalue',
         'crate::dom::bindings::record::Record',
         'crate::dom::types::*',
-        'crate::dom::windowproxy::WindowProxy',
+        #'crate::dom::windowproxy::WindowProxy',
         'js::typedarray',
     ]
 
@@ -7896,7 +7896,7 @@ class GlobalGenRoots():
         imports = [CGGeneric("use crate::dom::types::*;\n"),
                    CGGeneric("use crate::dom::bindings::conversions::{DerivedFrom, get_dom_class};\n"),
                    CGGeneric("use crate::dom::bindings::inheritance::Castable;\n"),
-                   CGGeneric("use crate::dom::bindings::root::{Dom, DomRoot, LayoutDom};\n"),
+                   CGGeneric("use crate::dom::bindings::root::{Dom, DomRoot/*, LayoutDom*/};\n"),
                    CGGeneric("use crate::dom::bindings::trace::JSTraceable;\n"),
                    CGGeneric("use crate::dom::bindings::reflector::DomObject;\n"),
                    CGGeneric("use js::jsapi::JSTracer;\n\n"),

@@ -11,13 +11,33 @@ publish.workspace = true
 name = "script_bindings"
 path = "lib.rs"
 
+[features]
+js_backtrace = []
+
 [build-dependencies]
 phf_codegen = "0.11"
 phf_shared = "0.11"
 serde_json = { workspace = true }
 
 [dependencies]
+bincode = { workspace = true }
+bitflags = { workspace = true }
+chrono = { workspace = true }
+cssparser = { workspace = true }
+dom_struct = { path = "../dom_struct" }
+domobject_derive = { path = "../domobject_derive" }
+html5ever = { workspace = true }
+indexmap = { workspace = true }
 js = { package = "mozjs", git = "https://github.com/servo/mozjs", features = ["streams"] }
+jstraceable_derive = { path = "../jstraceable_derive" }
+libc = { workspace = true }
+log = { workspace = true }
+malloc_size_of = { workspace = true }
+malloc_size_of_derive = { workspace = true }
+num-traits = { workspace = true }
 phf = "0.10"
+regex = { workspace = true }
+servo_atoms = { workspace = true }
 servo_config = { path = "../config" }
+servo_url = { path = "../url" }
 style = { git = "https://github.com/servo/stylo", branch = "2024-07-16", features = ["servo"] }

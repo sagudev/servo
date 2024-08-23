@@ -1,3 +1,37 @@
+#![feature(register_tool)]
+// Register the linter `crown`, which is the Servo-specific linter for the script
+// crate. Issue a warning if `crown` is not being used to compile, but not when
+// building rustdoc or running clippy.
+#![register_tool(crown)]
+
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+
+#[macro_use]
+extern crate js;
+#[macro_use]
+extern crate jstraceable_derive;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate malloc_size_of_derive;
+
+/// For use on non-jsmanaged types
+/// Use #[derive(JSTraceable)] on JS managed types
+macro_rules! unsafe_no_jsmanaged_fields(
+    ($($ty:ty),+) => (
+        $(
+            #[allow(unsafe_code)]
+            unsafe impl $crate::dom::bindings::trace::JSTraceable for $ty {
+                #[inline]
+                unsafe fn trace(&self, _: *mut ::js::jsapi::JSTracer) {
+                    // Do nothing
+                }
+            }
+        )+
+    );
+);
+
 /// Generated JS-Rust bindings.
 #[allow(missing_docs, non_snake_case)]
 pub mod codegen {
@@ -32,9 +66,65 @@ pub mod codegen {
     }
 }
 
+mod constant;
+mod conversions;
+mod error;
+mod finalize;
+mod guard;
+mod inheritance;
+mod interface;
+mod iterable;
+mod mem;
+mod num;
+mod principals;
+mod record;
+mod reflector;
+mod root;
+mod str;
+mod trace;
+mod utils;
+
+mod script_runtime {
+    #[derive(Copy, Clone)]
+    #[repr(transparent)]
+    pub struct JSContext(*mut js::jsapi::JSContext);
+    impl JSContext {
+        pub fn from_ptr(cx: *mut js::jsapi::JSContext) -> JSContext {
+            JSContext(cx)
+        }
+    }
+    impl std::ops::Deref for JSContext {
+        type Target = *mut js::jsapi::JSContext;
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+}
+
+mod realms {
+    pub struct AlreadyInRealm;
+    pub struct InRealm;
+}
+
 pub mod dom {
     pub mod bindings {
-        pub use crate::codegen;
+        pub(crate) use crate::constant;
+        pub(crate) use crate::codegen;
+        pub(crate) use crate::conversions;
+        pub(crate) use crate::error;
+        pub(crate) use crate::finalize;
+        pub(crate) use crate::guard;
+        pub(crate) use crate::inheritance;
+        pub(crate) use crate::interface;
+        pub(crate) use crate::iterable;
+        pub(crate) use crate::num;
+        pub(crate) use crate::principals;
+        pub(crate) use crate::record;
+        pub(crate) use crate::reflector;
+        pub(crate) use crate::root;
+        pub(crate) use crate::str;
+        pub(crate) use crate::trace;
+        pub(crate) use crate::utils;
 
         pub mod import {
             #[allow(unused_imports)]
@@ -61,7 +151,7 @@ pub mod dom {
                 ChannelInterpretationValues,
             };*/
                 pub use crate::codegen::UnionTypes;
-                /*pub use crate::dom::bindings::conversions::{
+                pub use crate::dom::bindings::conversions::{
                 root_from_handlevalue, ConversionBehavior, ConversionResult, FromJSValConvertible,
                 StringificationBehavior, ToJSValConvertible,
             };
@@ -73,8 +163,8 @@ pub mod dom {
                 pub use crate::dom::bindings::str::{ByteString, DOMString, USVString};
                 pub use crate::dom::bindings::trace::RootedTraceableBox;
                 pub use crate::dom::bindings::utils::{get_dictionary_property, set_dictionary_property};
-                pub use crate::dom::globalscope::GlobalScope;
-                pub use crate::script_runtime::JSContext as SafeJSContext;*/
+                /*pub use crate::dom::globalscope::GlobalScope;*/
+                pub use crate::script_runtime::JSContext as SafeJSContext;
             }
 
             #[allow(unused_imports)]
@@ -137,19 +227,19 @@ pub mod dom {
             };
                 pub use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTarget_Binding;*/
                 pub use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList, RegisterBindings};
-                /*pub use crate::dom::bindings::constant::{ConstantSpec, ConstantVal};
+                pub use crate::dom::bindings::constant::{ConstantSpec, ConstantVal};
                 pub use crate::dom::bindings::conversions::{
-                is_array_like, jsid_to_string, native_from_handlevalue, native_from_object_static,
+                /*is_array_like,*/ jsid_to_string, native_from_handlevalue, native_from_object_static,
                 IDLInterface, StringificationBehavior, ToJSValConvertible, DOM_OBJECT_SLOT,
             };
                 pub use crate::dom::bindings::error::{throw_constructor_without_new, Error, ErrorResult};
                 pub use crate::dom::bindings::finalize::{
-                finalize_common, finalize_global, finalize_weak_referenceable,
+                finalize_common, finalize_global, /*finalize_weak_referenceable,*/
             };
                 pub use crate::dom::bindings::guard::{Condition, Guard};
-                pub use crate::dom::bindings::htmlconstructor::{
+                /*pub use crate::dom::bindings::htmlconstructor::{
                 pop_current_element_queue, push_new_element_queue,
-            };
+            };*/
                 pub use crate::dom::bindings::inheritance::Castable;
                 pub use crate::dom::bindings::interface::{
                 create_callback_interface_object, create_global_object, create_interface_prototype_object,
@@ -159,14 +249,14 @@ pub mod dom {
                 InterfaceConstructorBehavior, NonCallbackInterfaceObjectClass, ProtoOrIfaceIndex,
             };
                 pub use crate::dom::bindings::iterable::{Iterable, IteratorType};
-                pub use crate::dom::bindings::like::{Maplike, Setlike};
-                pub use crate::dom::bindings::namespace::{create_namespace_object, NamespaceObjectClass};
-                pub use crate::dom::bindings::proxyhandler;
+                /*pub use crate::dom::bindings::like::{Maplike, Setlike};
+                pub use crate::dom::bindings::namespace::{create_namespace_object, NamespaceObjectClass};*/
+                /*pub use crate::dom::bindings::proxyhandler;
                 pub use crate::dom::bindings::proxyhandler::{
                 ensure_expando_object, get_expando_object, set_property_descriptor,
-            };
+            };*/
                 pub use crate::dom::bindings::record::Record;
-                pub use crate::dom::bindings::reflector::{DomObjectIteratorWrap, DomObjectWrap, Reflector};
+                pub use crate::dom::bindings::reflector::{/*DomObjectIteratorWrap,*/ DomObjectWrap, Reflector};
                 pub use crate::dom::bindings::root::{Dom, DomSlice, MaybeUnreflectedDom, Root};
                 pub use crate::dom::bindings::trace::JSTraceable;
                 pub use crate::dom::bindings::utils::{
@@ -176,10 +266,10 @@ pub mod dom {
                 resolve_global, trace_global, AsVoidPtr, DOMClass, DOMJSClass, ProtoOrIfaceArray,
                 DOM_PROTO_UNFORGEABLE_HOLDER_SLOT, JSCLASS_DOM_GLOBAL,
             };
-                pub use crate::dom::bindings::weakref::{WeakReferenceable, DOM_WEAK_SLOT};
-                pub use crate::dom::types::{AnalyserNode, AudioNode, BaseAudioContext, EventTarget};
+                /*pub use crate::dom::bindings::weakref::{WeakReferenceable, DOM_WEAK_SLOT};
+                pub use crate::dom::types::{AnalyserNode, AudioNode, BaseAudioContext, EventTarget};*/
                 pub use crate::mem::malloc_size_of_including_raw_self;
-                pub use crate::realms::{AlreadyInRealm, InRealm};*/
+                pub use crate::realms::{AlreadyInRealm, InRealm};
             }
         }
     }

@@ -1,1 +1,2 @@
+[Exposed=Window]
 interface Document {};
