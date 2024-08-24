@@ -662,3 +662,14 @@ pub unsafe fn exception_to_promise(cx: *mut JSContext, rval: RawMutableHandleVal
         false
     }
 }
+
+#[allow(non_camel_case_types)]
+pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
+    fn throw_dom_exception(
+        cx: crate::script_runtime::JSContext,
+        global: &D::GlobalScope,
+        result: crate::error::Error,
+    );
+
+    fn global_scope_from_object(obj: *mut JSObject) -> crate::root::DomRoot<D::GlobalScope>;
+}

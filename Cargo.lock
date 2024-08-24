@@ -5650,12 +5650,29 @@ dependencies = [
 name = "script_bindings"
 version = "0.0.1"
 dependencies = [
+ "bincode",
+ "bitflags 2.6.0",
+ "chrono",
+ "cssparser",
+ "dom_struct",
+ "domobject_derive",
+ "html5ever",
+ "indexmap",
+ "jstraceable_derive",
+ "libc",
+ "log",
+ "malloc_size_of",
+ "malloc_size_of_derive",
  "mozjs",
+ "num-traits",
  "phf 0.10.1",
  "phf_codegen",
  "phf_shared 0.11.2",
+ "regex",
  "serde_json",
+ "servo_atoms",
  "servo_config",
+ "servo_url",
  "style",
 ]
 

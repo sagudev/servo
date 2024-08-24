@@ -39,6 +39,9 @@ pub mod codegen {
     pub mod Bindings {
         include!(concat!(env!("OUT_DIR"), "/Bindings/mod.rs"));
     }
+    pub mod DomTypes {
+        include!(concat!(env!("OUT_DIR"), "/DomTypes.rs"));
+    }
     pub mod InterfaceObjectMap {
         include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMap.rs"));
     }
@@ -156,13 +159,13 @@ pub mod dom {
                 StringificationBehavior, ToJSValConvertible,
             };
                 pub use crate::dom::bindings::error::Error::JSFailed;
-                pub use crate::dom::bindings::error::{throw_dom_exception, Fallible};
+                pub use crate::dom::bindings::error::{/*throw_dom_exception,*/ Fallible};
                 pub use crate::dom::bindings::num::Finite;
-                pub use crate::dom::bindings::reflector::DomObject;
+                pub use crate::dom::bindings::reflector::{DomObject, DomGlobal};
                 pub use crate::dom::bindings::root::DomRoot;
                 pub use crate::dom::bindings::str::{ByteString, DOMString, USVString};
                 pub use crate::dom::bindings::trace::RootedTraceableBox;
-                pub use crate::dom::bindings::utils::{get_dictionary_property, set_dictionary_property};
+                pub use crate::dom::bindings::utils::{get_dictionary_property, set_dictionary_property, DomHelpers};
                 /*pub use crate::dom::globalscope::GlobalScope;*/
                 pub use crate::script_runtime::JSContext as SafeJSContext;
             }
@@ -226,7 +229,7 @@ pub mod dom {
                 ChannelInterpretationValues,
             };
                 pub use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTarget_Binding;*/
-                pub use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList, RegisterBindings};
+                pub use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList, RegisterBindings, DomTypes::DomTypes};
                 pub use crate::dom::bindings::constant::{ConstantSpec, ConstantVal};
                 pub use crate::dom::bindings::conversions::{
                 /*is_array_like,*/ jsid_to_string, native_from_handlevalue, native_from_object_static,

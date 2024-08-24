@@ -26,10 +26,11 @@ use crate::dom::bindings::conversions::{
     root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
 };
 use crate::dom::bindings::str::USVString;
-use crate::dom::domexception::{DOMErrorName, DOMException};
-use crate::dom::globalscope::GlobalScope;
+//use crate::dom::domexception::{DOMErrorName, DOMException};
+//use crate::dom::globalscope::GlobalScope;
 use crate::realms::InRealm;
 use crate::script_runtime::JSContext as SafeJSContext;
+use crate::codegen::DomTypes::DomTypes;
 
 #[cfg(feature = "js_backtrace")]
 thread_local! {
@@ -104,9 +105,9 @@ pub type Fallible<T> = Result<T, Error>;
 /// return `()`.
 pub type ErrorResult = Fallible<()>;
 
-/// Set a pending exception for the given `result` on `cx`.
-pub fn throw_dom_exception(cx: SafeJSContext, global: &GlobalScope, result: Error) {
-    #[cfg(feature = "js_backtrace")]
+/*/// Set a pending exception for the given `result` on `cx`.
+pub fn throw_dom_exception<D: DomTypes>(cx: SafeJSContext, global: &D::GlobalScope, result: Error) {
+    /*#[cfg(feature = "js_backtrace")]
     unsafe {
         capture_stack!(in(*cx) let stack);
         let js_stack = stack.and_then(|s| s.as_string(None, JSStackFormat::Default));
@@ -158,14 +159,16 @@ pub fn throw_dom_exception(cx: SafeJSContext, global: &GlobalScope, result: Erro
 
     unsafe {
         assert!(!JS_IsExceptionPending(*cx));
-        let exception = DOMException::new(global, code);
+        //XXXjdm fixme
+        //let exception = DOMException::new(global, code);
         rooted!(in(*cx) let mut thrown = UndefinedValue());
         exception.to_jsval(*cx, thrown.handle_mut());
         JS_SetPendingException(*cx, thrown.handle(), ExceptionStackBehavior::Capture);
-    }
-}
+}*/
+    todo!()
+}*/
 
-/// A struct encapsulating information about a runtime script error.
+/*/// A struct encapsulating information about a runtime script error.
 #[derive(Default)]
 pub struct ErrorInfo {
     /// The error message.
@@ -214,8 +217,8 @@ impl ErrorInfo {
         })
     }
 
-    fn from_dom_exception(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
-        let exception = match root_from_object::<DOMException>(object.get(), cx) {
+    fn from_dom_exception<D: DomTypes>(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
+        let exception = match root_from_object::<D::DOMException>(object.get(), cx) {
             Ok(exception) => exception,
             Err(_) => return None,
         };
@@ -228,11 +231,11 @@ impl ErrorInfo {
         })
     }
 
-    unsafe fn from_object(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
+    unsafe fn from_object<D: DomTypes>(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
         if let Some(info) = ErrorInfo::from_native_error(object, cx) {
             return Some(info);
         }
-        if let Some(info) = ErrorInfo::from_dom_exception(object, cx) {
+        if let Some(info) = ErrorInfo::from_dom_exception::<D>(object, cx) {
             return Some(info);
         }
         None
@@ -258,7 +261,7 @@ impl ErrorInfo {
             },
         }
     }
-}
+}*/
 
 /*/// Report a pending exception, thereby clearing it.
 ///
@@ -320,10 +323,10 @@ pub unsafe fn throw_constructor_without_new(cx: *mut JSContext, name: &str) {
 impl Error {
     /// Convert this error value to a JS value, consuming it in the process.
     #[allow(clippy::wrong_self_convention)]
-    pub unsafe fn to_jsval(
+    pub unsafe fn to_jsval<D: DomTypes>(
         self,
         cx: *mut JSContext,
-        global: &GlobalScope,
+        global: &D::GlobalScope,
         rval: MutableHandleValue,
     ) {
         match self {

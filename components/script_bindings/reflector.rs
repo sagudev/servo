@@ -16,30 +16,33 @@ use crate::dom::bindings::trace::JSTraceable;
 //use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
+use crate::codegen::DomTypes::DomTypes;
 
-/*/// Create the reflector for a new DOM object and yield ownership to the
+/// Create the reflector for a new DOM object and yield ownership to the
 /// reflector.
-pub fn reflect_dom_object<T, U>(obj: Box<T>, global: &U) -> DomRoot<T>
+pub fn reflect_dom_object<D, T, U>(obj: Box<T>, global: &U) -> DomRoot<T>
 where
-    T: DomObject + DomObjectWrap,
-    U: DerivedFrom<GlobalScope>,
+    D: DomTypes,
+    T: DomObject + DomObjectWrap<D>,
+    U: DerivedFrom<D::GlobalScope>,
 {
     let global_scope = global.upcast();
-    unsafe { T::WRAP(GlobalScope::get_cx(), global_scope, None, obj) }
+    unsafe { T::WRAP(/*GlobalScope::get_cx()*/todo!(), global_scope, None, obj) }
 }
 
-pub fn reflect_dom_object_with_proto<T, U>(
+pub fn reflect_dom_object_with_proto<D, T, U>(
     obj: Box<T>,
     global: &U,
     proto: Option<HandleObject>,
 ) -> DomRoot<T>
 where
-    T: DomObject + DomObjectWrap,
-    U: DerivedFrom<GlobalScope>,
+    D: DomTypes,
+    T: DomObject + DomObjectWrap<D>,
+    U: DerivedFrom<D::GlobalScope>,
 {
     let global_scope = global.upcast();
-    unsafe { T::WRAP(GlobalScope::get_cx(), global_scope, proto, obj) }
-}*/
+    unsafe { T::WRAP(/*GlobalScope::get_cx()*/todo!(), global_scope, proto, obj) }
+}
 
 /// A struct to store a reference to the reflector of a DOM object.
 #[allow(crown::unrooted_must_root)]
@@ -94,15 +97,18 @@ impl Reflector {
 pub trait DomObject: JSTraceable + 'static {
     /// Returns the receiver's reflector.
     fn reflector(&self) -> &Reflector;
+}
 
-    /*/// Returns the global scope of the realm that the DomObject was created in.
-    fn global(&self) -> DomRoot<GlobalScope>
+pub trait DomGlobal<D: DomTypes>: DomObject {
+    /// Returns the global scope of the realm that the DomObject was created in.
+    fn global(&self) -> DomRoot<D::GlobalScope>
     where
         Self: Sized,
     {
-        let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
-        GlobalScope::from_reflector(self, &realm)
-    }*/
+        /*let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
+        GlobalScope::from_reflector(self, &realm)*/
+        todo!()
+    }
 }
 
 impl DomObject for Reflector {
@@ -124,11 +130,11 @@ impl MutDomObject for Reflector {
 }
 
 /// A trait to provide a function pointer to wrap function for DOM objects.
-pub trait DomObjectWrap: Sized + DomObject {
+pub trait DomObjectWrap<D: DomTypes>: Sized + DomObject {
     /// Function pointer to the general wrap function type
     const WRAP: unsafe fn(
         JSContext,
-        &GlobalScope,
+        &D::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>>;

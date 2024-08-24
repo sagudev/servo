@@ -809,7 +809,7 @@ def getJSToNativeConversionInfo(type, descriptorProvider, failureCode=None,
                 match Promise::new_resolved(&promiseGlobal, cx, valueToResolve.handle()) {
                     Ok(value) => value,
                     Err(error) => {
-                    throw_dom_exception(cx, &promiseGlobal, error);
+                    <D as DomHelpers<D>>::throw_dom_exception(cx, &promiseGlobal, error);
                     $*{exceptionCode}
                     }
                 }
@@ -1848,7 +1848,7 @@ class MethodDefiner(PropertyDefiner):
                     # easy to tell whether the methodinfo is a JSJitInfo or
                     # a JSTypedMethodJitInfo here.  The compiler knows, though,
                     # so let it do the work.
-                    jitinfo = f"&{identifier}_methodinfo as *const _ as *const JSJitInfo"
+                    jitinfo = f"unsafe {{ std::ptr::addr_of!({identifier}_methodinfo) as *const _ as *const JSJitInfo }}"
                     accessor = f"Some(generic_method::<{exceptionToRejection}>)"
                 else:
                     if m.get("returnsPromise", False):
@@ -1957,7 +1957,7 @@ class AttrDefiner(PropertyDefiner):
                     accessor = f"generic_lenient_getter::<{exceptionToRejection}>"
                 else:
                     accessor = f"generic_getter::<{exceptionToRejection}>"
-                jitinfo = f"&{self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo"
+                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo)"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
@@ -2246,8 +2246,8 @@ class CGImports(CGWrapper):
             if t.isInterface() or t.isNamespace():
                 name = getIdentifier(t).name
                 descriptor = descriptorProvider.getDescriptor(name)
-                if name != 'GlobalScope':
-                    extras += [descriptor.path]
+                #if name != 'GlobalScope':
+                #    extras += [descriptor.path]
                 parentName = descriptor.getParentName()
                 while parentName:
                     descriptor = descriptorProvider.getDescriptor(parentName)
@@ -2325,7 +2325,8 @@ def DOMClass(descriptor):
     # padding.
     protoList.extend(['PrototypeList::ID::Last'] * (descriptor.config.maxProtoChainLength - len(protoList)))
     prototypeChainString = ', '.join(protoList)
-    mallocSizeOf = f'malloc_size_of_including_raw_self::<{descriptor.concreteType}>'
+    mallocSizeOf = "crate::mem::malloc_size_of_including_raw_self_dummy"
+    #mallocSizeOf = f'malloc_size_of_including_raw_self::<{descriptor.concreteType}>'
     if descriptor.isGlobal():
         globals_ = camel_to_upper_snake(descriptor.name)
     else:
@@ -2356,12 +2357,12 @@ class CGDOMJSClass(CGThing):
         args = {
             "domClass": DOMClass(self.descriptor),
             "enumerateHook": "None",
-            "finalizeHook": FINALIZE_HOOK_NAME,
+            "finalizeHook": f"{FINALIZE_HOOK_NAME}::<D>",
             "flags": "JSCLASS_FOREGROUND_FINALIZE",
             "name": str_to_cstr_ptr(self.descriptor.interface.identifier.name),
             "resolveHook": "None",
             "slots": "1",
-            "traceHook": TRACE_HOOK_NAME,
+            "traceHook": f"{TRACE_HOOK_NAME}::<D>",
         }
         if self.descriptor.isGlobal():
             assert not self.descriptor.weakReferenceable
@@ -2373,32 +2374,56 @@ class CGDOMJSClass(CGThing):
         elif self.descriptor.weakReferenceable:
             args["slots"] = "2"
         return f"""
-static CLASS_OPS: JSClassOps = JSClassOps {{
+static mut CLASS_OPS: JSClassOps = JSClassOps {{
     addProperty: None,
     delProperty: None,
     enumerate: None,
-    newEnumerate: {args['enumerateHook']},
-    resolve: {args['resolveHook']},
+    newEnumerate: None,
+    resolve: None,
     mayResolve: None,
-    finalize: Some({args['finalizeHook']}),
+    finalize: None,
     call: None,
     construct: None,
-    trace: Some({args['traceHook']}),
+    trace: None,
 }};
 
-static Class: DOMJSClass = DOMJSClass {{
+fn init_class_ops<D: DomTypes>() {{
+    unsafe {{
+    CLASS_OPS = JSClassOps {{
+        addProperty: None,
+        delProperty: None,
+        enumerate: None,
+        newEnumerate: {args['enumerateHook']},
+        resolve: {args['resolveHook']},
+        mayResolve: None,
+        finalize: Some({args['finalizeHook']}),
+        call: None,
+        construct: None,
+        trace: Some({args['traceHook']}),
+    }};
+    }}
+}}
+
+static mut Class: DOMJSClass = DOMJSClass {{
     base: JSClass {{
         name: {args['name']},
         flags: JSCLASS_IS_DOMJSCLASS | {args['flags']} |
                ((({args['slots']}) & JSCLASS_RESERVED_SLOTS_MASK) << JSCLASS_RESERVED_SLOTS_SHIFT)
                /* JSCLASS_HAS_RESERVED_SLOTS({args['slots']}) */,
-        cOps: &CLASS_OPS,
+        cOps: unsafe {{ std::ptr::addr_of!(CLASS_OPS) }},
         spec: ptr::null(),
         ext: ptr::null(),
         oOps: ptr::null(),
     }},
     dom_class: {args['domClass']},
 }};
+
+fn init_domjs_class<D: DomTypes>() {{
+    init_class_ops::<D>();
+    unsafe {{
+        Class.dom_class.malloc_size_of = malloc_size_of_including_raw_self::<D::{self.descriptor.interface.identifier.name}>;
+    }}
+}}
 """
 
 
@@ -2497,25 +2522,44 @@ static NAMESPACE_OBJECT_CLASS: NamespaceObjectClass = unsafe {{
 }};
 """
         if self.descriptor.interface.ctor():
-            constructorBehavior = f"InterfaceConstructorBehavior::call({CONSTRUCT_HOOK_NAME})"
+            constructorBehavior = f"InterfaceConstructorBehavior::call({CONSTRUCT_HOOK_NAME}::<D>)"
         else:
             constructorBehavior = "InterfaceConstructorBehavior::throw()"
         name = self.descriptor.interface.identifier.name
         representation = f'b"function {name}() {{\\n    [native code]\\n}}"'
         return f"""
-static INTERFACE_OBJECT_CLASS: NonCallbackInterfaceObjectClass =
+static mut INTERFACE_OBJECT_CLASS: NonCallbackInterfaceObjectClass =
     NonCallbackInterfaceObjectClass::new(
         {{
             // Intermediate `const` because as of nightly-2018-10-05,
             // rustc is conservative in promotion to `'static` of the return values of `const fn`s:
             // https://github.com/rust-lang/rust/issues/54846
             // https://github.com/rust-lang/rust/pull/53851
-            const BEHAVIOR: InterfaceConstructorBehavior = {constructorBehavior};
-            &BEHAVIOR
+            //const BEHAVIOR: InterfaceConstructorBehavior = InterfaceConstructorBehavior::throw();
+            //&BEHAVIOR
+        &InterfaceConstructorBehavior::throw()
         }},
         {representation},
         PrototypeList::ID::{name},
         {self.descriptor.prototypeDepth});
+
+fn init_interface_object<D: DomTypes>() {{
+    unsafe {{
+        INTERFACE_OBJECT_CLASS = NonCallbackInterfaceObjectClass::new(
+        {{
+            // Intermediate `const` because as of nightly-2018-10-05,
+            // rustc is conservative in promotion to `'static` of the return values of `const fn`s:
+            // https://github.com/rust-lang/rust/issues/54846
+            // https://github.com/rust-lang/rust/pull/53851
+            //const BEHAVIOR: InterfaceConstructorBehavior = {constructorBehavior};
+            //&BEHAVIOR
+        &{constructorBehavior}
+        }},
+        {representation},
+        PrototypeList::ID::{name},
+        {self.descriptor.prototypeDepth});
+    }}
+}}
 """
 
 
@@ -2637,6 +2681,28 @@ def UnionTypes(descriptors, dictionaries, callbacks, typedefs, config):
 
     return CGImports(CGList(unionStructs, "\n\n"), descriptors=[], callbacks=[], dictionaries=[], enums=[],
                      typedefs=[], imports=imports, config=config)
+
+
+def DomTypes(descriptors, dictionaries, callbacks, typedefs, config):
+    elements = [CGGeneric("pub trait DomTypes: crate::utils::DomHelpers<Self> + Sized {\n")]
+    universal = [
+        "crate::reflector::DomObject",
+        "crate::reflector::DomGlobal<Self>",
+        "crate::conversions::IDLInterface",
+        "PartialEq",
+        "crate::reflector::DomObjectWrap<Self>",
+        "crate::inheritance::Castable",
+        "malloc_size_of::MallocSizeOf",
+        "crate::reflector::MutDomObject",
+    ]
+    for descriptor in descriptors:
+        iface_name = descriptor.interface.identifier.name
+        traits = list(universal)
+        for parent in descriptor.prototypeChain:
+            traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]
+        elements += [CGGeneric(f"    type {iface_name}: crate::dom::bindings::codegen::Bindings::{iface_name}Binding::{iface_name}Methods<Self> + {' + '.join(traits)};\n")]
+    elements += [CGGeneric("}\n")]
+    return CGList(elements)
 
 
 class Argument():
@@ -2887,12 +2953,12 @@ class CGWrapMethod(CGAbstractMethod):
         assert not descriptor.interface.isCallback()
         assert not descriptor.isGlobal()
         args = [Argument('SafeJSContext', 'cx'),
-                Argument('&GlobalScope', 'scope'),
+                Argument('&D::GlobalScope', 'scope'),
                 Argument('Option<HandleObject>', 'given_proto'),
-                Argument(f"Box<{descriptor.concreteType}>", 'object')]
-        retval = f'DomRoot<{descriptor.concreteType}>'
+                Argument(f"Box<D::{descriptor.concreteType}>", 'object')]
+        retval = f'DomRoot<D::{descriptor.concreteType}>'
         CGAbstractMethod.__init__(self, descriptor, 'Wrap', retval, args,
-                                  pub=True, unsafe=True)
+                                  pub=True, unsafe=True, templateArgs=["D: DomTypes"])
 
     def definition_body(self):
         unforgeable = CopyLegacyUnforgeablePropertiesToInstance(self.descriptor)
@@ -2981,10 +3047,10 @@ class CGWrapGlobalMethod(CGAbstractMethod):
         assert not descriptor.interface.isCallback()
         assert descriptor.isGlobal()
         args = [Argument('SafeJSContext', 'cx'),
-                Argument(f"Box<{descriptor.concreteType}>", 'object')]
-        retval = f'DomRoot<{descriptor.concreteType}>'
+                Argument(f"Box<D::{descriptor.concreteType}>", 'object')]
+        retval = f'DomRoot<D::{descriptor.concreteType}>'
         CGAbstractMethod.__init__(self, descriptor, 'Wrap', retval, args,
-                                  pub=True, unsafe=True)
+                                  pub=True, unsafe=True, templateArgs=['D: DomTypes'])
         self.properties = properties
 
     def definition_body(self):
@@ -2999,7 +3065,7 @@ class CGWrapGlobalMethod(CGAbstractMethod):
 
         return CGGeneric(f"""
 let raw = Root::new(MaybeUnreflectedDom::from_box(object));
-let origin = (*raw.as_ptr()).upcast::<GlobalScope>().origin();
+let origin = (*raw.as_ptr()).upcast::<D::GlobalScope>().origin();
 
 rooted!(in(*cx) let mut obj = ptr::null_mut::<JSObject>());
 create_global_object(
@@ -3049,16 +3115,16 @@ class CGIDLInterface(CGThing):
         else:
             check = "ptr::eq(class, &Class.dom_class)"
         return f"""
-impl IDLInterface for {name} {{
+impl <D: DomTypes> IDLInterface for D::{name} {{
     #[inline]
     fn derives(class: &'static DOMClass) -> bool {{
         {check}
     }}
 }}
 
-impl PartialEq for {name} {{
-    fn eq(&self, other: &{name}) -> bool {{
-        self as *const {name} == other
+impl <D: DomTypes> PartialEq for D::{name} {{
+    fn eq(&self, other: &D::{name}) -> bool {{
+        self as *const D::{name} == other
     }}
 }}
 """
@@ -3076,10 +3142,10 @@ class CGDomObjectWrap(CGThing):
         name = self.descriptor.concreteType
         name = f"dom::{name.lower()}::{name}"
         return f"""
-impl DomObjectWrap for {name} {{
+impl <D: DomTypes/*, T: {self.descriptor.interface.identifier.name}Methods*/> DomObjectWrap<D> for D::{self.descriptor.interface.identifier.name} {{
     const WRAP: unsafe fn(
         SafeJSContext,
-        &GlobalScope,
+        &D::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>> = Wrap;
@@ -3115,9 +3181,9 @@ class CGAbstractExternMethod(CGAbstractMethod):
     Abstract base class for codegen of implementation-only (no
     declaration) static methods.
     """
-    def __init__(self, descriptor, name, returnType, args, doesNotPanic=False):
+    def __init__(self, descriptor, name, returnType, args, doesNotPanic=False, templateArgs=None):
         CGAbstractMethod.__init__(self, descriptor, name, returnType, args,
-                                  inline=False, extern=True, doesNotPanic=doesNotPanic)
+                                  inline=False, extern=True, doesNotPanic=doesNotPanic, templateArgs=templateArgs)
 
 
 class PropertyArrays():
@@ -3374,7 +3440,7 @@ rooted!(in(*cx) let mut interface = ptr::null_mut::<JSObject>());
 create_noncallback_interface_object(cx,
                                     global,
                                     interface_proto.handle(),
-                                    &INTERFACE_OBJECT_CLASS,
+                                    std::ptr::addr_of!(INTERFACE_OBJECT_CLASS),
                                     {properties['static_methods']},
                                     {properties['static_attrs']},
                                     {properties['consts']},
@@ -3730,7 +3796,7 @@ class CGCallGenerator(CGThing):
 
         if isFallible:
             if static:
-                glob = "global.upcast::<GlobalScope>()"
+                glob = "global.upcast::<D::GlobalScope>()"
             else:
                 glob = "&this.global()"
 
@@ -3738,7 +3804,7 @@ class CGCallGenerator(CGThing):
                 "let result = match result {\n"
                 "    Ok(result) => result,\n"
                 "    Err(e) => {\n"
-                f"        throw_dom_exception(cx, {glob}, e);\n"
+                f"        <D as DomHelpers<D>>::throw_dom_exception(cx, {glob}, e);\n"
                 f"        return{errorResult};\n"
                 "    },\n"
                 "};"))
@@ -3939,16 +4005,16 @@ class CGAbstractStaticBindingMethod(CGAbstractMethod):
             Argument('libc::c_uint', 'argc'),
             Argument('*mut JSVal', 'vp'),
         ]
-        CGAbstractMethod.__init__(self, descriptor, name, "bool", args, extern=True)
+        CGAbstractMethod.__init__(self, descriptor, name, "bool", args, extern=True, templateArgs=["D: DomTypes"])
         self.exposureSet = descriptor.interface.exposureSet
 
     def definition_body(self):
         preamble = """\
 let args = CallArgs::from_vp(vp, argc);
-let global = GlobalScope::from_object(args.callee());
+let global = <D as DomHelpers<D>>::global_scope_from_object(args.callee());
 """
         if len(self.exposureSet) == 1:
-            preamble += f"let global = DomRoot::downcast::<dom::types::{list(self.exposureSet)[0]}>(global).unwrap();\n"
+            preamble += f"let global = DomRoot::downcast::<D::{list(self.exposureSet)[0]}>(global).unwrap();\n"
         return CGList([CGGeneric(preamble), self.generate_code()])
 
     def generate_code(self):
@@ -3978,7 +4044,7 @@ class CGSpecializedMethod(CGAbstractExternMethod):
                 Argument('RawHandleObject', '_obj'),
                 Argument('*mut libc::c_void', 'this'),
                 Argument('*const JSJitMethodCallArgs', 'args')]
-        CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args)
+        CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args, templateArgs=["D: DomTypes"])
 
     def definition_body(self):
         nativeName = CGSpecializedMethod.makeNativeName(self.descriptor,
@@ -3986,7 +4052,7 @@ class CGSpecializedMethod(CGAbstractExternMethod):
         return CGWrapper(CGMethodCall([], nativeName, self.method.isStatic(),
                                       self.descriptor, self.method),
                          pre="let cx = SafeJSContext::from_ptr(cx);\n"
-                             f"let this = &*(this as *const {self.descriptor.concreteType});\n"
+                             f"let this = &*(this as *const D::{self.descriptor.concreteType});\n"
                              "let args = &*args;\n"
                              "let argc = args.argc_;\n")
 
@@ -4143,7 +4209,7 @@ class CGSpecializedGetter(CGAbstractExternMethod):
                 Argument('RawHandleObject', '_obj'),
                 Argument('*mut libc::c_void', 'this'),
                 Argument('JSJitGetterCallArgs', 'args')]
-        CGAbstractExternMethod.__init__(self, descriptor, name, "bool", args)
+        CGAbstractExternMethod.__init__(self, descriptor, name, "bool", args, templateArgs=["D: DomTypes"])
 
     def definition_body(self):
         nativeName = CGSpecializedGetter.makeNativeName(self.descriptor,
@@ -4152,7 +4218,7 @@ class CGSpecializedGetter(CGAbstractExternMethod):
         return CGWrapper(CGGetterCall([], self.attr.type, nativeName,
                                       self.descriptor, self.attr),
                          pre="let cx = SafeJSContext::from_ptr(cx);\n"
-                             f"let this = &*(this as *const {self.descriptor.concreteType});\n")
+                             f"let this = &*(this as *const D::{self.descriptor.concreteType});\n")
 
     @staticmethod
     def makeNativeName(descriptor, attr):
@@ -4200,7 +4266,7 @@ class CGSpecializedSetter(CGAbstractExternMethod):
                 Argument('RawHandleObject', 'obj'),
                 Argument('*mut libc::c_void', 'this'),
                 Argument('JSJitSetterCallArgs', 'args')]
-        CGAbstractExternMethod.__init__(self, descriptor, name, "bool", args)
+        CGAbstractExternMethod.__init__(self, descriptor, name, "bool", args, templateArgs=["D: DomTypes"])
 
     def definition_body(self):
         nativeName = CGSpecializedSetter.makeNativeName(self.descriptor,
@@ -4208,7 +4274,7 @@ class CGSpecializedSetter(CGAbstractExternMethod):
         return CGWrapper(
             CGSetterCall([], self.attr.type, nativeName, self.descriptor, self.attr),
             pre=("let cx = SafeJSContext::from_ptr(cx);\n"
-                 f"let this = &*(this as *const {self.descriptor.concreteType});\n")
+                 f"let this = &*(this as *const D::{self.descriptor.concreteType});\n")
         )
 
     @staticmethod
@@ -4311,12 +4377,12 @@ class CGMemberJITInfo(CGThing):
         assert not movable or aliasSet != "AliasEverything"  # Can't move write-aliasing things
         assert not alwaysInSlot or movable  # Things always in slots had better be movable
 
-        def jitInfoInitializer(isTypedMethod):
+        def jitInfoInitializer(isTypedMethod, specialize):
             initializer = fill(
                 """
                 JSJitInfo {
                     __bindgen_anon_1: JSJitInfo__bindgen_ty_1 {
-                        ${opKind}: Some(${opName})
+                        ${opKind}: ${opValue}
                     },
                     __bindgen_anon_2: JSJitInfo__bindgen_ty_2 {
                         protoID: PrototypeList::ID::${name} as u16,
@@ -4340,6 +4406,7 @@ class CGMemberJITInfo(CGThing):
                 }
                 """,
                 opName=opName,
+                opValue=f"Some({opName}::<D>)" if specialize else "None",
                 name=self.descriptor.name,
                 depth=self.descriptor.interface.inheritanceDepth(),
                 opType=opType,
@@ -4375,7 +4442,7 @@ class CGMemberJITInfo(CGThing):
                 jitInfo=indent(jitInfoInitializer(True)),
                 argTypes=argTypes)
 
-        return f"\nconst {infoName}: JSJitInfo = {jitInfoInitializer(False)};\n"
+        return f"static mut {infoName}: JSJitInfo = {jitInfoInitializer(False, False)};\n\nfn init_{infoName}<D: DomTypes>() {{ unsafe {{ {infoName} = {jitInfoInitializer(False, True)}; }} }}\n\n"
 
     def define(self):
         if self.member.isAttr():
@@ -5420,7 +5487,7 @@ class CGClass(CGThing):
             result = f"{result}{memberString}"
 
         result += f'{self.indent}}}\n\n'
-        result += f'impl {self.name} {{\n'
+        result += f'impl <D: DomTypes> D::{self.name} {{\n'
 
         order = [(self.constructors + disallowedCopyConstructors, '\n'),
                  (self.destructors, '\n'), (self.methods, '\n)')]
@@ -6127,11 +6194,11 @@ class CGAbstractClassHook(CGAbstractExternMethod):
     """
     def __init__(self, descriptor, name, returnType, args, doesNotPanic=False):
         CGAbstractExternMethod.__init__(self, descriptor, name, returnType,
-                                        args)
+                                        args, templateArgs=["D: DomTypes"])
 
     def definition_body_prologue(self):
         return CGGeneric(f"""
-let this = native_from_object_static::<{self.descriptor.concreteType}>(obj).unwrap();
+let this = native_from_object_static::<D::{self.descriptor.concreteType}>(obj).unwrap();
 """)
 
     def definition_body(self):
@@ -6184,18 +6251,18 @@ class CGClassConstructHook(CGAbstractExternMethod):
         else:
             constructor = descriptor.interface.ctor()
             assert constructor
-        CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args)
+        CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args, templateArgs=["D: DomTypes"])
         self.constructor = constructor
         self.exposureSet = descriptor.interface.exposureSet
 
     def definition_body(self):
         preamble = """let cx = SafeJSContext::from_ptr(cx);
 let args = CallArgs::from_vp(vp, argc);
-let global = GlobalScope::from_object(JS_CALLEE(*cx, vp).to_object());
+let global = <D as DomHelpers<D>>::global_scope_from_object(JS_CALLEE(*cx, vp).to_object());
 """
         if len(self.exposureSet) == 1:
             preamble += f"""
-let global = DomRoot::downcast::<dom::types::{list(self.exposureSet)[0]}>(global).unwrap();
+let global = DomRoot::downcast::<D::{list(self.exposureSet)[0]}>(global).unwrap();
 """
         if self.constructor.isHTMLConstructor():
             signatures = self.constructor.signatures()
@@ -6361,12 +6428,9 @@ class CGInterfaceTrait(CGThing):
             returnType = f" -> {rettype}" if rettype != '()' else ''
             methods.append(CGGeneric(f"{unsafe}fn {name}(&self{fmt(arguments)}){returnType};\n"))
 
-        if methods:
-            self.cgRoot = CGWrapper(CGIndenter(CGList(methods, "")),
-                                    pre=f"pub trait {descriptor.interface.identifier.name}Methods {{\n",
-                                    post="}")
-        else:
-            self.cgRoot = CGGeneric("")
+        self.cgRoot = CGWrapper(CGIndenter(CGList(methods, "")),
+                                pre=f"pub trait {descriptor.interface.identifier.name}Methods<D: DomTypes> {{\n",
+                                post="}")
         self.empty = not methods
 
     def define(self):
@@ -6510,18 +6574,20 @@ class CGDescriptor(CGThing):
             else:
                 cgThings.append(CGDOMJSClass(descriptor))
                 if not descriptor.interface.isIteratorInterface():
-                    cgThings.append(CGAssertInheritance(descriptor))
+                    pass
+                    #XXXjdm todo
+                    #cgThings.append(CGAssertInheritance(descriptor))
                 pass
 
             if descriptor.isGlobal():
                 cgThings.append(CGWrapGlobalMethod(descriptor, properties))
             else:
                 cgThings.append(CGWrapMethod(descriptor))
-                if descriptor.interface.isIteratorInterface():
-                    cgThings.append(CGDomObjectIteratorWrap(descriptor))
-                else:
-                    cgThings.append(CGDomObjectWrap(descriptor))
-            reexports.append('Wrap')
+                #if descriptor.interface.isIteratorInterface():
+                #    cgThings.append(CGDomObjectIteratorWrap(descriptor))
+                #else:
+                #    cgThings.append(CGDomObjectWrap(descriptor))
+            #reexports.append('Wrap')
 
         haveUnscopables = False
         if not descriptor.interface.isCallback() and not descriptor.interface.isNamespace():
@@ -6532,13 +6598,13 @@ class CGDescriptor(CGThing):
                             CGIndenter(CGList([CGGeneric(str_to_cstr(name)) for
                                                name in unscopableNames], ",\n")),
                             CGGeneric("];\n")], "\n"))
-            if descriptor.concrete or descriptor.hasDescendants():
-                cgThings.append(CGIDLInterface(descriptor))
+            #XXXjdm
+            #if descriptor.concrete or descriptor.hasDescendants():
+            #    cgThings.append(CGIDLInterface(descriptor))
 
             interfaceTrait = CGInterfaceTrait(descriptor)
             cgThings.append(interfaceTrait)
-            if not interfaceTrait.empty:
-                reexports.append(f'{descriptor.name}Methods')
+            reexports.append(f'{descriptor.name}Methods')
 
             if descriptor.weakReferenceable:
                 cgThings.append(CGWeakReferenceableTrait(descriptor))
@@ -7899,6 +7965,7 @@ class GlobalGenRoots():
                    CGGeneric("use crate::dom::bindings::root::{Dom, DomRoot/*, LayoutDom*/};\n"),
                    CGGeneric("use crate::dom::bindings::trace::JSTraceable;\n"),
                    CGGeneric("use crate::dom::bindings::reflector::DomObject;\n"),
+                   CGGeneric("use crate::codegen::DomTypes::DomTypes;\n"),
                    CGGeneric("use js::jsapi::JSTracer;\n\n"),
                    CGGeneric("use std::mem;\n\n")]
         allprotos = []
@@ -7919,12 +7986,12 @@ class GlobalGenRoots():
                 chain = chain[:-1]
 
             # Implement `DerivedFrom<Bar>` for `Foo`, for all `Bar` that `Foo` inherits from.
-            if chain:
-                allprotos.append(CGGeneric(f"impl Castable for {name} {{}}\n"))
-            for baseName in chain:
-                allprotos.append(CGGeneric(f"impl DerivedFrom<{baseName}> for {name} {{}}\n"))
-            if chain:
-                allprotos.append(CGGeneric("\n"))
+            #if chain:
+            #    allprotos.append(CGGeneric(f"impl <D: DomTypes> Castable for D::{name} {{}}\n"))
+            #for baseName in chain:
+            #    allprotos.append(CGGeneric(f"impl <D: DomTypes> DerivedFrom<D::{baseName}> for D::{name} {{}}\n"))
+            #if chain:
+            #    allprotos.append(CGGeneric("\n"))
 
             if downcast:
                 hierarchy[descriptor.interface.parent.identifier.name].append(name)
@@ -7966,9 +8033,10 @@ impl Clone for TopTypeId {
             typeIdCode.append(CGWrapper(CGIndenter(CGList(variants, ",\n"), 4),
                                         pre=f"#[derive({derives})]\npub enum {base}TypeId {{\n",
                                         post="\n}\n\n"))
-            if base in topTypes:
+            #XXXjdm todo
+            if False and base in topTypes:
                 typeIdCode.append(CGGeneric(f"""
-impl {base} {{
+impl <D: DomTypes> D::{base} {{
     pub fn type_id(&self) -> &'static {base}TypeId {{
         unsafe {{
             &get_dom_class(self.reflector().get_jsobject().get())
@@ -7999,6 +8067,21 @@ impl {base} {{
 
         # Done.
         return curr
+
+    @staticmethod
+    def DomTypes(config):
+        curr = DomTypes(config.getDescriptors(),
+                        config.getDictionaries(),
+                        config.getCallbacks(),
+                        config.typedefs,
+                        config)
+
+        # Add the auto-generated comment.
+        curr = CGWrapper(curr, pre=AUTOGENERATED_WARNING_COMMENT)
+
+        # Done.
+        return curr
+        
 
     @staticmethod
     def SupportedDomApis(config):
