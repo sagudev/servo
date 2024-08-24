@@ -1648,12 +1648,12 @@ class PropertyDefiner:
                     prefableTemplate % (cond, f"{name}_specs", len(specs) - 1))
 
         joinedSpecs = ',\n'.join(specs)
-        specsArray = (f"const {name}_specs: &[&[{specType}]] = &[\n"
+        specsArray = (f"static {name}_specs: &[&[{specType}]] = &[\n"
                       f"{joinedSpecs}\n"
                       "];\n")
 
         joinedPrefableSpecs = ',\n'.join(prefableSpecs)
-        prefArray = (f"const {name}: &[Guard<&[{specType}]>] = &[\n"
+        prefArray = (f"static {name}: &[Guard<&[{specType}]>] = &[\n"
                      f"{joinedPrefableSpecs}\n"
                      "];\n")
         return f"{specsArray}{prefArray}"
@@ -1681,7 +1681,7 @@ class PropertyDefiner:
         joinedSpecs = ',\n'.join(specsArray)
         return dedent(
             f"""
-            const {name}: &[{specType}] = &[
+            static {name}: &[{specType}] = &[
             {joinedSpecs}
             ];
             """)
@@ -1957,7 +1957,7 @@ class AttrDefiner(PropertyDefiner):
                     accessor = f"generic_lenient_getter::<{exceptionToRejection}>"
                 else:
                     accessor = f"generic_getter::<{exceptionToRejection}>"
-                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo)"
+                jitinfo = f"unsafe {{ std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo) }}"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
@@ -2528,17 +2528,18 @@ static NAMESPACE_OBJECT_CLASS: NamespaceObjectClass = unsafe {{
         name = self.descriptor.interface.identifier.name
         representation = f'b"function {name}() {{\\n    [native code]\\n}}"'
         return f"""
+        
 static mut INTERFACE_OBJECT_CLASS: NonCallbackInterfaceObjectClass =
     NonCallbackInterfaceObjectClass::new(
-        {{
+        //{{
             // Intermediate `const` because as of nightly-2018-10-05,
             // rustc is conservative in promotion to `'static` of the return values of `const fn`s:
             // https://github.com/rust-lang/rust/issues/54846
             // https://github.com/rust-lang/rust/pull/53851
             //const BEHAVIOR: InterfaceConstructorBehavior = InterfaceConstructorBehavior::throw();
             //&BEHAVIOR
-        &InterfaceConstructorBehavior::throw()
-        }},
+        &crate::interface::DefaultThrow
+        /*}}*/,
         {representation},
         PrototypeList::ID::{name},
         {self.descriptor.prototypeDepth});
@@ -2553,7 +2554,7 @@ fn init_interface_object<D: DomTypes>() {{
             // https://github.com/rust-lang/rust/pull/53851
             //const BEHAVIOR: InterfaceConstructorBehavior = {constructorBehavior};
             //&BEHAVIOR
-        &{constructorBehavior}
+        Box::leak(Box::new({constructorBehavior}))
         }},
         {representation},
         PrototypeList::ID::{name},
@@ -3065,14 +3066,14 @@ class CGWrapGlobalMethod(CGAbstractMethod):
 
         return CGGeneric(f"""
 let raw = Root::new(MaybeUnreflectedDom::from_box(object));
-let origin = (*raw.as_ptr()).upcast::<D::GlobalScope>().origin();
+let origin = <D as DomHelpers<D>>::global_scope_origin((*raw.as_ptr()).upcast::<D::GlobalScope>());
 
 rooted!(in(*cx) let mut obj = ptr::null_mut::<JSObject>());
 create_global_object(
     cx,
     &Class.base,
     raw.as_ptr() as *const libc::c_void,
-    _trace,
+    _trace::<D>,
     obj.handle_mut(),
     origin);
 assert!(!obj.is_null());
@@ -3440,7 +3441,7 @@ rooted!(in(*cx) let mut interface = ptr::null_mut::<JSObject>());
 create_noncallback_interface_object(cx,
                                     global,
                                     interface_proto.handle(),
-                                    std::ptr::addr_of!(INTERFACE_OBJECT_CLASS),
+                                    &*std::ptr::addr_of!(INTERFACE_OBJECT_CLASS),
                                     {properties['static_methods']},
                                     {properties['static_attrs']},
                                     {properties['consts']},
@@ -3775,7 +3776,7 @@ class CGCallGenerator(CGThing):
 
         call = CGGeneric(nativeMethodName)
         if static:
-            call = CGWrapper(call, pre=f"{MakeNativeName(descriptor.interface.identifier.name)}::")
+            call = CGWrapper(call, pre=f"<D::{MakeNativeName(descriptor.interface.identifier.name)}>::")
         else:
             call = CGWrapper(call, pre=f"{object}.")
         call = CGList([call, CGWrapper(args, pre="(", post=")")])
@@ -6409,10 +6410,11 @@ class CGInterfaceTrait(CGThing):
                     rettype = return_type(descriptor, rettype, infallible)
                     yield name, arguments, rettype
 
-        def fmt(arguments):
+        def fmt(arguments, leadingComma=True):
             keywords = {"async"}
-            return "".join(
-                f", {name if name not in keywords else f'r#{name}'}: {type_}"
+            prefix = "" if not leadingComma else ", "
+            return prefix + ", ".join(
+                f"{name if name not in keywords else f'r#{name}'}: {type_}"
                 for name, type_ in arguments
             )
 
@@ -6427,6 +6429,13 @@ class CGInterfaceTrait(CGThing):
             unsafe = 'unsafe ' if contains_unsafe_arg(arguments) else ''
             returnType = f" -> {rettype}" if rettype != '()' else ''
             methods.append(CGGeneric(f"{unsafe}fn {name}(&self{fmt(arguments)}){returnType};\n"))
+        ctor = descriptor.interface.ctor()
+        if ctor:
+            global_name = "GlobalScope" if len(descriptor.interface.exposureSet) > 1 else list(descriptor.interface.exposureSet)[0]
+            for (i, (rettype, arguments)) in enumerate(ctor.signatures()):
+                name = "Constructor" + "_" * i
+                args = [("global", f"&D::{global_name}"), ("proto", "Option<HandleObject>")] + list(method_arguments(descriptor, rettype, arguments))
+                methods.append(CGGeneric(f"fn {name}({fmt(args, leadingComma=False)}) -> Result<{descriptor.returnType}, Error>;\n"))
 
         self.cgRoot = CGWrapper(CGIndenter(CGList(methods, "")),
                                 pre=f"pub trait {descriptor.interface.identifier.name}Methods<D: DomTypes> {{\n",

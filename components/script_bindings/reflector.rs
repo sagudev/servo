@@ -18,7 +18,7 @@ use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
 use crate::codegen::DomTypes::DomTypes;
 
-/// Create the reflector for a new DOM object and yield ownership to the
+/*/// Create the reflector for a new DOM object and yield ownership to the
 /// reflector.
 pub fn reflect_dom_object<D, T, U>(obj: Box<T>, global: &U) -> DomRoot<T>
 where
@@ -42,7 +42,7 @@ where
 {
     let global_scope = global.upcast();
     unsafe { T::WRAP(/*GlobalScope::get_cx()*/todo!(), global_scope, proto, obj) }
-}
+}*/
 
 /// A struct to store a reference to the reflector of a DOM object.
 #[allow(crown::unrooted_must_root)]

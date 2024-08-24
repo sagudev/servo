@@ -672,4 +672,6 @@ pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
     );
 
     fn global_scope_from_object(obj: *mut JSObject) -> crate::root::DomRoot<D::GlobalScope>;
+
+    fn global_scope_origin(global: &D::GlobalScope) -> &servo_url::MutableOrigin;
 }

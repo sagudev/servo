@@ -95,6 +95,8 @@ pub type ConstructorClassHook =
 /// The constructor behavior of a non-callback interface object.
 pub struct InterfaceConstructorBehavior(JSClassOps);
 
+pub static DefaultThrow: InterfaceConstructorBehavior = InterfaceConstructorBehavior::throw();
+
 impl InterfaceConstructorBehavior {
     /// An interface constructor that unconditionally throws a type error.
     pub const fn throw() -> Self {

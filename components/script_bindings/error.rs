@@ -26,6 +26,7 @@ use crate::dom::bindings::conversions::{
     root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
 };
 use crate::dom::bindings::str::USVString;
+use crate::dom::bindings::utils::DomHelpers;
 //use crate::dom::domexception::{DOMErrorName, DOMException};
 //use crate::dom::globalscope::GlobalScope;
 use crate::realms::InRealm;
@@ -333,7 +334,7 @@ impl Error {
             Error::JSFailed => (),
             _ => assert!(!JS_IsExceptionPending(cx)),
         }
-        throw_dom_exception(SafeJSContext::from_ptr(cx), global, self);
+        <D as DomHelpers<D>>::throw_dom_exception(SafeJSContext::from_ptr(cx), global, self);
         assert!(JS_IsExceptionPending(cx));
         assert!(JS_GetPendingException(cx, rval));
         JS_ClearPendingException(cx);
