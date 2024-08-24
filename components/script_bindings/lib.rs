@@ -280,3 +280,8 @@ pub mod dom {
     pub mod types {
     }
 }
+
+// export traits to be available for derive macros
+pub use crate::inheritance::HasParent;
+pub use crate::reflector::{DomObject, MutDomObject, Reflector};
+pub use crate::trace::{CustomTraceable, JSTraceable};
