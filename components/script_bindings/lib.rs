@@ -69,30 +69,30 @@ pub mod codegen {
     }
 }
 
-mod constant;
-mod conversions;
-mod error;
-mod finalize;
-mod guard;
-mod inheritance;
-mod interface;
-mod iterable;
-mod mem;
-mod num;
-mod principals;
-mod record;
-mod reflector;
-mod root;
-mod str;
-mod trace;
-mod utils;
+pub mod constant;
+pub mod conversions;
+pub mod error;
+pub mod finalize;
+pub mod guard;
+pub mod inheritance;
+pub mod interface;
+pub mod iterable;
+pub mod mem;
+pub mod num;
+pub mod principals;
+pub mod record;
+pub mod reflector;
+pub mod root;
+pub mod str;
+pub mod trace;
+pub mod utils;
 
-mod script_runtime {
+pub mod script_runtime {
     #[derive(Copy, Clone)]
     #[repr(transparent)]
     pub struct JSContext(*mut js::jsapi::JSContext);
     impl JSContext {
-        pub fn from_ptr(cx: *mut js::jsapi::JSContext) -> JSContext {
+        unsafe pub fn from_ptr(cx: *mut js::jsapi::JSContext) -> JSContext {
             JSContext(cx)
         }
     }
@@ -285,3 +285,4 @@ pub mod dom {
 pub use crate::inheritance::HasParent;
 pub use crate::reflector::{DomObject, MutDomObject, Reflector};
 pub use crate::trace::{CustomTraceable, JSTraceable};
+pub use crate::dom::bindings::utils::DomHelpers;

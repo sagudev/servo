@@ -120,14 +120,14 @@ impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> IterableIterator<T> {
     }
 }
 
-impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> DomObjectWrap for IterableIterator<T> {
+/*impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> DomObjectWrap for IterableIterator<T> {
     const WRAP: unsafe fn(
         JSContext,
         &GlobalScope,
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>> = T::ITER_WRAP;
-}
+}*/
 
 fn dict_return(
     cx: JSContext,

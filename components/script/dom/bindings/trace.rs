@@ -38,8 +38,8 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexMap;
-/// A trait to allow tracing (only) DOM objects.
-pub use js::gc::Traceable as JSTraceable;
+/*/// A trait to allow tracing (only) DOM objects.
+pub use js::gc::Traceable as JSTraceable;*/
 use js::glue::{CallObjectTracer, CallScriptTracer, CallStringTracer, CallValueTracer};
 use js::jsapi::{GCTraceKindToAscii, Heap, JSObject, JSScript, JSString, JSTracer, TraceKind};
 use js::jsval::JSVal;
@@ -70,7 +70,8 @@ use crate::script_runtime::{ContextForRequestInterrupt, StreamConsumer};
 use crate::script_thread::IncompleteParserContexts;
 use crate::task::TaskBox;
 
-/// A trait to allow tracing only DOM sub-objects.
+pub use script_bindings::trace::{CustomTraceable, JSTraceable};
+/*/// A trait to allow tracing only DOM sub-objects.
 pub unsafe trait CustomTraceable {
     /// Trace `self`.
     unsafe fn trace(&self, trc: *mut JSTracer);
@@ -81,7 +82,7 @@ unsafe impl<T: CustomTraceable> CustomTraceable for Box<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         (**self).trace(trc);
     }
-}
+}*/
 
 unsafe impl<T: CustomTraceable> CustomTraceable for DomRefCell<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
@@ -89,13 +90,13 @@ unsafe impl<T: CustomTraceable> CustomTraceable for DomRefCell<T> {
     }
 }
 
-unsafe impl<T: JSTraceable> CustomTraceable for OnceCell<T> {
+/*unsafe impl<T: JSTraceable> CustomTraceable for OnceCell<T> {
     unsafe fn trace(&self, tracer: *mut JSTracer) {
         if let Some(value) = self.get() {
             value.trace(tracer)
         }
     }
-}
+}*/
 
 /// Wrapper type for nop traceble
 ///
@@ -241,7 +242,7 @@ unsafe_no_jsmanaged_fields!(Box<dyn TaskBox>);
 
 unsafe_no_jsmanaged_fields!(IncompleteParserContexts);
 
-unsafe_no_jsmanaged_fields!(Reflector);
+//unsafe_no_jsmanaged_fields!(Reflector);
 
 #[allow(dead_code)]
 /// Trace a `JSScript`.
@@ -305,7 +306,7 @@ pub fn trace_string(tracer: *mut JSTracer, description: &str, s: &Heap<*mut JSSt
     }
 }
 
-unsafe impl<T: JSTraceable> CustomTraceable for ServoArc<T> {
+/*unsafe impl<T: JSTraceable> CustomTraceable for ServoArc<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         (**self).trace(trc)
     }
@@ -315,7 +316,7 @@ unsafe impl<T: JSTraceable> CustomTraceable for RwLock<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         self.read().trace(trc)
     }
-}
+}*/
 
 unsafe impl<T: JSTraceable> JSTraceable for DomRefCell<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
@@ -323,16 +324,16 @@ unsafe impl<T: JSTraceable> JSTraceable for DomRefCell<T> {
     }
 }
 
-unsafe impl<T: JSTraceable + Eq + Hash> CustomTraceable for indexmap::IndexSet<T> {
+/*unsafe impl<T: JSTraceable + Eq + Hash> CustomTraceable for indexmap::IndexSet<T> {
     #[inline]
     unsafe fn trace(&self, trc: *mut JSTracer) {
         for e in self.iter() {
             e.trace(trc);
         }
     }
-}
+}*/
 
-// XXXManishearth Check if the following three are optimized to no-ops
+/*// XXXManishearth Check if the following three are optimized to no-ops
 // if e.trace() is a no-op (e.g it is an unsafe_no_jsmanaged_fields type)
 unsafe impl<T: JSTraceable + 'static> CustomTraceable for SmallVec<[T; 1]> {
     #[inline]
@@ -356,7 +357,7 @@ where
             v.trace(trc);
         }
     }
-}
+}*/
 
 unsafe_no_jsmanaged_fields!(Error);
 unsafe_no_jsmanaged_fields!(TrustedPromise);
@@ -378,7 +379,7 @@ unsafe impl<T: DomObject> JSTraceable for Trusted<T> {
     }
 }
 
-unsafe impl<S> CustomTraceable for DocumentStylesheetSet<S>
+/*unsafe impl<S> CustomTraceable for DocumentStylesheetSet<S>
 where
     S: JSTraceable + ::style::stylesheets::StylesheetInDocument + PartialEq + 'static,
 {
@@ -468,7 +469,7 @@ where
         phalanx_distal.trace(trc);
         phalanx_tip.trace(trc);
     }
-}
+}*/
 
 /// Holds a set of JSTraceables that need to be rooted
 pub use js::gc::RootedTraceableSet;

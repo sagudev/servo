@@ -41,7 +41,7 @@ where
     unsafe { T::WRAP(GlobalScope::get_cx(), global_scope, proto, obj) }
 }
 
-/// A struct to store a reference to the reflector of a DOM object.
+/*/// A struct to store a reference to the reflector of a DOM object.
 #[allow(crown::unrooted_must_root)]
 #[derive(MallocSizeOf)]
 #[crown::unrooted_must_root_lint::must_root]
@@ -88,9 +88,9 @@ impl Reflector {
             object: Heap::default(),
         }
     }
-}
+}*/
 
-/// A trait to provide access to the `Reflector` for a DOM object.
+/*/// A trait to provide access to the `Reflector` for a DOM object.
 pub trait DomObject: JSTraceable + 'static {
     /// Returns the receiver's reflector.
     fn reflector(&self) -> &Reflector;
@@ -103,9 +103,10 @@ pub trait DomObject: JSTraceable + 'static {
         let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
         GlobalScope::from_reflector(self, &realm)
     }
-}
+}*/
+pub use script_bindings::{DomObject, MutDomObject, Reflector};
 
-impl DomObject for Reflector {
+/*impl DomObject for Reflector {
     fn reflector(&self) -> &Self {
         self
     }
@@ -121,9 +122,10 @@ impl MutDomObject for Reflector {
     unsafe fn init_reflector(&self, obj: *mut JSObject) {
         self.set_jsobject(obj)
     }
-}
+}*/
 
-/// A trait to provide a function pointer to wrap function for DOM objects.
+pub use script_bindings::reflector::DomObjectWrap;
+/*/// A trait to provide a function pointer to wrap function for DOM objects.
 pub trait DomObjectWrap: Sized + DomObject {
     /// Function pointer to the general wrap function type
     const WRAP: unsafe fn(
@@ -132,7 +134,7 @@ pub trait DomObjectWrap: Sized + DomObject {
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>>;
-}
+}*/
 
 /// A trait to provide a function pointer to wrap function for
 /// DOM iterator interfaces.

@@ -98,6 +98,34 @@ pub use init::init;
 pub use script_runtime::JSEngineSetup;
 
 // export traits to be available for derive macros
-pub use crate::dom::bindings::inheritance::HasParent;
-pub use crate::dom::bindings::reflector::{DomObject, MutDomObject, Reflector};
-pub use crate::dom::bindings::trace::{CustomTraceable, JSTraceable};
+pub use script_bindings::inheritance::HasParent;
+pub use script_bindings::reflector::{DomObject, DomGlobal, MutDomObject, Reflector};
+pub use script_bindings::trace::{CustomTraceable, JSTraceable};
+
+pub struct DomTypeHolder;
+impl script_bindings::codegen::DomTypes::DomTypes for DomTypeHolder {
+    type CSSStyleDeclaration = crate::dom::cssstyledeclaration::CSSStyleDeclaration;
+    type DOMException = crate::dom::domexception::DOMException;
+    type DOMParser = crate::dom::domparser::DOMParser;
+    type Document = crate::dom::document::Document;
+    type GlobalScope = crate::dom::globalscope::GlobalScope;
+    type Window = crate::dom::window::Window;
+}
+
+impl script_bindings::DomHelpers<DomTypeHolder> for DomTypeHolder {
+    fn throw_dom_exception(
+        cx: crate::script_runtime::JSContext,
+        global: &DomTypeHolder::GlobalScope,
+        result: script_bindings::error::Error,
+    ) {
+        todo!()
+    }
+
+    fn global_scope_from_object(obj: *mut js::jsapi::JSObject) -> crate::dom::bindings::root::DomRoot<DomTypeHolder::GlobalScope> {
+        todo!()
+    }
+
+    fn global_scope_origin(global: &DomTypeHolder::GlobalScope) -> &servo_url::MutableOrigin {
+        todo!()
+    }
+}

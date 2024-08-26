@@ -945,7 +945,7 @@ impl ContextForRequestInterrupt {
 /// at `mozjs/js/src/vm/JSContext.h`.
 unsafe impl Send for ContextForRequestInterrupt {}
 
-#[derive(Clone, Copy)]
+/*#[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct JSContext(*mut RawJSContext);
 
@@ -963,7 +963,9 @@ impl Deref for JSContext {
     fn deref(&self) -> &Self::Target {
         &self.0
     }
-}
+}*/
+
+pub use script_bindings::script_runtime::JSContext;
 
 pub struct StreamConsumer(*mut JSStreamConsumer);
 

@@ -112,7 +112,7 @@ impl<T: Float + FromJSValConvertible<Config = ()>> FromJSValConvertible for Fini
     }
 }
 
-impl<T: DomObject + IDLInterface> FromJSValConvertible for DomRoot<T> {
+/*impl<T: DomObject + IDLInterface> FromJSValConvertible for DomRoot<T> {
     type Config = ();
 
     unsafe fn from_jsval(
@@ -125,7 +125,7 @@ impl<T: DomObject + IDLInterface> FromJSValConvertible for DomRoot<T> {
             Err(()) => ConversionResult::Failure("value is not an object".into()),
         })
     }
-}
+}*/
 
 impl<T: ToJSValConvertible + JSTraceable> ToJSValConvertible for RootedTraceableBox<T> {
     #[inline]
@@ -346,14 +346,14 @@ impl FromJSValConvertible for ByteString {
     }
 }
 
-impl ToJSValConvertible for Reflector {
+/*impl ToJSValConvertible for Reflector {
     unsafe fn to_jsval(&self, cx: *mut JSContext, mut rval: MutableHandleValue) {
         let obj = self.get_jsobject().get();
         assert!(!obj.is_null());
         rval.set(ObjectValue(obj));
         maybe_wrap_value(cx, rval);
     }
-}
+}*/
 
 /// Returns whether `obj` is a DOM object implemented as a proxy.
 pub fn is_dom_proxy(obj: *mut JSObject) -> bool {
@@ -556,11 +556,11 @@ where
     root_from_object(obj.get(), cx)
 }
 
-impl<T: DomObject> ToJSValConvertible for DomRoot<T> {
+/*impl<T: DomObject> ToJSValConvertible for DomRoot<T> {
     unsafe fn to_jsval(&self, cx: *mut JSContext, rval: MutableHandleValue) {
         self.reflector().to_jsval(cx, rval);
     }
-}
+}*/
 
 /// Returns whether `value` is an array-like object (Array, FileList,
 /// HTMLCollection, HTMLFormControlsCollection, HTMLOptionsCollection,

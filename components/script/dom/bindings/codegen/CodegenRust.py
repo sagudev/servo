@@ -3076,7 +3076,7 @@ class CGDomObjectWrap(CGThing):
         name = self.descriptor.concreteType
         name = f"dom::{name.lower()}::{name}"
         return f"""
-impl DomObjectWrap for {name} {{
+impl DomObjectWrap<crate::DomTypeHolder> for {name} {{
     const WRAP: unsafe fn(
         SafeJSContext,
         &GlobalScope,

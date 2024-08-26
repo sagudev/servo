@@ -42,7 +42,9 @@ use crate::dom::bindings::reflector::{DomObject, MutDomObject, Reflector};
 use crate::dom::bindings::trace::{trace_reflector, JSTraceable};
 use crate::dom::node::Node;
 
-/// A rooted value.
+pub use script_bindings::root::*;
+
+/*/// A rooted value.
 #[allow(crown::unrooted_must_root)]
 #[crown::unrooted_must_root_lint::allow_unrooted_interior]
 pub struct Root<T: StableTraceObject> {
@@ -385,6 +387,7 @@ unsafe impl<T: DomObject> JSTraceable for Dom<T> {
         trace_reflector(trc, trace_info, (*self.ptr.as_ptr()).reflector());
     }
 }
+pub use script_bindings::root::Dom;
 
 /// A traced reference to a DOM object that may not be reflected yet.
 #[crown::unrooted_must_root_lint::must_root]
@@ -425,7 +428,7 @@ where
         root
     }
 }
-
+*/
 /// An unrooted reference to a DOM object for use in layout. `Layout*Helpers`
 /// traits must be implemented on this.
 #[crown::unrooted_must_root_lint::allow_unrooted_interior]
@@ -480,7 +483,7 @@ where
 }
 
 impl<T> Copy for LayoutDom<'_, T> {}
-
+/*
 impl<T> PartialEq for Dom<T> {
     fn eq(&self, other: &Dom<T>) -> bool {
         self.ptr.as_ptr() == other.ptr.as_ptr()
@@ -494,7 +497,7 @@ impl<'a, T: DomObject> PartialEq<&'a T> for Dom<T> {
 }
 
 impl<T> Eq for Dom<T> {}
-
+*/
 impl<T> PartialEq for LayoutDom<'_, T> {
     fn eq(&self, other: &Self) -> bool {
         std::ptr::eq(self.value, other.value)
@@ -502,19 +505,19 @@ impl<T> PartialEq for LayoutDom<'_, T> {
 }
 
 impl<T> Eq for LayoutDom<'_, T> {}
-
+/*
 impl<T> Hash for Dom<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.ptr.as_ptr().hash(state)
     }
 }
-
+*/
 impl<T> Hash for LayoutDom<'_, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         (self.value as *const T).hash(state)
     }
 }
-
+/*
 impl<T> Clone for Dom<T> {
     #[inline]
     #[allow(crown::unrooted_must_root)]
@@ -523,7 +526,7 @@ impl<T> Clone for Dom<T> {
         Dom { ptr: self.ptr }
     }
 }
-
+*/
 impl<T> Clone for LayoutDom<'_, T> {
     #[inline]
     #[allow(clippy::non_canonical_clone_impl)]
@@ -544,7 +547,7 @@ impl LayoutDom<'_, Node> {
         }
     }
 }
-
+/*
 /// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`.  Essentially a `Cell<Dom<T>>`, but safer.
 ///
@@ -602,11 +605,11 @@ impl<T: DomObject + PartialEq> PartialEq<T> for MutDom<T> {
 pub(crate) fn assert_in_script() {
     debug_assert!(thread_state::get().is_script());
 }
-
+*/
 pub(crate) fn assert_in_layout() {
     debug_assert!(thread_state::get().is_layout());
 }
-
+/*
 /// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`, with nullability represented by an enclosing Option wrapper.
 /// Essentially a `Cell<Option<Dom<T>>>`, but safer.
@@ -778,3 +781,4 @@ where
         &*(slice as *const [Dom<T>] as *const [LayoutDom<T>])
     }
 }
+*/

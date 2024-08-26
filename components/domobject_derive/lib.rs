@@ -52,6 +52,9 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
             }
         }
 
+        impl #impl_generics crate::DomGlobal<crate::DomTypeHolder> for #name #ty_generics #where_clause {
+        }
+
         impl #impl_generics crate::MutDomObject for #name #ty_generics #where_clause {
             unsafe fn init_reflector(&self, obj: *mut js::jsapi::JSObject) {
                 self.#first_field_name.init_reflector(obj);
@@ -66,11 +69,12 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
     // pair of all the type parameters of the DomObject and and the field type.
     // This allows us to support parameterized DOM objects
     // such as IteratorIterable<T>.
-    items.append_all(field_types.iter().map(|ty| {
+    //XXXjdm
+    /*items.append_all(field_types.iter().map(|ty| {
         quote! {
             impl #impl_generics ShouldNotImplDomObject for ((#params), #ty) #where_clause {}
         }
-    }));
+    }));*/
 
     let mut generics = input.generics.clone();
     generics.params.push(parse_quote!(
@@ -79,10 +83,11 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    items.append_all(quote! {
+    //XXXjdm
+    /*items.append_all(quote! {
         trait ShouldNotImplDomObject {}
         impl #impl_generics ShouldNotImplDomObject for ((#params), __T) #where_clause {}
-    });
+    });*/
 
     let dummy_const = syn::Ident::new(
         &format!("_IMPL_DOMOBJECT_FOR_{}", name),
