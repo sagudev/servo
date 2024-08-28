@@ -16,12 +16,13 @@ use js::jsapi::{Heap, JSObject};
 use js::jsval::UndefinedValue;
 use js::rust::{HandleObject, HandleValue, MutableHandleObject};
 
-/*use crate::dom::bindings::codegen::Bindings::IterableIteratorBinding::{
+use crate::codegen::DomTypes::DomTypes;
+use crate::dom::bindings::codegen::Bindings::IterableIteratorBinding::{
     IterableKeyAndValueResult, IterableKeyOrValueResult,
-};*/
+};
 use crate::dom::bindings::error::Fallible;
 use crate::dom::bindings::reflector::{
-    /*reflect_dom_object, DomObjectIteratorWrap,*/ DomObjectWrap, Reflector,
+    reflect_dom_object, DomObjectIteratorWrap, DomObjectWrap, Reflector,
 };
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
 use crate::dom::bindings::trace::{JSTraceable, RootedTraceableBox};
@@ -53,17 +54,17 @@ pub trait Iterable {
     fn get_key_at_index(&self, index: u32) -> Self::Key;
 }
 
-/*/// An iterator over the iterable entries of a given DOM interface.
+/// An iterator over the iterable entries of a given DOM interface.
 //FIXME: #12811 prevents dom_struct with type parameters
 #[dom_struct]
-pub struct IterableIterator<T: DomObjectIteratorWrap + JSTraceable + Iterable> {
+pub struct IterableIterator<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> {
     reflector: Reflector,
     iterable: Dom<T>,
     type_: IteratorType,
     index: Cell<u32>,
 }
 
-impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> IterableIterator<T> {
+impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.
     pub fn new(iterable: &T, type_: IteratorType) -> DomRoot<Self> {
         let iterator = Box::new(IterableIterator {
@@ -120,10 +121,10 @@ impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> IterableIterator<T> {
     }
 }
 
-impl<T: DomObjectIteratorWrap + JSTraceable + Iterable> DomObjectWrap for IterableIterator<T> {
+impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> DomObjectWrap<D> for IterableIterator<D, T> {
     const WRAP: unsafe fn(
         JSContext,
-        &GlobalScope,
+        &D::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>> = T::ITER_WRAP;
@@ -167,4 +168,3 @@ fn key_and_value_return(
     result.set(dict_value.to_object());
     Ok(())
 }
-*/

@@ -31,7 +31,7 @@ use js::rust::wrappers::{
 };
 use js::rust::{
     get_object_class, is_dom_class, GCMethods, Handle, HandleId, HandleObject, HandleValue,
-    MutableHandleValue, ToString,
+    MutableHandleValue, MutableHandleObject, ToString,
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
@@ -41,7 +41,7 @@ use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
     jsstring_to_str, private_from_proto_check, PrototypeCheck,
 };
-use crate::dom::bindings::error::throw_invalid_this;
+use crate::dom::bindings::error::{throw_invalid_this, Fallible};
 use crate::dom::bindings::inheritance::TopTypeId;
 use crate::dom::bindings::str::DOMString;
 use crate::dom::bindings::trace::trace_object;
@@ -674,4 +674,27 @@ pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
     fn global_scope_from_object(obj: *mut JSObject) -> crate::root::DomRoot<D::GlobalScope>;
 
     fn global_scope_origin(global: &D::GlobalScope) -> &servo_url::MutableOrigin;
+
+    fn report_cross_origin_denial(cx: crate::script_runtime::JSContext, id: RawHandleId, access: &str) -> bool;
+
+    fn Window_create_named_properties_object(
+        cx: JSContext,
+        proto: HandleObject,
+        object: MutableHandleObject,
+    );
+
+    fn Promise_new_resolved(
+        global: &D::GlobalScope,
+        cx: SafeJSContext,
+        value: HandleValue,
+    ) -> Fallible<std::rc::Rc<D::Promise>>;
+
+    unsafe fn GlobalScope_from_object_maybe_wrapped(
+        obj: *mut JSObject,
+        cx: *mut JSContext,
+    ) -> crate::root::DomRoot<D::GlobalScope>;
+
+    fn GlobalScope_incumbent() -> Option<crate::root::DomRoot<D::GlobalScope>>;
+
+    fn GlobalScope_get_cx() -> crate::script_runtime::JSContext;
 }

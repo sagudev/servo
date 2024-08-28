@@ -10,7 +10,7 @@ use js::jsapi::JSObject;
 use js::jsval::UndefinedValue;
 
 use crate::dom::bindings::utils::finalize_global as do_finalize_global;
-//use crate::dom::bindings::weakref::{WeakBox, WeakReferenceable, DOM_WEAK_SLOT};
+use crate::dom::bindings::weakref::{WeakBox, WeakReferenceable, DOM_WEAK_SLOT};
 
 /// Generic finalizer implementations for DOM binding implementations.
 
@@ -27,7 +27,7 @@ pub unsafe fn finalize_global<T>(obj: *mut JSObject, this: *const T) {
     finalize_common::<T>(this);
 }
 
-/*pub unsafe fn finalize_weak_referenceable<T: WeakReferenceable>(
+pub unsafe fn finalize_weak_referenceable<T: WeakReferenceable>(
     obj: *mut JSObject,
     this: *const T,
 ) {
@@ -49,4 +49,4 @@ pub unsafe fn finalize_global<T>(obj: *mut JSObject, this: *const T) {
         }
     }
     finalize_common::<T>(this);
-}*/
+}

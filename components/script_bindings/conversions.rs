@@ -54,6 +54,7 @@ use js::rust::{
 use num_traits::Float;
 use servo_config::opts;
 
+use crate::codegen::DomTypes::DomTypes;
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::num::Finite;
@@ -565,7 +566,7 @@ impl<T: DomObject> ToJSValConvertible for DomRoot<T> {
 /// Returns whether `value` is an array-like object (Array, FileList,
 /// HTMLCollection, HTMLFormControlsCollection, HTMLOptionsCollection,
 /// NodeList).
-/*pub unsafe fn is_array_like(cx: *mut JSContext, value: HandleValue) -> bool {
+pub unsafe fn is_array_like<D: DomTypes>(cx: *mut JSContext, value: HandleValue) -> bool {
     let mut is_array = false;
     assert!(IsArrayObject(cx, value, &mut is_array));
     if is_array {
@@ -577,24 +578,24 @@ impl<T: DomObject> ToJSValConvertible for DomRoot<T> {
         _ => return false,
     };
 
-    if root_from_object::<FileList>(object, cx).is_ok() {
+    if root_from_object::<D::FileList>(object, cx).is_ok() {
         return true;
     }
-    if root_from_object::<HTMLCollection>(object, cx).is_ok() {
+    if root_from_object::<D::HTMLCollection>(object, cx).is_ok() {
         return true;
     }
-    if root_from_object::<HTMLFormControlsCollection>(object, cx).is_ok() {
+    if root_from_object::<D::HTMLFormControlsCollection>(object, cx).is_ok() {
         return true;
     }
-    if root_from_object::<HTMLOptionsCollection>(object, cx).is_ok() {
+    if root_from_object::<D::HTMLOptionsCollection>(object, cx).is_ok() {
         return true;
     }
-    if root_from_object::<NodeList>(object, cx).is_ok() {
+    if root_from_object::<D::NodeList>(object, cx).is_ok() {
         return true;
     }
 
     false
-}*/
+}
 
 /// Get a property from a JS object.
 pub unsafe fn get_property_jsval(
@@ -647,12 +648,12 @@ where
     }
 }
 
-/*/// Get a `DomRoot<T>` for a WindowProxy accessible from a `HandleValue`.
+/// Get a `DomRoot<T>` for a WindowProxy accessible from a `HandleValue`.
 /// Caller is responsible for throwing a JS exception if needed in case of error.
-pub unsafe fn windowproxy_from_handlevalue(
+pub unsafe fn windowproxy_from_handlevalue<D: DomTypes>(
     v: HandleValue,
     _cx: *mut JSContext,
-) -> Result<DomRoot<WindowProxy>, ()> {
+) -> Result<DomRoot<D::WindowProxy>, ()> {
     if !v.get().is_object() {
         return Err(());
     }
@@ -662,6 +663,6 @@ pub unsafe fn windowproxy_from_handlevalue(
     }
     let mut value = UndefinedValue();
     GetProxyReservedSlot(object, 0, &mut value);
-    let ptr = value.to_private() as *const WindowProxy;
+    let ptr = value.to_private() as *const D::WindowProxy;
     Ok(DomRoot::from_ref(&*ptr))
-}*/
+}

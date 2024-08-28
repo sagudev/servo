@@ -197,10 +197,12 @@ class Descriptor(DescriptorProvider):
         # nativeType of the iterable interface. That way we can have a
         # templated implementation for all the duplicated iterator
         # functionality.
+        useDomPrefix = True
         if self.interface.isIteratorInterface():
             itrName = self.interface.iterableInterface.identifier.name
             itrDesc = self.getDescriptor(itrName)
             nativeTypeDefault = iteratorNativeType(itrDesc)
+            useDomPrefix = False
 
         typeName = desc.get('nativeType', nativeTypeDefault)
 
@@ -220,9 +222,9 @@ class Descriptor(DescriptorProvider):
             self.argumentType = "???"
             self.nativeType = ty
         else:
-            self.returnType = "DomRoot<D::%s>" % typeName
-            self.argumentType = "&%s" % typeName
-            self.nativeType = "*const %s" % typeName
+            self.returnType = "DomRoot<%s%s>" % ("D::" if useDomPrefix else "", typeName)
+            self.argumentType = "&%s%s" % ("D::" if useDomPrefix else "", typeName)
+            self.nativeType = "*const %s%s" % ("D::" if useDomPrefix else "", typeName)
             if self.interface.isIteratorInterface():
                 pathDefault = 'crate::dom::bindings::iterable::IterableIterator'
             else:
@@ -371,7 +373,7 @@ class Descriptor(DescriptorProvider):
         filename = getIdlFileName(self.interface)
         # if interface name is not same as webidl file
         # webidl is super module for interface
-        if filename.lower() != self.interface.identifier.name.lower() and not self.interface.isIteratorInterface():
+        if filename.lower() != self.interface.identifier.name.lower(): #and not self.interface.isIteratorInterface():
             return filename
         return None
 
@@ -533,7 +535,7 @@ def iteratorNativeType(descriptor, infer=False):
     iterableDecl = descriptor.interface.maplikeOrSetlikeOrIterable
     assert (iterableDecl.isIterable() and iterableDecl.isPairIterator()) \
         or iterableDecl.isSetlike() or iterableDecl.isMaplike()
-    res = "IterableIterator%s" % ("" if infer else '<%s>' % descriptor.interface.identifier.name)
+    res = "IterableIterator%s" % ("" if infer else '<D, D::%s>' % descriptor.interface.identifier.name)
     # todo: this hack is telling us that something is still wrong in codegen
     if iterableDecl.isSetlike() or iterableDecl.isMaplike():
         res = f"crate::dom::bindings::iterable::{res}"

@@ -9,7 +9,7 @@
 
 [
   ExceptionClass,
-  Exposed=(Window/*,Worker,Worklet,DissimilarOriginWindow*/)
+  Exposed=(Window,Worker,Worklet,DissimilarOriginWindow)
 ]
 interface DOMException {
   [Throws] constructor(optional DOMString message="", optional DOMString name="Error");
