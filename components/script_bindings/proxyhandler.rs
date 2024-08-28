@@ -244,7 +244,7 @@ pub unsafe fn report_cross_origin_denial<D: crate::DomTypes>(cx: SafeJSContext, 
     );
     let in_realm_proof = AlreadyInRealm::assert_for_cx(cx);
     if !JS_IsExceptionPending(*cx) {
-        let global = <D as crate::DomHelpers<D>>::GlobalScope::from_context(*cx, InRealm::Already(&in_realm_proof));
+        let global = <D as crate::DomHelpers<D>>::GlobalScope_from_context(*cx, InRealm::Already(&in_realm_proof));
         // TODO: include `id` and `access` in the exception message
         D::throw_dom_exception(cx, &global, Error::Security);
     }
