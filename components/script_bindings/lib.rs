@@ -114,16 +114,16 @@ mod realms {
 
     impl AlreadyInRealm {
         #![allow(unsafe_code)]
-        pub fn assert<D: crate::utils::DomHelpers>() -> AlreadyInRealm {
+        pub fn assert<D: crate::DomTypes>() -> AlreadyInRealm {
             unsafe {
-                assert!(!js::jsapi::GetCurrentRealmOrNull(*D::GlobalScope_get_cx()).is_null());
+                assert!(!js::jsapi::GetCurrentRealmOrNull(*<D as crate::DomHelpers<D>>::GlobalScope_get_cx()).is_null());
             }
             AlreadyInRealm(())
         }
 
         pub fn assert_for_cx(cx: crate::script_runtime::JSContext) -> AlreadyInRealm {
             unsafe {
-                assert!(!GetCurrentRealmOrNull(*cx).is_null());
+                assert!(!js::jsapi::GetCurrentRealmOrNull(*cx).is_null());
             }
             AlreadyInRealm(())
         }
@@ -145,9 +145,9 @@ mod realms {
         }
     }
 
-    pub fn enter_realm<D: crate::utils::DomHelpers>(object: &impl crate::reflector::DomObject) -> JSAutoRealm {
+    pub fn enter_realm<D: crate::DomTypes>(object: &impl crate::reflector::DomObject) -> js::jsapi::JSAutoRealm {
         js::jsapi::JSAutoRealm::new(
-            *D::GlobalScope_get_cx(),
+            *<D as crate::DomHelpers<D>>::GlobalScope_get_cx(),
             object.reflector().get_jsobject().get(),
         )
     }

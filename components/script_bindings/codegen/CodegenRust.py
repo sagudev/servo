@@ -2745,7 +2745,8 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                     traits += ["crate::like::Setlike"]
                 traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
             traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]
-        elements += [CGGeneric(f"    type {iface_name}: crate::dom::bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(iface_name)}::{iface_name}Methods<Self> + {' + '.join(traits)};\n")]
+        if not descriptor.interface.isCallback():
+            elements += [CGGeneric(f"    type {iface_name}: crate::dom::bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(iface_name)}::{iface_name}Methods<Self> + {' + '.join(traits)};\n")]
     elements += [CGGeneric("}\n")]
     return CGList(elements)
 

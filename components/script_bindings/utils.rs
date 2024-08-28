@@ -698,7 +698,7 @@ pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
 
     fn GlobalScope_get_cx() -> crate::script_runtime::JSContext;
 
-    fn GlobalScope_from_context(cx: *mut JSContext, in_realm: script_runtime::InRealm) -> crate::root::DomRoot<D::GlobalScope>;
+    fn GlobalScope_from_context(cx: *mut JSContext, in_realm: crate::realms::InRealm) -> crate::root::DomRoot<D::GlobalScope>;
 
     fn GlobalScope_report_an_error(info: crate::error::ErrorInfo, value: HandleValue);
 }

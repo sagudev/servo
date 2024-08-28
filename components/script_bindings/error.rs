@@ -169,7 +169,7 @@ pub fn throw_dom_exception<D: DomTypes>(cx: SafeJSContext, global: &D::GlobalSco
     todo!()
 }*/
 
-/*/// A struct encapsulating information about a runtime script error.
+/// A struct encapsulating information about a runtime script error.
 #[derive(Default)]
 pub struct ErrorInfo {
     /// The error message.
@@ -262,13 +262,13 @@ impl ErrorInfo {
             },
         }
     }
-}*/
+}
 
 /// Report a pending exception, thereby clearing it.
 ///
 /// The `dispatch_event` argument is temporary and non-standard; passing false
 /// prevents dispatching the `error` event.
-pub unsafe fn report_pending_exception<D: crate::utils::DomHelpers>(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
+pub unsafe fn report_pending_exception<D: crate::DomTypes>(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
     if !JS_IsExceptionPending(cx) {
         return;
     }
@@ -300,7 +300,7 @@ pub unsafe fn report_pending_exception<D: crate::utils::DomHelpers>(cx: *mut JSC
     }
 
     if dispatch_event {
-        let global = D::GlobalScope_from_context(cx, realm);
+        let global = <D as crate::DomHelpers<D>>::GlobalScope_from_context(cx, realm);
         D::GlobalScope_report_an_error(error_info, value.handle());
     }
 }
