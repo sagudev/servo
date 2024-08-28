@@ -264,11 +264,11 @@ impl ErrorInfo {
     }
 }*/
 
-/*/// Report a pending exception, thereby clearing it.
+/// Report a pending exception, thereby clearing it.
 ///
 /// The `dispatch_event` argument is temporary and non-standard; passing false
 /// prevents dispatching the `error` event.
-pub unsafe fn report_pending_exception(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
+pub unsafe fn report_pending_exception<D: crate::utils::DomHelpers>(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
     if !JS_IsExceptionPending(cx) {
         return;
     }
@@ -300,9 +300,10 @@ pub unsafe fn report_pending_exception(cx: *mut JSContext, dispatch_event: bool,
     }
 
     if dispatch_event {
-        GlobalScope::from_context(cx, realm).report_an_error(error_info, value.handle());
+        let global = D::GlobalScope_from_context(cx, realm);
+        D::GlobalScope_report_an_error(error_info, value.handle());
     }
-}*/
+}
 
 /// Throw an exception to signal that a `JSObject` can not be converted to a
 /// given DOM type.

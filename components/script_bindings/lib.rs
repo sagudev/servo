@@ -110,8 +110,47 @@ pub mod script_runtime {
 }
 
 mod realms {
-    pub struct AlreadyInRealm;
-    pub struct InRealm;
+    pub struct AlreadyInRealm(());
+
+    impl AlreadyInRealm {
+        #![allow(unsafe_code)]
+        pub fn assert<D: crate::utils::DomHelpers>() -> AlreadyInRealm {
+            unsafe {
+                assert!(!js::jsapi::GetCurrentRealmOrNull(*D::GlobalScope_get_cx()).is_null());
+            }
+            AlreadyInRealm(())
+        }
+
+        pub fn assert_for_cx(cx: crate::script_runtime::JSContext) -> AlreadyInRealm {
+            unsafe {
+                assert!(!GetCurrentRealmOrNull(*cx).is_null());
+            }
+            AlreadyInRealm(())
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    pub enum InRealm<'a> {
+        Already(&'a AlreadyInRealm),
+        Entered(&'a js::jsapi::JSAutoRealm),
+    }
+
+    impl<'a> InRealm<'a> {
+        pub fn already(token: &AlreadyInRealm) -> InRealm {
+            InRealm::Already(token)
+        }
+
+        pub fn entered(token: &js::jsapi::JSAutoRealm) -> InRealm {
+            InRealm::Entered(token)
+        }
+    }
+
+    pub fn enter_realm<D: crate::utils::DomHelpers>(object: &impl crate::reflector::DomObject) -> JSAutoRealm {
+        js::jsapi::JSAutoRealm::new(
+            *D::GlobalScope_get_cx(),
+            object.reflector().get_jsobject().get(),
+        )
+    }
 }
 
 pub mod dom {

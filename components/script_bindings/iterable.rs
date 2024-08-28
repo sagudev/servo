@@ -57,14 +57,15 @@ pub trait Iterable {
 /// An iterator over the iterable entries of a given DOM interface.
 //FIXME: #12811 prevents dom_struct with type parameters
 #[dom_struct]
-pub struct IterableIterator<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> {
+pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> {
     reflector: Reflector,
     iterable: Dom<T>,
     type_: IteratorType,
     index: Cell<u32>,
+    _marker: std::marker::PhantomData<D>,
 }
 
-impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.
     pub fn new(iterable: &T, type_: IteratorType) -> DomRoot<Self> {
         let iterator = Box::new(IterableIterator {
@@ -72,6 +73,7 @@ impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> Iterable
             type_,
             iterable: Dom::from_ref(iterable),
             index: Cell::new(0),
+            _marker: std::marker::PhantomData::new(),
         });
         reflect_dom_object(iterator, &*iterable.global())
     }
@@ -121,7 +123,7 @@ impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> Iterable
     }
 }
 
-impl<D: DomTypes, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> DomObjectWrap<D> for IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> DomObjectWrap<D> for IterableIterator<D, T> {
     const WRAP: unsafe fn(
         JSContext,
         &D::GlobalScope,

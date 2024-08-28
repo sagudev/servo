@@ -566,7 +566,7 @@ def typeIsSequenceOrHasSequenceMember(type):
 
 def union_native_type(t, includeGeneric=True):
     name = t.unroll().name
-    generic = "<D>" if includeGeneric and any(map(lambda x: isDomInterface(x), t.unroll().flatMemberTypes)) else ""
+    generic = "<D>" if includeGeneric and any(map(lambda x: containsDomInterface(x), t.unroll().flatMemberTypes)) else ""
     return f'UnionTypes::{name}{generic}'
 
 
@@ -2719,8 +2719,8 @@ def UnionTypes(descriptors, dictionaries, callbacks, typedefs, config):
                      typedefs=[], imports=imports, config=config)
 
 
-def DomTypes(descriptors, dictionaries, callbacks, typedefs, config):
-    elements = [CGGeneric("pub trait DomTypes: crate::utils::DomHelpers<Self> + Sized {\n")]
+def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs, config):
+    elements = [CGGeneric("pub trait DomTypes: crate::utils::DomHelpers<Self> + js::rust::Trace + Sized where Self: 'static {\n")]
     universal = [
         "crate::reflector::DomObject",
         "crate::reflector::DomGlobal<Self>",
@@ -2736,6 +2736,14 @@ def DomTypes(descriptors, dictionaries, callbacks, typedefs, config):
         iface_name = descriptor.interface.identifier.name
         traits = list(universal)
         for parent in descriptor.prototypeChain:
+            parentDescriptor = descriptorProvider.getDescriptor(parent)
+            iterableDecl = parentDescriptor.interface.maplikeOrSetlikeOrIterable
+            if iterableDecl:
+                if iterableDecl.isMaplike():
+                    traits += ["crate::like::Maplike"]
+                if iterableDecl.isSetlike():
+                    traits += ["crate::like::Setlike"]
+                traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
             traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]
         elements += [CGGeneric(f"    type {iface_name}: crate::dom::bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(iface_name)}::{iface_name}Methods<Self> + {' + '.join(traits)};\n")]
     elements += [CGGeneric("}\n")]
@@ -5001,8 +5009,8 @@ class CGUnionStruct(CGThing):
         self.type = type
         self.descriptorProvider = descriptorProvider
 
-        if any(map(lambda x: isDomInterface(x), self.type.flatMemberTypes)):
-            self.generic = "<D: DomTypes>"
+        if containsDomInterface(self.type):
+            self.generic = "<D: DomTypes + 'static>"
             self.genericSuffix = "<D>"
         else:
             self.generic = ""
@@ -5193,7 +5201,7 @@ class CGUnionConversionStruct(CGThing):
         conversions.append(CGGeneric(
             f'Ok(ConversionResult::Failure("argument could not be converted to any of: {", ".join(names)}".into()))'
         ))
-        needsGeneric = any(map(lambda x: isDomInterface(x), memberTypes))
+        needsGeneric = any(map(lambda x: containsDomInterface(x), memberTypes))
         genericSuffix = "<D>" if needsGeneric else ""
         method = CGWrapper(
             CGIndenter(CGList(conversions, "\n\n")),
@@ -5236,7 +5244,7 @@ class CGUnionConversionStruct(CGThing):
         methods = CGIndenter(CGList([
             self.try_method(t) for t in self.type.flatMemberTypes
         ], "\n\n"))
-        if any(map(lambda x: isDomInterface(x), self.type.flatMemberTypes)):
+        if any(map(lambda x: containsDomInterface(x), self.type.flatMemberTypes)):
             generic = "<D: DomTypes> "
             genericSuffix = "<D>"
         else:
@@ -6842,7 +6850,7 @@ class CGDictionary(CGThing):
             if not self.hasRequiredFields(self.dictionary):
                 derive += ["Default"]
         joinedMemberDecls = '\n'.join(memberDecls)
-        generic = "<D: DomTypes>" if self.needsGeneric else ""
+        generic = "<D: DomTypes + 'static>" if self.needsGeneric else ""
         return (
             f"#[derive({', '.join(derive)})]\n"
             f"{mustRoot}"
@@ -7156,15 +7164,15 @@ class CGBindingRoot(CGThing):
 
         # Do codegen for all the typedefs
         for t in typedefs:
-            typeName = getRetvalDeclarationForType(t.innerType, config.getDescriptorProvider(), includeGenerics=False)
+            typeName = getRetvalDeclarationForType(t.innerType, config.getDescriptorProvider())
             name = t.identifier.name
             type = typeName.define()
 
             if t.innerType.isUnion() and not t.innerType.nullable():
                 # Allow using the typedef's name for accessing variants.
-                typeDefinition = f"pub use self::{type} as {name};"
+                typeDefinition = f"pub use self::{type.replace('<D>', '')} as {name};"
             else:
-                generic = "<D: DomTypes>" if ("<D>" in type or "D::" in type) else ""
+                generic = "<D: DomTypes>" if containsDomInterface(t.innerType) else ""
                 typeDefinition = f"pub type {name}{generic} = {type};"
 
             cgthings.append(CGGeneric(typeDefinition))
@@ -8183,6 +8191,7 @@ impl <D: DomTypes> D::{base} {{
     @staticmethod
     def DomTypes(config):
         curr = DomTypes(config.getDescriptors(),
+                        config.getDescriptorProvider(),
                         config.getDictionaries(),
                         config.getCallbacks(),
                         config.typedefs,
