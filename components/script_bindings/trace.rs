@@ -238,11 +238,6 @@ unsafe impl<K, V: JSTraceable, S> JSTraceable for HashMapTracedValues<K, V, S> {
 }
 
 
-unsafe impl<T> JSTraceable for std::marker::PhantomData<T> {
-    #[inline]
-    unsafe fn trace(&self, trc: *mut ::js::jsapi::JSTracer) {}
-}
-
 /*unsafe_no_jsmanaged_fields!(Box<dyn TaskBox>);
 
 unsafe_no_jsmanaged_fields!(IncompleteParserContexts);*/

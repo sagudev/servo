@@ -62,6 +62,7 @@ pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> +
     iterable: Dom<T>,
     type_: IteratorType,
     index: Cell<u32>,
+    #[no_trace]
     _marker: std::marker::PhantomData<D>,
 }
 
@@ -123,7 +124,7 @@ impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable
     }
 }
 
-impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> DomObjectWrap<D> for IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomObjectWrap<D> for IterableIterator<D, T> {
     const WRAP: unsafe fn(
         JSContext,
         &D::GlobalScope,

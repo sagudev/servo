@@ -230,7 +230,7 @@ class Descriptor(DescriptorProvider):
             else:
                 pathDefault = 'crate::dom::types::%s' % MakeNativeName(typeName)
 
-        self.concreteType = typeName
+        self.concreteType = "%s%s" % ("D::" if useDomPrefix else "", typeName)
         self.register = desc.get('register', True)
         self.path = desc.get('path', pathDefault)
         self.inRealmMethods = [name for name in desc.get('inRealms', [])]
