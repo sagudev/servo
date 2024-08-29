@@ -87,6 +87,7 @@ pub mod proxyhandler;
 pub mod record;
 pub mod reflector;
 pub mod root;
+pub mod settings_stack;
 pub mod str;
 pub mod trace;
 pub mod utils;
@@ -173,6 +174,7 @@ pub mod dom {
         pub use crate::record;
         pub use crate::reflector;
         pub use crate::root;
+        pub use crate::settings_stack;
         pub use crate::str;
         pub use crate::trace;
         pub use crate::utils;

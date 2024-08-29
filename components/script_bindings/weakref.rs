@@ -21,7 +21,7 @@ use js::jsval::{PrivateValue, UndefinedValue};
 use libc::c_void;
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
 
-use crate::dom::bindings::cell::DomRefCell;
+//use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::trace::JSTraceable;
@@ -297,7 +297,7 @@ impl<'a, T: WeakReferenceable + 'a> Drop for WeakRefEntry<'a, T> {
     }
 }
 
-#[derive(MallocSizeOf)]
+/*#[derive(MallocSizeOf)]
 pub struct DOMTracker<T: WeakReferenceable> {
     dom_objects: DomRefCell<WeakRefVec<T>>,
 }
@@ -326,4 +326,4 @@ unsafe impl<T: WeakReferenceable> JSTraceable for DOMTracker<T> {
     unsafe fn trace(&self, _: *mut JSTracer) {
         self.dom_objects.borrow_mut().retain_alive();
     }
-}
+}*/

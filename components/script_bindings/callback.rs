@@ -71,7 +71,7 @@ impl <D: DomTypes> CallbackObject<D> {
         Self {
             callback: Heap::default(),
             permanent_js_root: Heap::default(),
-            incumbent: <D as DomHelpers>::GlobalScope_incumbent().map(|i| Dom::from_ref(&*i)),
+            incumbent: <D as DomHelpers<D>>::GlobalScope_incumbent().map(|i| Dom::from_ref(&*i)),
         }
     }
 
@@ -233,10 +233,10 @@ pub struct CallSetup<D: DomTypes> {
     handling: ExceptionHandling,
     /// <https://heycam.github.io/webidl/#es-invoking-callback-functions>
     /// steps 8 and 18.2.
-    entry_script: Option<AutoEntryScript>,
+    entry_script: Option<AutoEntryScript<D>>,
     /// <https://heycam.github.io/webidl/#es-invoking-callback-functions>
     /// steps 9 and 18.1.
-    incumbent_script: Option<AutoIncumbentScript>,
+    incumbent_script: Option<AutoIncumbentScript<D>>,
 }
 
 impl <D: DomTypes> CallSetup<D> {
@@ -245,11 +245,12 @@ impl <D: DomTypes> CallSetup<D> {
     pub fn new<T: CallbackContainer<D>>(callback: &T, handling: ExceptionHandling) -> CallSetup<D> {
         let global = unsafe { <D as DomHelpers<D>>::global_scope_from_object(callback.callback()) };
         if let Some(window) = global.downcast::<D::Window>() {
-            window.Document().ensure_safe_to_run_script_or_layout();
+            //XXXjdm
+            //window.Document().ensure_safe_to_run_script_or_layout();
         }
         let cx = <D as DomHelpers<D>>::GlobalScope_get_cx();
 
-        let aes = AutoEntryScript::new(&global);
+        let aes = AutoEntryScript::new(&*global);
         let ais = callback.incumbent().map(AutoIncumbentScript::new);
         CallSetup {
             exception_global: global,
@@ -272,8 +273,8 @@ impl <D: DomTypes> Drop for CallSetup<D> {
         unsafe {
             LeaveRealm(*self.cx, self.old_realm);
             if self.handling == ExceptionHandling::Report {
-                let ar = enter_realm(&*self.exception_global);
-                report_pending_exception(*self.cx, true, InRealm::Entered(&ar));
+                let ar = enter_realm::<D>(&*self.exception_global);
+                report_pending_exception::<D>(*self.cx, true, InRealm::Entered(&ar));
             }
             drop(self.incumbent_script.take());
             drop(self.entry_script.take().unwrap());

@@ -22,7 +22,7 @@ use crate::dom::bindings::codegen::Bindings::IterableIteratorBinding::{
 };
 use crate::dom::bindings::error::Fallible;
 use crate::dom::bindings::reflector::{
-    reflect_dom_object, DomObjectIteratorWrap, DomObjectWrap, Reflector,
+    reflect_dom_object, DomObjectIteratorWrap, DomObjectWrap, Reflector, DomGlobal,
 };
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
 use crate::dom::bindings::trace::{JSTraceable, RootedTraceableBox};
@@ -65,7 +65,7 @@ pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> +
     _marker: std::marker::PhantomData<D>,
 }
 
-impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.
     pub fn new(iterable: &T, type_: IteratorType) -> DomRoot<Self> {
         let iterator = Box::new(IterableIterator {
@@ -73,7 +73,7 @@ impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable
             type_,
             iterable: Dom::from_ref(iterable),
             index: Cell::new(0),
-            _marker: std::marker::PhantomData::new(),
+            _marker: std::marker::PhantomData,
         });
         reflect_dom_object(iterator, &*iterable.global())
     }

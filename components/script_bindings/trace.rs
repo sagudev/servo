@@ -55,9 +55,9 @@ use tendril::stream::LossyDecoder;
 use tendril::TendrilSink;
 use webxr_api::{Finger, Hand};*/
 
-/*use crate::dom::bindings::cell::DomRefCell;
+/*use crate::dom::bindings::cell::DomRefCell;*/
 use crate::dom::bindings::error::Error;
-use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};*/
+//use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};*/
 use crate::dom::bindings::reflector::{DomObject, Reflector};
 use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::str::{DOMString, USVString};
@@ -237,6 +237,12 @@ unsafe impl<K, V: JSTraceable, S> JSTraceable for HashMapTracedValues<K, V, S> {
     }
 }
 
+
+unsafe impl<T> JSTraceable for std::marker::PhantomData<T> {
+    #[inline]
+    unsafe fn trace(&self, trc: *mut ::js::jsapi::JSTracer) {}
+}
+
 /*unsafe_no_jsmanaged_fields!(Box<dyn TaskBox>);
 
 unsafe_no_jsmanaged_fields!(IncompleteParserContexts);*/
@@ -358,18 +364,18 @@ where
     }
 }
 
-/*unsafe_no_jsmanaged_fields!(Error);
-unsafe_no_jsmanaged_fields!(TrustedPromise);
+unsafe_no_jsmanaged_fields!(Error);
+//unsafe_no_jsmanaged_fields!(TrustedPromise);
 
-unsafe_no_jsmanaged_fields!(ContextForRequestInterrupt);
-unsafe_no_jsmanaged_fields!(WindowProxyHandler);
+//unsafe_no_jsmanaged_fields!(ContextForRequestInterrupt);
+//unsafe_no_jsmanaged_fields!(WindowProxyHandler);
 unsafe_no_jsmanaged_fields!(DOMString);
 unsafe_no_jsmanaged_fields!(USVString);
-unsafe_no_jsmanaged_fields!(WebGPUContextId);
-unsafe_no_jsmanaged_fields!(GPUBufferState);
-unsafe_no_jsmanaged_fields!(SourceSet);
-unsafe_no_jsmanaged_fields!(HTMLMediaElementFetchContext);
-unsafe_no_jsmanaged_fields!(StreamConsumer);*/
+//unsafe_no_jsmanaged_fields!(WebGPUContextId);
+//unsafe_no_jsmanaged_fields!(GPUBufferState);
+//unsafe_no_jsmanaged_fields!(SourceSet);
+//unsafe_no_jsmanaged_fields!(HTMLMediaElementFetchContext);
+//unsafe_no_jsmanaged_fields!(StreamConsumer);
 
 /*unsafe impl<T: DomObject> JSTraceable for Trusted<T> {
     #[inline]

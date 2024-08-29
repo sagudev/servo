@@ -242,10 +242,10 @@ impl ErrorInfo {
         None
     }
 
-    unsafe fn from_value(value: HandleValue, cx: *mut JSContext) -> ErrorInfo {
+    unsafe fn from_value<D: DomTypes>(value: HandleValue, cx: *mut JSContext) -> ErrorInfo {
         if value.is_object() {
             rooted!(in(cx) let object = value.to_object());
-            if let Some(info) = ErrorInfo::from_object(object.handle(), cx) {
+            if let Some(info) = ErrorInfo::from_object::<D>(object.handle(), cx) {
                 return info;
             }
         }
@@ -281,7 +281,7 @@ pub unsafe fn report_pending_exception<D: crate::DomTypes>(cx: *mut JSContext, d
     }
 
     JS_ClearPendingException(cx);
-    let error_info = ErrorInfo::from_value(value.handle(), cx);
+    let error_info = ErrorInfo::from_value::<D>(value.handle(), cx);
 
     error!(
         "Error at {}:{}:{} {}",
