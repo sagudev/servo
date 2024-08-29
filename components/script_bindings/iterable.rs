@@ -57,7 +57,7 @@ pub trait Iterable {
 /// An iterator over the iterable entries of a given DOM interface.
 //FIXME: #12811 prevents dom_struct with type parameters
 #[dom_struct]
-pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable> {
+pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> {
     reflector: Reflector,
     iterable: Dom<T>,
     type_: IteratorType,
@@ -65,6 +65,8 @@ pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> +
     #[no_trace]
     _marker: std::marker::PhantomData<D>,
 }
+
+impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterableIterator<D, T> {}
 
 impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.

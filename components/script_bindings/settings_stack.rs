@@ -83,7 +83,7 @@ impl <D: DomTypes> Drop for AutoEntryScript<D> {
         });
 
         // Step 5
-        if !thread::panicking() && incumbent_global().is_none() {
+        if !thread::panicking() && incumbent_global::<D>().is_none() {
             <D as crate::DomHelpers<D>>::perform_a_microtask_checkpoint(&self.global);
         }
     }

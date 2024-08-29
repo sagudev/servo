@@ -1671,7 +1671,7 @@ class PropertyDefiner:
             if specTerminator:
                 currentSpecs.append(specTerminator)
             joinedCurrentSpecs = ',\n'.join(currentSpecs)
-            specs.append(f"&[\n{joinedCurrentSpecs}]\n")
+            specs.append(f"&Box::leak(vec![\n{joinedCurrentSpecs}].into_boxed_slice())[..]\n")
             if isinstance(cond, list):
                 for i in cond:
                     prefableSpecs.append(
@@ -1684,18 +1684,18 @@ class PropertyDefiner:
         specsArray = f"static mut {name}_specs: &[&[{specType}]] = &[];\n"
 
         initSpecs = (f"fn init_{name}_specs<D: DomTypes>() {{\n"
-                     f"    unsafe {{ {name}_specs = &[\n"
+                     f"    unsafe {{ {name}_specs = Box::leak(vec![\n"
                      f"{joinedSpecs}\n"
-                     "    ]; }\n"
+                     "    ].into_boxed_slice()); }\n"
                      "}\n")
 
         joinedPrefableSpecs = ',\n'.join(prefableSpecs)
         prefArray = f"static mut {name}: &[Guard<&[{specType}]>] = &[];\n"
 
         initPrefs = (f"fn init_{name}_prefs<D: DomTypes>() {{\n"
-                     f"    unsafe {{ {name} = &[\n"
-                     f"{joinedPrefableSpecs}\n"
-                     "    ]; }\n"
+                     f"    unsafe {{ {name} = \n"
+                     f"Box::leak(Box::new([{joinedPrefableSpecs}]))\n"
+                     "    ; }\n"
                      "}\n")
 
         return f"{specsArray}{initSpecs}{prefArray}{initPrefs}"
@@ -1867,7 +1867,7 @@ class MethodDefiner(PropertyDefiner):
         def condition(m, d):
             return m["condition"]
 
-        def specData(m):
+        def specData(m, in_unsafe=True):
             flags = m["flags"]
             if self.unforgeable:
                 flags += " | JSPROP_PERMANENT | JSPROP_READONLY"
@@ -1890,7 +1890,9 @@ class MethodDefiner(PropertyDefiner):
                     # easy to tell whether the methodinfo is a JSJitInfo or
                     # a JSTypedMethodJitInfo here.  The compiler knows, though,
                     # so let it do the work.
-                    jitinfo = f"unsafe {{ std::ptr::addr_of!({identifier}_methodinfo) as *const _ as *const JSJitInfo }}"
+                    unsafeOpen = "" if in_unsafe else "{"
+                    unsafeClose = "" if in_unsafe else "}"
+                    jitinfo = f"{unsafeOpen}std::ptr::addr_of!({identifier}_methodinfo) as *const _ as *const JSJitInfo{unsafeClose}"
                     accessor = f"Some(generic_method::<{exceptionToRejection}>)"
                 else:
                     if m.get("returnsPromise", False):
@@ -1999,7 +2001,7 @@ class AttrDefiner(PropertyDefiner):
                     accessor = f"generic_lenient_getter::<{exceptionToRejection}>"
                 else:
                     accessor = f"generic_getter::<{exceptionToRejection}>"
-                jitinfo = f"unsafe {{ std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo) }}"
+                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo)"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
@@ -2020,7 +2022,7 @@ class AttrDefiner(PropertyDefiner):
                     accessor = "generic_lenient_setter"
                 else:
                     accessor = "generic_setter"
-                jitinfo = f"unsafe {{ std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_setterinfo) }}"
+                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_setterinfo)"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
