@@ -6560,11 +6560,11 @@ class CGInterfaceTrait(CGThing):
             else:
                 arguments = extra + arguments
             methods.append(CGGeneric(f"{unsafe}fn {name}({selfArg}{fmt(arguments, leadingComma=not isStatic)}){returnType};\n"))
-        ctor = descriptor.interface.ctor()
-        if ctor:
+
+        def ctorMethod(ctor, baseName=None):
             infallible = 'infallible' in descriptor.getExtendedAttributes(ctor)
             for (i, (rettype, arguments)) in enumerate(ctor.signatures()):
-                name = "Constructor" + "_" * i
+                name = (baseName or ctor.identifier.name) + ('_' * i)
                 args = list(method_arguments(descriptor, rettype, arguments))
                 extra = [("global", f"&D::{exposedGlobal}"), ("proto", "Option<HandleObject>")]
                 if args and args[0][0] == "cx":
@@ -6572,7 +6572,15 @@ class CGInterfaceTrait(CGThing):
                 else:
                     args = extra + args
 
-                methods.append(CGGeneric(f"fn {name}({fmt(args, leadingComma=False)}) -> {return_type(descriptorProvider, rettype, infallible)};\n"))
+                yield CGGeneric(f"fn {name}({fmt(args, leadingComma=False)}) -> {return_type(descriptorProvider, rettype, infallible)};\n")
+
+
+        ctor = descriptor.interface.ctor()
+        if ctor:
+            methods.extend(list(ctorMethod(ctor, "Constructor")))
+
+        for ctor in descriptor.interface.legacyFactoryFunctions:
+            methods.extend(list(ctorMethod(ctor)))
 
         self.cgRoot = CGWrapper(CGIndenter(CGList(methods, "")),
                                 pre=f"pub trait {descriptor.interface.identifier.name}Methods<D: DomTypes> {{\n",
