@@ -237,6 +237,11 @@ unsafe impl<K, V: JSTraceable, S> JSTraceable for HashMapTracedValues<K, V, S> {
     }
 }
 
+#[allow(unsafe_code)]
+unsafe impl <T> JSTraceable for crate::iterable::NoTrace<T> {
+    #[inline]
+    unsafe fn trace(&self, trc: *mut ::js::jsapi::JSTracer) {}
+}
 
 /*unsafe_no_jsmanaged_fields!(Box<dyn TaskBox>);
 

@@ -17,6 +17,7 @@ use js::jsval::UndefinedValue;
 use js::rust::{HandleObject, HandleValue, MutableHandleObject};
 
 use crate::codegen::DomTypes::DomTypes;
+use crate::conversions::IDLInterface;
 use crate::dom::bindings::codegen::Bindings::IterableIteratorBinding::{
     IterableKeyAndValueResult, IterableKeyOrValueResult,
 };
@@ -26,6 +27,7 @@ use crate::dom::bindings::reflector::{
 };
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
 use crate::dom::bindings::trace::{JSTraceable, RootedTraceableBox};
+use crate::dom::bindings::utils::DOMClass;
 //use crate::dom::globalscope::GlobalScope;
 use crate::script_runtime::JSContext;
 
@@ -55,18 +57,25 @@ pub trait Iterable {
 }
 
 /// An iterator over the iterable entries of a given DOM interface.
-//FIXME: #12811 prevents dom_struct with type parameters
 #[dom_struct]
 pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> {
     reflector: Reflector,
     iterable: Dom<T>,
     type_: IteratorType,
     index: Cell<u32>,
-    #[no_trace]
-    _marker: std::marker::PhantomData<D>,
+    #[ignore_malloc_size_of = "zero size"]
+    _marker: NoTrace<std::marker::PhantomData<D>>,
 }
 
+pub(crate) struct NoTrace<T>(T);
+
 impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterableIterator<D, T> {}
+
+impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface> IDLInterface for IterableIterator<D, T> {
+    fn derives(class: &'static DOMClass) -> bool {
+        <T as IDLInterface>::derives(class)
+    }
+}
 
 impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.
@@ -76,7 +85,7 @@ impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable
             type_,
             iterable: Dom::from_ref(iterable),
             index: Cell::new(0),
-            _marker: std::marker::PhantomData,
+            _marker: NoTrace(std::marker::PhantomData),
         });
         reflect_dom_object(iterator, &*iterable.global())
     }

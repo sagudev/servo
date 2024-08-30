@@ -34,7 +34,7 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
 
     let name = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let mut items = quote! {
+    let items = quote! {
         impl #impl_generics ::js::conversions::ToJSValConvertible for #name #ty_generics #where_clause {
             #[allow(unsafe_code)]
             unsafe fn to_jsval(&self,
@@ -81,7 +81,7 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
         __T: crate::DomObject
     ));
 
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
+    let (_impl_generics, _, _where_clause) = generics.split_for_impl();
 
     //XXXjdm
     /*items.append_all(quote! {
