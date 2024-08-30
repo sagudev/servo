@@ -13,7 +13,8 @@ pub use accountable_refcell::{ref_filter_map, Ref, RefCell, RefMut};
 #[cfg(not(feature = "refcell_backtrace"))]
 pub use ref_filter_map::ref_filter_map;
 
-use crate::dom::bindings::root::{assert_in_layout, assert_in_script};
+use script_bindings::root::assert_in_script;
+use crate::dom::bindings::root::{assert_in_layout};
 
 /// A mutable field in the DOM.
 ///

@@ -154,11 +154,13 @@ pub mod principals;
 pub mod proxyhandler;
 pub mod record;
 pub mod refcounted;
-pub mod reflector;
+pub use script_bindings::reflector;
+//pub mod reflector;
 pub mod root;
 pub mod serializable;
 pub mod settings_stack;
-pub mod str;
+//pub mod str;
+pub use script_bindings::str;
 pub mod structuredclone;
 pub mod trace;
 pub mod transferable;
@@ -169,14 +171,19 @@ pub mod xmlname;
 /// Generated JS-Rust bindings.
 #[allow(missing_docs, non_snake_case)]
 pub mod codegen {
-    #[allow(dead_code, crown::unrooted_must_root)]
+    pub use script_bindings::codegen::*;
+    pub mod DomTypeHolder {
+        include!(concat!(env!("OUT_DIR"), "/DomTypeHolder.rs"));
+    }
+    
+    /*#[allow(dead_code, crown::unrooted_must_root)]
     pub mod Bindings {
         include!(concat!(env!("OUT_DIR"), "/Bindings/mod.rs"));
-    }
+    }*/
     pub mod InterfaceObjectMap {
         include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMap.rs"));
     }
-    #[allow(dead_code, unused_imports, clippy::enum_variant_names)]
+    /*#[allow(dead_code, unused_imports, clippy::enum_variant_names)]
     pub mod InheritTypes {
         include!(concat!(env!("OUT_DIR"), "/InheritTypes.rs"));
     }
@@ -197,5 +204,5 @@ pub mod codegen {
     )]
     pub mod UnionTypes {
         include!(concat!(env!("OUT_DIR"), "/UnionTypes.rs"));
-    }
+    }*/
 }

@@ -31,7 +31,7 @@ use crate::dom::globalscope::GlobalScope;
 use crate::realms::InRealm;
 use crate::script_runtime::JSContext as SafeJSContext;
 
-#[cfg(feature = "js_backtrace")]
+/*#[cfg(feature = "js_backtrace")]
 thread_local! {
     /// An optional stringified JS backtrace and stringified native backtrace from the
     /// the last DOM exception that was reported.
@@ -102,7 +102,9 @@ pub type Fallible<T> = Result<T, Error>;
 
 /// The return type for IDL operations that can throw DOM exceptions and
 /// return `()`.
-pub type ErrorResult = Fallible<()>;
+pub type ErrorResult = Fallible<()>;*/
+
+pub use script_bindings::error::*;
 
 /// Set a pending exception for the given `result` on `cx`.
 pub fn throw_dom_exception(cx: SafeJSContext, global: &GlobalScope, result: Error) {
@@ -165,7 +167,7 @@ pub fn throw_dom_exception(cx: SafeJSContext, global: &GlobalScope, result: Erro
     }
 }
 
-/// A struct encapsulating information about a runtime script error.
+/*/// A struct encapsulating information about a runtime script error.
 #[derive(Default)]
 pub struct ErrorInfo {
     /// The error message.
@@ -336,3 +338,4 @@ impl Error {
         JS_ClearPendingException(cx);
     }
 }
+*/

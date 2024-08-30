@@ -199,11 +199,11 @@ impl fmt::Debug for Element {
     }
 }
 
-impl fmt::Debug for DomRoot<Element> {
+/*impl fmt::Debug for DomRoot<Element> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         (**self).fmt(f)
     }
-}
+}*/
 
 #[derive(MallocSizeOf, PartialEq)]
 pub enum ElementCreator {

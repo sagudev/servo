@@ -6,6 +6,10 @@
 
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+#![allow(type_alias_bounds)]
+#![allow(static_mut_refs)]
+#![allow(dead_code)]
+#![allow(non_upper_case_globals)]
 
 #[macro_use]
 extern crate js;
@@ -110,7 +114,7 @@ pub mod script_runtime {
     }
 }
 
-mod realms {
+pub mod realms {
     pub struct AlreadyInRealm(());
 
     impl AlreadyInRealm {

@@ -56,7 +56,7 @@ use tendril::TendrilSink;
 use webxr_api::{Finger, Hand};
 
 use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::error::Error;
+//use crate::dom::bindings::error::Error;
 use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};
 use crate::dom::bindings::reflector::{DomObject, Reflector};
 use crate::dom::bindings::root::{Dom, DomRoot};
@@ -70,7 +70,7 @@ use crate::script_runtime::{ContextForRequestInterrupt, StreamConsumer};
 use crate::script_thread::IncompleteParserContexts;
 use crate::task::TaskBox;
 
-pub use script_bindings::trace::{CustomTraceable, JSTraceable};
+pub use script_bindings::trace::*;
 /*/// A trait to allow tracing only DOM sub-objects.
 pub unsafe trait CustomTraceable {
     /// Trace `self`.
@@ -359,13 +359,13 @@ where
     }
 }*/
 
-unsafe_no_jsmanaged_fields!(Error);
+//unsafe_no_jsmanaged_fields!(Error);
 unsafe_no_jsmanaged_fields!(TrustedPromise);
 
 unsafe_no_jsmanaged_fields!(ContextForRequestInterrupt);
 unsafe_no_jsmanaged_fields!(WindowProxyHandler);
-unsafe_no_jsmanaged_fields!(DOMString);
-unsafe_no_jsmanaged_fields!(USVString);
+//unsafe_no_jsmanaged_fields!(DOMString);
+//unsafe_no_jsmanaged_fields!(USVString);
 unsafe_no_jsmanaged_fields!(WebGPUContextId);
 unsafe_no_jsmanaged_fields!(GPUBufferState);
 unsafe_no_jsmanaged_fields!(SourceSet);
@@ -474,7 +474,7 @@ where
 /// Holds a set of JSTraceables that need to be rooted
 pub use js::gc::RootedTraceableSet;
 
-/// Roots any JSTraceable thing
+/*/// Roots any JSTraceable thing
 ///
 /// If you have a valid DomObject, use DomRoot.
 /// If you have GC things like *mut JSObject or JSVal, use rooted!.
@@ -539,7 +539,7 @@ impl<T: JSTraceable> DerefMut for RootedTraceableBox<T> {
     fn deref_mut(&mut self) -> &mut T {
         self.0.deref_mut()
     }
-}
+}*/
 
 /// A vector of items to be rooted with `RootedVec`.
 /// Guaranteed to be empty when not rooted.

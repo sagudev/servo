@@ -8,7 +8,9 @@ use crate::dom::bindings::reflector::DomObject;
 use crate::dom::globalscope::GlobalScope;
 use crate::script_runtime::JSContext;
 
-pub struct AlreadyInRealm(());
+pub use script_bindings::realms::*;
+
+/*pub struct AlreadyInRealm(());
 
 impl AlreadyInRealm {
     #![allow(unsafe_code)]
@@ -48,4 +50,4 @@ pub fn enter_realm(object: &impl DomObject) -> JSAutoRealm {
         *GlobalScope::get_cx(),
         object.reflector().get_jsobject().get(),
     )
-}
+}*/

@@ -128,7 +128,7 @@ impl<T: MallocSizeOf> MallocSizeOf for NoTrace<T> {
     }
 }
 
-/// HashMap wrapper, that has non-jsmanaged keys
+/*/// HashMap wrapper, that has non-jsmanaged keys
 ///
 /// Not all methods are reexposed, but you can access inner type via .0
 #[crown::trace_in_no_trace_lint::must_not_have_traceable(0)]
@@ -235,7 +235,7 @@ unsafe impl<K, V: JSTraceable, S> JSTraceable for HashMapTracedValues<K, V, S> {
             v.trace(trc);
         }
     }
-}
+}*/
 
 #[allow(unsafe_code)]
 unsafe impl <T> JSTraceable for crate::iterable::NoTrace<T> {
@@ -546,7 +546,7 @@ impl<T: JSTraceable> DerefMut for RootedTraceableBox<T> {
     }
 }
 
-/// A vector of items to be rooted with `RootedVec`.
+/*/// A vector of items to be rooted with `RootedVec`.
 /// Guaranteed to be empty when not rooted.
 /// Usage: `rooted_vec!(let mut v);` or if you have an
 /// iterator of `DomRoot`s, `rooted_vec!(let v <- iterator);`.
@@ -617,3 +617,4 @@ impl<'a, T: JSTraceable> DerefMut for RootedVec<'a, T> {
         &mut self.root.v
     }
 }
+*/

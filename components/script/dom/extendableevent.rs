@@ -93,8 +93,8 @@ impl ExtendableEvent {
     }
 }
 
-impl Default for ExtendableEventBinding::ExtendableEventInit {
+/*impl Default for ExtendableEventBinding::ExtendableEventInit {
     fn default() -> Self {
         Self::empty()
     }
-}
+}*/

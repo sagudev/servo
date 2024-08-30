@@ -746,8 +746,9 @@ fn inner_invoke(
     found
 }
 
-impl Default for EventBinding::EventInit {
+/*impl Default for EventBinding::EventInit {
     fn default() -> Self {
         Self::empty()
     }
 }
+*/

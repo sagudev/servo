@@ -17,7 +17,7 @@ use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
 
-/// Create the reflector for a new DOM object and yield ownership to the
+/*/// Create the reflector for a new DOM object and yield ownership to the
 /// reflector.
 pub fn reflect_dom_object<T, U>(obj: Box<T>, global: &U) -> DomRoot<T>
 where
@@ -39,7 +39,7 @@ where
 {
     let global_scope = global.upcast();
     unsafe { T::WRAP(GlobalScope::get_cx(), global_scope, proto, obj) }
-}
+}*/
 
 /*/// A struct to store a reference to the reflector of a DOM object.
 #[allow(crown::unrooted_must_root)]
@@ -104,7 +104,7 @@ pub trait DomObject: JSTraceable + 'static {
         GlobalScope::from_reflector(self, &realm)
     }
 }*/
-pub use script_bindings::{DomObject, MutDomObject, Reflector};
+//pub use script_bindings::{DomObject, MutDomObject, Reflector};
 
 /*impl DomObject for Reflector {
     fn reflector(&self) -> &Self {
@@ -124,7 +124,7 @@ impl MutDomObject for Reflector {
     }
 }*/
 
-pub use script_bindings::reflector::DomObjectWrap;
+//pub use script_bindings::reflector::DomObjectWrap;
 /*/// A trait to provide a function pointer to wrap function for DOM objects.
 pub trait DomObjectWrap: Sized + DomObject {
     /// Function pointer to the general wrap function type
@@ -136,7 +136,7 @@ pub trait DomObjectWrap: Sized + DomObject {
     ) -> Root<Dom<Self>>;
 }*/
 
-/// A trait to provide a function pointer to wrap function for
+/*/// A trait to provide a function pointer to wrap function for
 /// DOM iterator interfaces.
 pub trait DomObjectIteratorWrap: DomObjectWrap + JSTraceable + Iterable {
     /// Function pointer to the wrap function for `IterableIterator<T>`
@@ -147,3 +147,4 @@ pub trait DomObjectIteratorWrap: DomObjectWrap + JSTraceable + Iterable {
         Box<IterableIterator<Self>>,
     ) -> Root<Dom<IterableIterator<Self>>>;
 }
+*/

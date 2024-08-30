@@ -408,7 +408,7 @@ pub unsafe fn get_dom_class(obj: *mut JSObject) -> Result<&'static DOMClass, ()>
     Err(())
 }
 
-pub(crate) enum PrototypeCheck {
+pub enum PrototypeCheck {
     Derive(fn(&'static DOMClass) -> bool),
     Depth { depth: usize, proto_id: u16 },
 }
@@ -420,7 +420,7 @@ pub(crate) enum PrototypeCheck {
 /// not an object for a DOM object of the given type (as defined by the
 /// proto_id and proto_depth).
 #[inline]
-pub(crate) unsafe fn private_from_proto_check(
+pub unsafe fn private_from_proto_check(
     mut obj: *mut JSObject,
     cx: *mut JSContext,
     proto_check: PrototypeCheck,

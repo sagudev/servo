@@ -69,7 +69,9 @@ use crate::dom::htmloptionscollection::HTMLOptionsCollection;
 use crate::dom::nodelist::NodeList;
 use crate::dom::windowproxy::WindowProxy;
 
-/// A trait to check whether a given `JSObject` implements an IDL interface.
+pub use script_bindings::conversions::*;
+
+/*/// A trait to check whether a given `JSObject` implements an IDL interface.
 pub trait IDLInterface {
     /// Returns whether the given DOM class derives that interface.
     fn derives(_: &'static DOMClass) -> bool;
@@ -110,7 +112,7 @@ impl<T: Float + FromJSValConvertible<Config = ()>> FromJSValConvertible for Fini
             },
         }
     }
-}
+}*/
 
 /*impl<T: DomObject + IDLInterface> FromJSValConvertible for DomRoot<T> {
     type Config = ();
@@ -127,7 +129,7 @@ impl<T: Float + FromJSValConvertible<Config = ()>> FromJSValConvertible for Fini
     }
 }*/
 
-impl<T: ToJSValConvertible + JSTraceable> ToJSValConvertible for RootedTraceableBox<T> {
+/*impl<T: ToJSValConvertible + JSTraceable> ToJSValConvertible for RootedTraceableBox<T> {
     #[inline]
     unsafe fn to_jsval(&self, cx: *mut JSContext, rval: MutableHandleValue) {
         let value = &**self;
@@ -154,9 +156,9 @@ where
             ConversionResult::Failure(msg) => ConversionResult::Failure(msg),
         })
     }
-}
+}*/
 
-/// Convert `id` to a `DOMString`. Returns `None` if `id` is not a string or
+/*/// Convert `id` to a `DOMString`. Returns `None` if `id` is not a string or
 /// integer.
 ///
 /// Handling of invalid UTF-16 in strings depends on the relevant option.
@@ -171,16 +173,16 @@ pub unsafe fn jsid_to_string(cx: *mut JSContext, id: HandleId) -> Option<DOMStri
     }
 
     None
-}
+}*/
 
-// http://heycam.github.io/webidl/#es-USVString
+/*// http://heycam.github.io/webidl/#es-USVString
 impl ToJSValConvertible for USVString {
     unsafe fn to_jsval(&self, cx: *mut JSContext, rval: MutableHandleValue) {
         self.0.to_jsval(cx, rval);
     }
-}
+}*/
 
-/// Behavior for stringification of `JSVal`s.
+/*/// Behavior for stringification of `JSVal`s.
 #[derive(Clone, PartialEq)]
 pub enum StringificationBehavior {
     /// Convert `null` to the string `"null"`.
@@ -216,9 +218,9 @@ impl FromJSValConvertible for DOMString {
             }
         }
     }
-}
+}*/
 
-/// Convert the given `JSString` to a `DOMString`. Fails if the string does not
+/*/// Convert the given `JSString` to a `DOMString`. Fails if the string does not
 /// contain valid UTF-16.
 pub unsafe fn jsstring_to_str(cx: *mut JSContext, s: *mut JSString) -> DOMString {
     assert!(!s.is_null());
@@ -344,7 +346,7 @@ impl FromJSValConvertible for ByteString {
             )))
         }
     }
-}
+}*/
 
 /*impl ToJSValConvertible for Reflector {
     unsafe fn to_jsval(&self, cx: *mut JSContext, mut rval: MutableHandleValue) {
@@ -355,7 +357,7 @@ impl FromJSValConvertible for ByteString {
     }
 }*/
 
-/// Returns whether `obj` is a DOM object implemented as a proxy.
+/*/// Returns whether `obj` is a DOM object implemented as a proxy.
 pub fn is_dom_proxy(obj: *mut JSObject) -> bool {
     use js::glue::IsProxyHandlerFamily;
     unsafe {
@@ -554,7 +556,7 @@ where
     T: DomObject + IDLInterface,
 {
     root_from_object(obj.get(), cx)
-}
+}*/
 
 /*impl<T: DomObject> ToJSValConvertible for DomRoot<T> {
     unsafe fn to_jsval(&self, cx: *mut JSContext, rval: MutableHandleValue) {
@@ -562,7 +564,7 @@ where
     }
 }*/
 
-/// Returns whether `value` is an array-like object (Array, FileList,
+/*/// Returns whether `value` is an array-like object (Array, FileList,
 /// HTMLCollection, HTMLFormControlsCollection, HTMLOptionsCollection,
 /// NodeList).
 pub unsafe fn is_array_like(cx: *mut JSContext, value: HandleValue) -> bool {
@@ -645,7 +647,7 @@ where
         Ok(ConversionResult::Failure(_)) => Ok(None),
         Err(()) => Err(Error::JSFailed),
     }
-}
+}*/
 
 /// Get a `DomRoot<T>` for a WindowProxy accessible from a `HandleValue`.
 /// Caller is responsible for throwing a JS exception if needed in case of error.

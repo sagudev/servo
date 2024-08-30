@@ -599,7 +599,7 @@ impl<T: DomObject + PartialEq> PartialEq<T> for MutDom<T> {
     }
 }
 
-pub(crate) fn assert_in_script() {
+pub fn assert_in_script() {
     debug_assert!(thread_state::get().is_script());
 }
 
