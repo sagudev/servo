@@ -79,7 +79,7 @@ impl <D: DomTypes> Drop for AutoEntryScript<D> {
                 "Dropped AutoEntryScript out of order."
             );
             assert_eq!(entry.kind, StackEntryKind::Entry);
-            trace!("Clean up after running script with {:p}", &*entry.global);
+            trace!("Clean up after running script with {:p}", entry.global);
         });
 
         // Step 5

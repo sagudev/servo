@@ -6,6 +6,7 @@
 
 from collections import defaultdict
 from itertools import groupby
+from functools import partial
 
 import operator
 import os
@@ -1742,7 +1743,7 @@ class MethodDefiner(PropertyDefiner):
     """
     A class for defining methods on a prototype object.
     """
-    def __init__(self, descriptor, name, static, unforgeable, crossorigin=False):
+    def __init__(self, descriptor, name, static, unforgeable, crossorigin=False, insideUnsafe=False):
         assert not (static and unforgeable)
         assert not (static and crossorigin)
         assert not (unforgeable and crossorigin)
@@ -1890,7 +1891,7 @@ class MethodDefiner(PropertyDefiner):
                     # easy to tell whether the methodinfo is a JSJitInfo or
                     # a JSTypedMethodJitInfo here.  The compiler knows, though,
                     # so let it do the work.
-                    unsafeOpen = "" if in_unsafe else "{"
+                    unsafeOpen = "" if in_unsafe else "unsafe {"
                     unsafeClose = "" if in_unsafe else "}"
                     jitinfo = f"{unsafeOpen}std::ptr::addr_of!({identifier}_methodinfo) as *const _ as *const JSJitInfo{unsafeClose}"
                     accessor = f"Some(generic_method::<{exceptionToRejection}>)"
@@ -1930,7 +1931,7 @@ class MethodDefiner(PropertyDefiner):
                 array, name,
                 specTemplate, specTerminator,
                 'JSFunctionSpec',
-                condition, specData)
+                condition, partial(specData, in_unsafe=False))
         else:
             return self.generateGuardedArray(
                 array, name,
@@ -1983,7 +1984,7 @@ class AttrDefiner(PropertyDefiner):
         if len(array) == 0:
             return ""
 
-        def getter(attr):
+        def getter(attr, in_unsafe):
             attr = attr['attr']
 
             if self.crossorigin and not attr.getExtendedAttribute("CrossOriginReadable"):
@@ -2001,11 +2002,13 @@ class AttrDefiner(PropertyDefiner):
                     accessor = f"generic_lenient_getter::<{exceptionToRejection}>"
                 else:
                     accessor = f"generic_getter::<{exceptionToRejection}>"
-                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo)"
+                unsafeOpen = "unsafe {" if not in_unsafe else ""
+                unsafeClose = "}" if not in_unsafe else ""
+                jitinfo = f"{unsafeOpen}std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_getterinfo){unsafeClose}"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
-        def setter(attr):
+        def setter(attr, in_unsafe):
             attr = attr['attr']
 
             if ((self.crossorigin and not attr.getExtendedAttribute("CrossOriginWritable"))
@@ -2022,7 +2025,9 @@ class AttrDefiner(PropertyDefiner):
                     accessor = "generic_lenient_setter"
                 else:
                     accessor = "generic_setter"
-                jitinfo = f"std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_setterinfo)"
+                unsafeOpen = "unsafe {" if not in_unsafe else ""
+                unsafeClose = "}" if not in_unsafe else ""
+                jitinfo = f"{unsafeOpen}std::ptr::addr_of!({self.descriptor.internalNameFor(attr.identifier.name)}_setterinfo){unsafeClose}"
 
             return f"JSNativeWrapper {{ op: Some({accessor}), info: {jitinfo} }}"
 
@@ -2031,7 +2036,7 @@ class AttrDefiner(PropertyDefiner):
                 return MemberCondition(pref=None, func=None, exposed=None, secure=None)
             return PropertyDefiner.getControllingCondition(m["attr"], d)
 
-        def specData(attr):
+        def specData(attr, in_unsafe=True):
             if attr["name"] == "@@toStringTag":
                 return (attr["name"][2:], attr["flags"], attr["kind"],
                         str_to_cstr_ptr(self.descriptor.interface.getClassName()))
@@ -2039,8 +2044,8 @@ class AttrDefiner(PropertyDefiner):
             flags = attr["flags"]
             if self.unforgeable:
                 flags += " | JSPROP_PERMANENT"
-            return (str_to_cstr_ptr(attr["attr"].identifier.name), flags, attr["kind"], getter(attr),
-                    setter(attr))
+            return (str_to_cstr_ptr(attr["attr"].identifier.name), flags, attr["kind"], getter(attr, in_unsafe),
+                    setter(attr, in_unsafe))
 
         def template(m):
             if m["name"] == "@@toStringTag":
@@ -2081,7 +2086,7 @@ class AttrDefiner(PropertyDefiner):
                 template,
                 '    JSPropertySpec::ZERO',
                 'JSPropertySpec',
-                condition, specData)
+                condition, partial(specData, in_unsafe=False))
         else:
             return self.generateGuardedArray(
                 array, name,
