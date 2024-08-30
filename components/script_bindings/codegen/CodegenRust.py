@@ -2758,9 +2758,9 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
             iterableDecl = parentDescriptor.interface.maplikeOrSetlikeOrIterable
             if iterableDecl:
                 if iterableDecl.isMaplike():
-                    traits += ["crate::like::Maplike"]
+                    traits += ["crate::like::Maplike<Key=crate::str::DOMString, Value=i32>"]
                 if iterableDecl.isSetlike():
-                    traits += ["crate::like::Setlike"]
+                    traits += ["crate::like::Setlike<Key=crate::str::DOMString>"]
                 traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
             if len(descriptor.prototypeChain) > 1:
                 traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]

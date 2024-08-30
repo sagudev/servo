@@ -664,7 +664,7 @@ pub unsafe fn exception_to_promise(cx: *mut JSContext, rval: RawMutableHandleVal
     }
 }
 
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, non_snake_case)]
 pub trait DomHelpers<D: DomTypes> {
     fn throw_dom_exception(
         cx: crate::script_runtime::JSContext,

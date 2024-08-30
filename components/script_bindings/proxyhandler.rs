@@ -269,7 +269,9 @@ unsafe fn id_to_source(cx: SafeJSContext, id: RawHandleId) -> Option<DOMString> 
 ///
 /// [`CrossOriginProperties(O)`]: https://html.spec.whatwg.org/multipage/#crossoriginproperties-(-o-)
 pub struct CrossOriginProperties {
+    ///
     pub attributes: &'static [JSPropertySpec],
+    ///
     pub methods: &'static [JSFunctionSpec],
 }
 
@@ -356,6 +358,7 @@ pub unsafe extern "C" fn maybe_cross_origin_set_rawcx<D: DomTypes>(
     )
 }
 
+///
 pub unsafe extern "C" fn maybe_cross_origin_get_prototype_if_ordinary_rawcx(
     _: *mut JSContext,
     _proxy: RawHandleObject,
