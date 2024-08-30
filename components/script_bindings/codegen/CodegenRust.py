@@ -1992,7 +1992,7 @@ class AttrDefiner(PropertyDefiner):
                 return "JSNativeWrapper { op: None, info: 0 as *const JSJitInfo }"
 
             if self.static:
-                accessor = f'get_{self.descriptor.internalNameFor(attr.identifier.name)}'
+                accessor = f'get_{self.descriptor.internalNameFor(attr.identifier.name)}::<D>'
                 jitinfo = "0 as *const JSJitInfo"
             else:
                 if attr.type.isPromise():
@@ -2019,7 +2019,7 @@ class AttrDefiner(PropertyDefiner):
                 return "JSNativeWrapper { op: None, info: 0 as *const JSJitInfo }"
 
             if self.static:
-                accessor = f'set_{self.descriptor.internalNameFor(attr.identifier.name)}'
+                accessor = f'set_{self.descriptor.internalNameFor(attr.identifier.name)}::<D>'
                 jitinfo = "0 as *const JSJitInfo"
             else:
                 if attr.hasLegacyLenientThis():
@@ -3376,7 +3376,7 @@ class CGCreateInterfaceObjectsMethod(CGAbstractMethod):
     def __init__(self, descriptor, properties, haveUnscopables, haveLegacyWindowAliases):
         args = [Argument('SafeJSContext', 'cx'), Argument('HandleObject', 'global'),
                 Argument('*mut ProtoOrIfaceArray', 'cache')]
-        templateArgs = ["D: DomTypes"] if descriptor.hasNamedPropertiesObject() else []
+        templateArgs = ["D: DomTypes"] if descriptor.hasNamedPropertiesObject() or descriptor.interface.legacyFactoryFunctions else []
         CGAbstractMethod.__init__(self, descriptor, 'CreateInterfaceObjects', 'void', args,
                                   unsafe=True, templateArgs=templateArgs)
         self.properties = properties
@@ -3594,7 +3594,7 @@ assert!((*cache)[PrototypeList::Constructor::{properties['id']} as usize].is_nul
             decl = f"let named_constructors: [(ConstructorClassHook, &std::ffi::CStr, u32); {len(constructors)}]"
             specs = []
             for constructor in constructors:
-                hook = f"{CONSTRUCT_HOOK_NAME}_{constructor.identifier.name}"
+                hook = f"{CONSTRUCT_HOOK_NAME}_{constructor.identifier.name}::<D>"
                 name = str_to_cstr(constructor.identifier.name)
                 length = methodLength(constructor)
                 specs.append(CGGeneric(f"({hook} as ConstructorClassHook, {name}, {length})"))
@@ -3643,7 +3643,7 @@ class CGGetPerInterfaceObject(CGAbstractMethod):
         args = [Argument('SafeJSContext', 'cx'),
                 Argument('HandleObject', 'global'),
                 Argument('MutableHandleObject', 'mut rval')]
-        self.usesGeneric = descriptor.hasNamedPropertiesObject()
+        self.usesGeneric = descriptor.hasNamedPropertiesObject() or descriptor.interface.legacyFactoryFunctions
         CGAbstractMethod.__init__(self, descriptor, name,
                                   'void', args, pub=pub, templateArgs=["D: DomTypes"] if self.usesGeneric else [])
         self.id = f"{idPrefix}::{MakeNativeName(self.descriptor.name)}"
@@ -3800,7 +3800,7 @@ class CGDefineDOMInterfaceMethod(CGAbstractMethod):
         return CGAbstractMethod.define(self)
 
     def definition_body(self):
-        generics = "::<D>" if self.descriptor.hasNamedPropertiesObject() else ""
+        generics = "::<D>" if self.descriptor.hasNamedPropertiesObject() or self.descriptor.interface.legacyFactoryFunctions else ""
         return CGGeneric(
             "define_dom_interface"
             f"(cx, global, ProtoOrIfaceIndex::{self.variant}({self.id}), CreateInterfaceObjects{generics}, ConstructorEnabled::<D>)"
@@ -6373,8 +6373,10 @@ class CGClassConstructHook(CGAbstractExternMethod):
         CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args, templateArgs=["D: DomTypes"])
         self.constructor = constructor
         self.exposureSet = descriptor.interface.exposureSet
+        self.needsGeneric = not not descriptor.interface.legacyFactoryFunctions
 
     def definition_body(self):
+        generic = "::<D>" if self.needsGeneric else ""
         preamble = """let cx = SafeJSContext::from_ptr(cx);
 let args = CallArgs::from_vp(vp, argc);
 let global = <D as DomHelpers<D>>::global_scope_from_object(JS_CALLEE(*cx, vp).to_object());
@@ -6394,7 +6396,7 @@ let global = DomRoot::downcast::<D::{list(self.exposureSet)[0]}>(global).unwrap(
                     &args,
                     &global,
                     PrototypeList::ID::{MakeNativeName(self.descriptor.name)},
-                    CreateInterfaceObjects,
+                    CreateInterfaceObjects{generic},
                 )*/
                 true
                 """
@@ -6412,7 +6414,7 @@ let proto_result = get_desired_proto(
   cx,
   &args,
   PrototypeList::ID::{MakeNativeName(self.descriptor.name)},
-  CreateInterfaceObjects,
+  CreateInterfaceObjects{generic},
   desired_proto.handle_mut(),
 );
 assert!(proto_result.is_ok());
@@ -6911,14 +6913,22 @@ class CGDictionary(CGThing):
                 inheritanceDefault = f"        parent: Default::default(),\n"
             else:
                 inheritanceDefault = ""
-            memberDefaults = [f"        {self.makeMemberName(m[0].identifier.name)}: Default::default(),"
-                              for m in self.memberInfo]
+            if not self.membersNeedTracing():
+                impl = "        Self::empty()\n"
+            else:
+                memberDefaults = [f"        {self.makeMemberName(m[0].identifier.name)}: Default::default(),"
+                                  for m in self.memberInfo]
+                impl = (
+                    "        Self {\n"
+                    f"            {inheritanceDefault}{'\n'.join(memberDefaults)}"
+                    "        }\n"
+                )
+
+
             default = (
                 f"impl {generic} Default for {className}{genericSuffix} {{\n"
                 "    fn default() -> Self {\n"
-                "        Self {\n"
-                f"            {inheritanceDefault}{'\n'.join(memberDefaults)}"
-                "        }\n"
+                f"{impl}"
                 "    }\n"
                 "}\n"
             )
