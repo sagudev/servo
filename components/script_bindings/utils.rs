@@ -708,5 +708,7 @@ pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
 
     fn perform_a_microtask_checkpoint(global: &D::GlobalScope);
 
-    fn ReadableStream_from_js(cx: crate::script_runtime::JSContext, obj: *mut JSObject, in_realm: crate::realms::InRealm) -> Result<crate::root::DomRoot<D::ReadableStream>, ()>; 
+    fn ReadableStream_from_js(cx: crate::script_runtime::JSContext, obj: *mut JSObject, in_realm: crate::realms::InRealm) -> Result<crate::root::DomRoot<D::ReadableStream>, ()>;
+
+    fn DOMException_stringifier(exception: &D::DOMException) -> DOMString;
 }

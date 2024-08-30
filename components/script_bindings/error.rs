@@ -226,7 +226,7 @@ impl ErrorInfo {
 
         Some(ErrorInfo {
             filename: "".to_string(),
-            message: exception.stringifier().into(),
+            message: <D as DomHelpers<D>>::DOMException_stringifier(&exception).into(),
             lineno: 0,
             column: 0,
         })

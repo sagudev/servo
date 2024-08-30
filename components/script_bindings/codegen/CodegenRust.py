@@ -6549,7 +6549,10 @@ class CGInterfaceTrait(CGThing):
         methods = []
         exposureSet = list(descriptor.interface.exposureSet)
         exposedGlobal = "GlobalScope" if len(exposureSet) > 1 else exposureSet[0]
+        hasLength = False
         for name, arguments, rettype, isStatic in members():
+            if name == "Length":
+                hasLength = True
             arguments = list(arguments)
             unsafe = 'unsafe ' if contains_unsafe_arg(arguments) else ''
             returnType = f" -> {rettype}" if rettype != '()' else ''
@@ -6581,6 +6584,9 @@ class CGInterfaceTrait(CGThing):
 
         for ctor in descriptor.interface.legacyFactoryFunctions:
             methods.extend(list(ctorMethod(ctor)))
+
+        if descriptor.operations['IndexedGetter'] and not hasLength:
+            methods.append(CGGeneric("fn Length(&self) -> u32;\n"))
 
         self.cgRoot = CGWrapper(CGIndenter(CGList(methods, "")),
                                 pre=f"pub trait {descriptor.interface.identifier.name}Methods<D: DomTypes> {{\n",
