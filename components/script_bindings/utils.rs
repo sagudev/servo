@@ -36,6 +36,7 @@ use js::rust::{
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
 
+use crate::DomTypes;
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
@@ -402,7 +403,7 @@ pub unsafe fn trace_global(tracer: *mut JSTracer, obj: *mut JSObject) {
 }
 
 /// Enumerate lazy properties of a global object.
-pub unsafe extern "C" fn enumerate_global(
+pub unsafe extern "C" fn enumerate_global<D: DomTypes>(
     cx: *mut JSContext,
     obj: RawHandleObject,
     _props: RawMutableHandleIdVector,
@@ -412,14 +413,14 @@ pub unsafe extern "C" fn enumerate_global(
     if !JS_EnumerateStandardClasses(cx, obj) {
         return false;
     }
-    for init_fun in InterfaceObjectMap::MAP.values() {
+    for init_fun in <D as DomHelpers<D>>::get_map().values()/*InterfaceObjectMap::MAP.values()*/ {
         init_fun(SafeJSContext::from_ptr(cx), Handle::from_raw(obj));
     }
     true
 }
 
 /// Resolve a lazy global property, for interface objects and named constructors.
-pub unsafe extern "C" fn resolve_global(
+pub unsafe extern "C" fn resolve_global<D: DomTypes>(
     cx: *mut JSContext,
     obj: RawHandleObject,
     id: RawHandleId,
@@ -447,7 +448,7 @@ pub unsafe extern "C" fn resolve_global(
     assert!(!ptr.is_null());
     let bytes = slice::from_raw_parts(ptr, length);
 
-    if let Some(init_fun) = InterfaceObjectMap::MAP.get(bytes) {
+    if let Some(init_fun) = <D as DomHelpers<D>>::get_map()/*InterfaceObjectMap::MAP*/.get(bytes) {
         init_fun(SafeJSContext::from_ptr(cx), Handle::from_raw(obj));
         *rval = true;
     } else {
@@ -664,7 +665,7 @@ pub unsafe fn exception_to_promise(cx: *mut JSContext, rval: RawMutableHandleVal
 }
 
 #[allow(non_camel_case_types)]
-pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
+pub trait DomHelpers<D: DomTypes> {
     fn throw_dom_exception(
         cx: crate::script_runtime::JSContext,
         global: &D::GlobalScope,
@@ -711,4 +712,6 @@ pub trait DomHelpers<D: crate::codegen::DomTypes::DomTypes> {
     fn ReadableStream_from_js(cx: crate::script_runtime::JSContext, obj: *mut JSObject, in_realm: crate::realms::InRealm) -> Result<crate::root::DomRoot<D::ReadableStream>, ()>;
 
     fn DOMException_stringifier(exception: &D::DOMException) -> DOMString;
+
+    fn get_map() -> &'static phf::Map<&'static [u8], fn(SafeJSContext, HandleObject)>;
 }
