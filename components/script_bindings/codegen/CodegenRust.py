@@ -3026,14 +3026,13 @@ class CGWrapMethod(CGAbstractMethod):
                 Argument('&D::GlobalScope', 'scope'),
                 Argument('Option<HandleObject>', 'given_proto'),
                 Argument(f"Box<{descriptor.argumentType[1:]}>", 'object')]
-        #retval = f'DomRoot<{descriptor.concreteType[1:]}>'
         retval = descriptor.returnType
         CGAbstractMethod.__init__(self, descriptor, 'Wrap', retval, args,
                                   pub=True, unsafe=True, templateArgs=["D: DomTypes"])
 
     def definition_body(self):
         unforgeable = CopyLegacyUnforgeablePropertiesToInstance(self.descriptor)
-        genericSuffix = "<D>" if self.descriptor.hasNamedPropertiesObject() else ""
+        genericSuffix = "::<D>" if self.descriptor.hasNamedPropertiesObject() or self.descriptor.interface.legacyFactoryFunctions else ""
         if self.descriptor.proxy:
             if self.descriptor.isMaybeCrossOriginObject():
                 proto = "ptr::null_mut()"
