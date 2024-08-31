@@ -2456,7 +2456,7 @@ fn init_class_ops<D: DomTypes>() {{
     }}
 }}
 
-static mut Class: DOMJSClass = DOMJSClass {{
+pub static mut Class: DOMJSClass = DOMJSClass {{
     base: JSClass {{
         name: {args['name']},
         flags: JSCLASS_IS_DOMJSCLASS | {args['flags']} |
@@ -2742,10 +2742,6 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
     universal = [
         "crate::reflector::DomObject",
         "crate::reflector::DomGlobal<Self>",
-        "crate::conversions::IDLInterface",
-        "PartialEq",
-        "crate::reflector::DomObjectWrap<Self>",
-        "crate::inheritance::Castable",
         "malloc_size_of::MallocSizeOf",
         "crate::reflector::MutDomObject",
         "js::conversions::ToJSValConvertible",
@@ -2753,10 +2749,20 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
     for descriptor in descriptors:
         iface_name = descriptor.interface.identifier.name
         traits = list(universal)
-        if len(descriptor.prototypeChain) > 1:
-            for parent in descriptor.prototypeChain:
-                parentDescriptor = descriptorProvider.getDescriptor(parent)
-                traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]
+
+        chain = descriptor.prototypeChain
+        upcast = descriptor.hasDescendants()
+
+        if not upcast:
+            # No other interface will implement DeriveFrom<Foo> for this Foo, so avoid
+            # implementing it for itself.
+            chain = chain[:-1]
+        
+        if chain:
+            traits += ["crate::inheritance::Castable"]
+
+        for parent in chain:
+            traits += [f"crate::conversions::DerivedFrom<Self::{parent}>"]
 
         iterableDecl = descriptor.interface.maplikeOrSetlikeOrIterable
         if iterableDecl:
@@ -2768,6 +2774,16 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
 
         if descriptor.weakReferenceable:
             traits += ["crate::weakref::WeakReferenceable"]
+
+        if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
+            traits += [
+                "crate::conversions::IDLInterface",
+                "PartialEq",
+            ]
+
+        if descriptor.concrete:
+            traits += ["crate::reflector::DomObjectWrap<Self>"]
+
         if not descriptor.interface.isCallback() and not descriptor.interface.isIteratorInterface():
             if descriptor.interface.members or descriptor.interface.ctor():
                 traits += [f"crate::dom::bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(iface_name)}::{iface_name}Methods<Self>"]
@@ -3197,25 +3213,27 @@ class CGIDLInterface(CGThing):
 
     def define(self):
         interface = self.descriptor.interface
-        name = self.descriptor.concreteType
+        name = interface.identifier.name
+        #name = self.descriptor.concreteType
         #name = interface.identifier.name if not self.iteratorOnly else interface.iterableInterface.identifier.name
+        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(name)}"
         if (interface.getUserData("hasConcreteDescendant", False)
                 or interface.getUserData("hasProxyDescendant", False)):
             depth = self.descriptor.prototypeDepth
             check = f"class.interface_chain[{depth}] == PrototypeList::ID::{name}"
         elif self.descriptor.proxy:
-            check = "ptr::eq(class, &Class)"
+            check = f"ptr::eq(class, &{bindingModule}::Class)"
         else:
-            check = "unsafe { ptr::eq(class, &Class.dom_class) }"
+            check = f"unsafe {{ ptr::eq(class, &{bindingModule}::Class.dom_class) }}"
         return f"""
-impl <D: DomTypes> IDLInterface for {name} {{
+impl IDLInterface for {name} {{
     #[inline]
     fn derives(class: &'static DOMClass) -> bool {{
         {check}
     }}
 }}
 
-impl <D: DomTypes> PartialEq for {name} {{
+impl PartialEq for {name} {{
     fn eq(&self, other: &{name}) -> bool {{
         self as *const {name} == other
     }}
@@ -3232,16 +3250,17 @@ class CGDomObjectWrap(CGThing):
         self.descriptor = descriptor
 
     def define(self):
-        name = self.descriptor.interface.identifier.name
-        name = f"dom::{name.lower()}::{name}"
+        ifaceName = self.descriptor.interface.identifier.name
+        name = f"dom::{ifaceName.lower()}::{ifaceName}"
+        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(ifaceName)}"
         return f"""
-impl <D: DomTypes/*, T: {self.descriptor.interface.identifier.name}Methods*/> DomObjectWrap<D> for D::{self.descriptor.interface.identifier.name} {{
+impl <D: DomTypes> DomObjectWrap<D> for {firstCap(ifaceName)} {{
     const WRAP: unsafe fn(
         SafeJSContext,
         &D::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
-    ) -> Root<Dom<Self>> = Wrap;
+    ) -> Root<Dom<Self>> = {bindingModule}::Wrap;
 }}
 """
 
@@ -3257,14 +3276,15 @@ class CGDomObjectIteratorWrap(CGThing):
     def define(self):
         assert self.descriptor.interface.isIteratorInterface()
         name = self.descriptor.interface.iterableInterface.identifier.name
+        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(name)}"
         return f"""
-impl DomObjectIteratorWrap for {name} {{
+impl <D: DomTypes> DomObjectIteratorWrap<D> for {name} {{
     const ITER_WRAP: unsafe fn(
         SafeJSContext,
-        &GlobalScope,
+        &D::GlobalScope,
         Option<HandleObject>,
         Box<IterableIterator<Self>>,
-    ) -> Root<Dom<IterableIterator<Self>>> = Wrap;
+    ) -> Root<Dom<IterableIterator<Self>>> = {bindingModule}::Wrap;
 }}
 """
 
@@ -6467,7 +6487,7 @@ class CGDOMJSProxyHandlerDOMClass(CGThing):
         self.descriptor = descriptor
 
     def define(self):
-        return f"static Class: DOMClass = {DOMClass(self.descriptor)};\n"
+        return f"pub static Class: DOMClass = {DOMClass(self.descriptor)};\n"
 
 
 class CGInterfaceTrait(CGThing):
@@ -6762,10 +6782,6 @@ class CGDescriptor(CGThing):
                 cgThings.append(CGWrapGlobalMethod(descriptor, properties))
             else:
                 cgThings.append(CGWrapMethod(descriptor))
-                #if descriptor.interface.isIteratorInterface():
-                #    cgThings.append(CGDomObjectIteratorWrap(descriptor))
-                #else:
-                #    cgThings.append(CGDomObjectWrap(descriptor))
             reexports.append('Wrap')
 
         haveUnscopables = False
@@ -8188,6 +8204,137 @@ class GlobalGenRoots():
                        | set(leafModule(d) for d in config.callbacks)
                        | set(leafModule(d) for d in config.getDictionaries()))
         curr = CGList([CGGeneric(f"pub mod {name};\n") for name in sorted(descriptors)])
+        curr = CGWrapper(curr, pre=AUTOGENERATED_WARNING_COMMENT)
+        return curr
+
+    @staticmethod
+    def ConcreteBindingRoot(config):
+        descriptors = config.getDescriptors(hasInterfaceObject=True)
+        # We also want descriptors that have an interface prototype object
+        # (isCallback=False), but we don't want to include a second copy
+        # of descriptors that we also matched in the previous line
+        # (hence hasInterfaceObject=False).
+        descriptors.extend(config.getDescriptors(hasInterfaceObject=False,
+                                                 isCallback=False,
+                                                 register=True))
+
+        cgThings = []
+        for descriptor in descriptors:
+            if descriptor.concrete:
+                if descriptor.interface.isIteratorInterface():
+                    cgThings.append(CGDomObjectIteratorWrap(descriptor))
+                else:
+                    cgThings.append(CGDomObjectWrap(descriptor))
+
+            if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
+                cgThings.append(CGIDLInterface(descriptor))
+
+            if descriptor.weakReferenceable:
+                cgThings.append(CGWeakReferenceableTrait(descriptor))
+
+            if descriptor.concrete and not descriptor.proxy and not descriptor.interface.isIteratorInterface():
+                cgThings.append(CGAssertInheritance(descriptor))
+                
+
+        # And make sure we have the right number of newlines at the end
+        curr = CGWrapper(CGList(cgThings, "\n\n"), post="\n\n")
+
+        # Add imports
+        # These are the global imports (outside of the generated module)
+        curr = CGImports(curr, descriptors=descriptors, callbacks=[],
+                         dictionaries=[], enums=[], typedefs=[],
+                         imports=[
+                             'crate::dom::bindings::import::base::*',
+                             'crate::dom::types::*',
+                             'script_bindings::codegen::PrototypeList',
+                             'script_bindings::conversions::IDLInterface',
+                             'script_bindings::iterable::IterableIterator',
+                             'script_bindings::DomTypes',
+                             'script_bindings::root::Dom',
+                             'script_bindings::root::Root',
+                             'script_bindings::reflector::Reflector',
+                             'script_bindings::reflector::DomObjectWrap',
+                             'script_bindings::reflector::DomObjectIteratorWrap',
+                             'script_bindings::utils::DOMClass', 
+                             'script_bindings::weakref::WeakReferenceable',
+                        ], config=config)
+
+        # Add the auto-generated comment.
+        curr = CGWrapper(curr, pre=f"{AUTOGENERATED_WARNING_COMMENT}{ALLOWED_WARNINGS}")
+        return curr
+
+
+    @staticmethod
+    def ConcreteInheritTypes(config):
+        descriptors = config.getDescriptors(register=True, isCallback=False)
+        imports = [CGGeneric("use crate::dom::types::*;\n"),
+                   CGGeneric("use crate::dom::bindings::conversions::{DerivedFrom, get_dom_class};\n"),
+                   CGGeneric("use crate::dom::bindings::inheritance::Castable;\n"),
+                   CGGeneric("use crate::dom::bindings::root::{Dom, DomRoot/*, LayoutDom*/};\n"),
+                   CGGeneric("use crate::dom::bindings::trace::JSTraceable;\n"),
+                   CGGeneric("use crate::dom::bindings::reflector::DomObject;\n"),
+                   CGGeneric("use js::jsapi::JSTracer;\n\n"),
+                   CGGeneric("use std::mem;\n\n")]
+        allprotos = []
+        topTypes = []
+        hierarchy = defaultdict(list)
+        for descriptor in descriptors:
+            name = descriptor.name
+            chain = descriptor.prototypeChain
+            upcast = descriptor.hasDescendants()
+            downcast = len(chain) != 1
+
+            if upcast and not downcast:
+                topTypes.append(name)
+
+            if not upcast:
+                # No other interface will implement DeriveFrom<Foo> for this Foo, so avoid
+                # implementing it for itself.
+                chain = chain[:-1]
+
+            # Implement `DerivedFrom<Bar>` for `Foo`, for all `Bar` that `Foo` inherits from.
+            if chain:
+                allprotos.append(CGGeneric(f"impl Castable for {name} {{}}\n"))
+            for baseName in chain:
+                allprotos.append(CGGeneric(f"impl DerivedFrom<{baseName}> for {name} {{}}\n"))
+            if chain:
+                allprotos.append(CGGeneric("\n"))
+
+            if downcast:
+                hierarchy[descriptor.interface.parent.identifier.name].append(name)
+
+        def type_id_variant(name):
+            # If `name` is present in the hierarchy keys', that means some other interfaces
+            # derive from it and this enum variant should have an argument with its own
+            # TypeId enum.
+            return f"{name}({name}TypeId)" if name in hierarchy else name
+
+        typeIdCode = []
+        for base, derived in hierarchy.items():
+            variants = []
+            if config.getDescriptor(base).concrete:
+                variants.append(CGGeneric(base))
+            variants += [CGGeneric(type_id_variant(derivedName)) for derivedName in derived]
+            derives = "Clone, Copy, Debug, PartialEq"
+            typeIdCode.append(CGWrapper(CGIndenter(CGList(variants, ",\n"), 4),
+                                        pre=f"#[derive({derives})]\npub enum {base}TypeId {{\n",
+                                        post="\n}\n\n"))
+            if base in topTypes:
+                typeIdCode.append(CGGeneric(f"""
+impl {base} {{
+    pub fn type_id(&self) -> &'static {base}TypeId {{
+        unsafe {{
+            &get_dom_class(self.reflector().get_jsobject().get())
+                .unwrap()
+                .type_id
+                .{base.lower()}
+        }}
+    }}
+}}
+
+"""))
+
+        curr = CGList(imports + typeIdCode + allprotos)
         curr = CGWrapper(curr, pre=AUTOGENERATED_WARNING_COMMENT)
         return curr
 

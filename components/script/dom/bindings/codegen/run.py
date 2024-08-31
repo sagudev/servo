@@ -46,7 +46,8 @@ def main():
         ("InterfaceObjectMap", "InterfaceObjectMap.rs"),
         ("InterfaceObjectMapData", "InterfaceObjectMapData.json"),
         #("InterfaceTypes", "InterfaceTypes.rs"),
-        #("InheritTypes", "InheritTypes.rs"),
+        ("ConcreteInheritTypes", "ConcreteInheritTypes.rs"),
+        ("ConcreteBindingRoot", "ConcreteBindingRoot.rs"),
         #("Bindings", "Bindings/mod.rs"),
         #("UnionTypes", "UnionTypes.rs"),
     ]:

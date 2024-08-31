@@ -112,6 +112,8 @@ pub trait DomGlobal<D: DomTypes>: DomObject {
     }
 }
 
+impl <D: DomTypes, T: DomObject> DomGlobal<D> for T {}
+
 impl DomObject for Reflector {
     fn reflector(&self) -> &Self {
         self

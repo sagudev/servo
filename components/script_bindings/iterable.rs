@@ -67,9 +67,15 @@ pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> +
     _marker: NoTrace<std::marker::PhantomData<D>>,
 }
 
+impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
+    pub fn global(&self) -> DomRoot<D::GlobalScope> {
+        <Self as DomGlobal<D>>::global(self)
+    }
+}
+
 pub(crate) struct NoTrace<T>(T);
 
-impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterableIterator<D, T> {}
+//impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterableIterator<D, T> {}
 
 impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface> IDLInterface for IterableIterator<D, T> {
     fn derives(class: &'static DOMClass) -> bool {

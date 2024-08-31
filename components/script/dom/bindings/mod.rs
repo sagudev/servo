@@ -183,11 +183,15 @@ pub mod codegen {
     pub mod InterfaceObjectMap {
         include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMap.rs"));
     }
-    /*#[allow(dead_code, unused_imports, clippy::enum_variant_names)]
+    #[allow(dead_code, unused_imports, clippy::enum_variant_names)]
     pub mod InheritTypes {
-        include!(concat!(env!("OUT_DIR"), "/InheritTypes.rs"));
+        include!(concat!(env!("OUT_DIR"), "/ConcreteInheritTypes.rs"));
     }
-    #[allow(clippy::upper_case_acronyms)]
+    #[allow(dead_code, unused_imports, clippy::enum_variant_names)]
+    pub mod ConcreteBindingRoot {
+        include!(concat!(env!("OUT_DIR"), "/ConcreteBindingRoot.rs"));
+    }
+    /*#[allow(clippy::upper_case_acronyms)]
     pub mod PrototypeList {
         include!(concat!(env!("OUT_DIR"), "/PrototypeList.rs"));
     }
