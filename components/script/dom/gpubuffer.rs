@@ -145,7 +145,7 @@ impl Drop for GPUBuffer {
     }
 }
 
-impl GPUBufferMethods for GPUBuffer {
+impl GPUBufferMethods<crate::DomTypeHolder> for GPUBuffer {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpubuffer-unmap>
     fn Unmap(&self) -> Fallible<()> {
         let cx = GlobalScope::get_cx();

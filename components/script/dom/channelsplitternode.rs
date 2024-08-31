@@ -7,11 +7,13 @@ use js::rust::HandleObject;
 use servo_media::audio::node::AudioNodeInit;
 
 use crate::dom::audionode::{AudioNode, MAX_CHANNEL_COUNT};
+use crate::dom::audiobuffersourcenode::AudioBufferSourceNode;
 use crate::dom::baseaudiocontext::BaseAudioContext;
+use crate::dom::bindings::codegen::Bindings::AudioBufferSourceNodeBinding::AudioBufferSourceOptions;
 use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{
     ChannelCountMode, ChannelInterpretation,
 };
-use crate::dom::bindings::codegen::Bindings::ChannelSplitterNodeBinding::ChannelSplitterOptions;
+use crate::dom::bindings::codegen::Bindings::ChannelSplitterNodeBinding::{ChannelSplitterNodeMethods, ChannelSplitterOptions};
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::reflector::reflect_dom_object_with_proto;
 use crate::dom::bindings::root::DomRoot;
@@ -74,14 +76,15 @@ impl ChannelSplitterNode {
         let node = ChannelSplitterNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl ChannelSplitterNodeMethods<crate::DomTypeHolder> for ChannelSplitterNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
-        options: &ChannelSplitterOptions,
-    ) -> Fallible<DomRoot<ChannelSplitterNode>> {
-        ChannelSplitterNode::new_with_proto(window, proto, context, options)
+        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
+    ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
+        AudioBufferSourceNode::new_with_proto(window, proto, context, options)
     }
 }

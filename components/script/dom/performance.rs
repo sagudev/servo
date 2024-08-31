@@ -58,11 +58,11 @@ const INVALID_ENTRY_NAMES: &[&str] = &[
 #[derive(JSTraceable, MallocSizeOf)]
 pub struct PerformanceEntryList {
     /// <https://w3c.github.io/performance-timeline/#dfn-performance-entry-buffer>
-    entries: DOMPerformanceEntryList,
+    entries: DOMPerformanceEntryList<crate::DomTypeHolder>,
 }
 
 impl PerformanceEntryList {
-    pub fn new(entries: DOMPerformanceEntryList) -> Self {
+    pub fn new(entries: DOMPerformanceEntryList<crate::DomTypeHolder>) -> Self {
         PerformanceEntryList { entries }
     }
 
@@ -401,7 +401,7 @@ impl Performance {
     }
 }
 
-impl PerformanceMethods for Performance {
+impl PerformanceMethods<crate::DomTypeHolder> for Performance {
     // FIXME(avada): this should be deprecated in the future, but some sites still use it
     // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/Overview.html#performance-timing-attribute
     fn Timing(&self) -> DomRoot<PerformanceNavigationTiming> {

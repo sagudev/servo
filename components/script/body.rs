@@ -442,7 +442,7 @@ pub trait Extractable {
     fn extract(&self, global: &GlobalScope) -> Fallible<ExtractedBody>;
 }
 
-impl Extractable for BodyInit {
+impl Extractable for BodyInit<crate::DomTypeHolder> {
     // https://fetch.spec.whatwg.org/#concept-bodyinit-extract
     fn extract(&self, global: &GlobalScope) -> Fallible<ExtractedBody> {
         match self {

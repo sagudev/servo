@@ -62,7 +62,7 @@ impl TestBindingPairIterable {
     }
 }
 
-impl TestBindingPairIterableMethods for TestBindingPairIterable {
+impl TestBindingPairIterableMethods<crate::DomTypeHolder> for TestBindingPairIterable {
     fn Add(&self, key: DOMString, value: u32) {
         self.map.borrow_mut().push((key, value));
     }

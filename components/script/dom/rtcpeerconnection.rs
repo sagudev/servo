@@ -515,7 +515,7 @@ impl RTCPeerConnection {
     }
 }
 
-impl RTCPeerConnectionMethods for RTCPeerConnection {
+impl RTCPeerConnectionMethods<crate::DomTypeHolder> for RTCPeerConnection {
     // https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-icecandidate
     event_handler!(icecandidate, GetOnicecandidate, SetOnicecandidate);
 

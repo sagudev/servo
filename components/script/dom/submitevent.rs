@@ -81,7 +81,7 @@ impl SubmitEvent {
     }
 }
 
-impl SubmitEventMethods for SubmitEvent {
+impl SubmitEventMethods<crate::DomTypeHolder> for SubmitEvent {
     /// <https://dom.spec.whatwg.org/#dom-event-istrusted>
     fn IsTrusted(&self) -> bool {
         self.event.IsTrusted()

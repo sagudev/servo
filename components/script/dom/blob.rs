@@ -218,7 +218,7 @@ pub fn blob_parts_to_bytes(
     Ok(ret)
 }
 
-impl BlobMethods for Blob {
+impl BlobMethods<crate::DomTypeHolder> for Blob {
     // https://w3c.github.io/FileAPI/#dfn-size
     fn Size(&self) -> u64 {
         self.global().get_blob_size(&self.blob_id)

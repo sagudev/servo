@@ -84,7 +84,7 @@ impl MediaStreamAudioDestinationNode {
     }
 }
 
-impl MediaStreamAudioDestinationNodeMethods for MediaStreamAudioDestinationNode {
+impl MediaStreamAudioDestinationNodeMethods<crate::DomTypeHolder> for MediaStreamAudioDestinationNode {
     /// <https://webaudio.github.io/web-audio-api/#dom-mediastreamaudiodestinationnode-stream>
     fn Stream(&self) -> DomRoot<MediaStream> {
         DomRoot::from_ref(&self.stream)

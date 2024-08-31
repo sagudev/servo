@@ -324,7 +324,7 @@ impl Range {
     }
 }
 
-impl RangeMethods for Range {
+impl RangeMethods<crate::DomTypeHolder> for Range {
     /// <https://dom.spec.whatwg.org/#dom-range-commonancestorcontainer>
     fn CommonAncestorContainer(&self) -> DomRoot<Node> {
         self.end_container()

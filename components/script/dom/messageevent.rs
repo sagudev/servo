@@ -36,9 +36,9 @@ enum SrcObject {
     ServiceWorker(Dom<ServiceWorker>),
 }
 
-impl From<&WindowProxyOrMessagePortOrServiceWorker> for SrcObject {
+impl From<&WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>> for SrcObject {
     #[allow(crown::unrooted_must_root)]
-    fn from(src_object: &WindowProxyOrMessagePortOrServiceWorker) -> SrcObject {
+    fn from(src_object: &WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>) -> SrcObject {
         match src_object {
             WindowProxyOrMessagePortOrServiceWorker::WindowProxy(blob) => {
                 SrcObject::WindowProxy(Dom::from_ref(blob))
@@ -115,7 +115,7 @@ impl MessageEvent {
         proto: Option<HandleObject>,
         data: HandleValue,
         origin: DOMString,
-        source: Option<&WindowProxyOrMessagePortOrServiceWorker>,
+        source: Option<&WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>>,
         lastEventId: DOMString,
         ports: Vec<DomRoot<MessagePort>>,
     ) -> DomRoot<MessageEvent> {
@@ -139,7 +139,7 @@ impl MessageEvent {
         cancelable: bool,
         data: HandleValue,
         origin: DOMString,
-        source: Option<&WindowProxyOrMessagePortOrServiceWorker>,
+        source: Option<&WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>>,
         lastEventId: DOMString,
         ports: Vec<DomRoot<MessagePort>>,
     ) -> DomRoot<MessageEvent> {
@@ -166,7 +166,7 @@ impl MessageEvent {
         cancelable: bool,
         data: HandleValue,
         origin: DOMString,
-        source: Option<&WindowProxyOrMessagePortOrServiceWorker>,
+        source: Option<&WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>>,
         lastEventId: DOMString,
         ports: Vec<DomRoot<MessagePort>>,
     ) -> DomRoot<MessageEvent> {
@@ -245,7 +245,7 @@ impl MessageEvent {
     }
 }
 
-impl MessageEventMethods for MessageEvent {
+impl MessageEventMethods<crate::DomTypeHolder> for MessageEvent {
     /// <https://html.spec.whatwg.org/multipage/#dom-messageevent-data>
     fn Data(&self, _cx: JSContext) -> JSVal {
         self.data.get()
@@ -257,7 +257,7 @@ impl MessageEventMethods for MessageEvent {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-messageevent-source
-    fn GetSource(&self) -> Option<WindowProxyOrMessagePortOrServiceWorker> {
+    fn GetSource(&self) -> Option<WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>> {
         match &*self.source.borrow() {
             Some(SrcObject::WindowProxy(i)) => Some(
                 WindowProxyOrMessagePortOrServiceWorker::WindowProxy(DomRoot::from_ref(i)),
@@ -318,7 +318,7 @@ impl MessageEventMethods for MessageEvent {
         data: HandleValue,
         origin: DOMString,
         lastEventId: DOMString,
-        source: Option<WindowProxyOrMessagePortOrServiceWorker>,
+        source: Option<WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>>,
         ports: Vec<DomRoot<MessagePort>>,
     ) {
         self.data.set(data.get());

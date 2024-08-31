@@ -90,7 +90,7 @@ impl MediaStream {
     }
 }
 
-impl MediaStreamMethods for MediaStream {
+impl MediaStreamMethods<crate::DomTypeHolder> for MediaStream {
     /// <https://w3c.github.io/mediacapture-main/#dom-mediastream-gettracks>
     fn GetTracks(&self) -> Vec<DomRoot<MediaStreamTrack>> {
         self.tracks

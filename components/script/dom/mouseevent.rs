@@ -215,7 +215,7 @@ impl MouseEvent {
     }
 }
 
-impl MouseEventMethods for MouseEvent {
+impl MouseEventMethods<crate::DomTypeHolder> for MouseEvent {
     // https://w3c.github.io/uievents/#widl-MouseEvent-screenX
     fn ScreenX(&self) -> i32 {
         self.screen_x.get()

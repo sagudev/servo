@@ -69,7 +69,7 @@ impl DocumentFragment {
     }
 }
 
-impl DocumentFragmentMethods for DocumentFragment {
+impl DocumentFragmentMethods<crate::DomTypeHolder> for DocumentFragment {
     // https://dom.spec.whatwg.org/#dom-parentnode-children
     fn Children(&self) -> DomRoot<HTMLCollection> {
         let window = window_from_node(self);

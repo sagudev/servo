@@ -900,7 +900,7 @@ impl WebGL2RenderingContext {
     }
 }
 
-impl WebGL2RenderingContextMethods for WebGL2RenderingContext {
+impl WebGL2RenderingContextMethods<crate::DomTypeHolder> for WebGL2RenderingContext {
     /// <https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.14.1>
     fn Canvas(&self) -> DomRoot<HTMLCanvasElement> {
         self.base.Canvas()

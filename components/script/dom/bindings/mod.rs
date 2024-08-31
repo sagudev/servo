@@ -135,7 +135,8 @@
 #![deny(non_snake_case)]
 
 pub mod buffer_source;
-pub mod callback;
+//pub mod callback;
+pub use script_bindings::callback;
 pub mod cell;
 pub mod constant;
 pub mod conversions;
@@ -145,14 +146,18 @@ pub mod guard;
 pub mod htmlconstructor;
 pub mod import;
 pub mod inheritance;
-pub mod interface;
-pub mod iterable;
+pub use script_bindings::interface;
+//pub mod interface;
+//pub mod iterable;
+pub use script_bindings::iterable;
 pub mod like;
 pub mod namespace;
-pub mod num;
+//pub mod num;
+pub use script_bindings::num;
 pub mod principals;
 pub mod proxyhandler;
-pub mod record;
+//pub mod record;
+pub use script_bindings::record;
 pub mod refcounted;
 pub use script_bindings::reflector;
 //pub mod reflector;
@@ -181,7 +186,8 @@ pub mod codegen {
         include!(concat!(env!("OUT_DIR"), "/Bindings/mod.rs"));
     }*/
     pub mod InterfaceObjectMap {
-        include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMap.rs"));
+        pub use script_bindings::codegen::InterfaceObjectMap::*;
+        include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMapPhf.rs"));
     }
     #[allow(dead_code, unused_imports, clippy::enum_variant_names)]
     pub mod InheritTypes {

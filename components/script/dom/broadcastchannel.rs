@@ -74,7 +74,7 @@ impl BroadcastChannel {
     }
 }
 
-impl BroadcastChannelMethods for BroadcastChannel {
+impl BroadcastChannelMethods<crate::DomTypeHolder> for BroadcastChannel {
     /// <https://html.spec.whatwg.org/multipage/#dom-messageport-postmessage>
     fn PostMessage(&self, cx: SafeJSContext, message: HandleValue) -> ErrorResult {
         // Step 3, if closed.

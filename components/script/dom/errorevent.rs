@@ -135,7 +135,7 @@ impl ErrorEvent {
     }
 }
 
-impl ErrorEventMethods for ErrorEvent {
+impl ErrorEventMethods<crate::DomTypeHolder> for ErrorEvent {
     // https://html.spec.whatwg.org/multipage/#dom-errorevent-lineno
     fn Lineno(&self) -> u32 {
         self.lineno.get()

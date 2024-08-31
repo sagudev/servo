@@ -89,7 +89,7 @@ impl XRInputSourceEvent {
     }
 }
 
-impl XRInputSourceEventMethods for XRInputSourceEvent {
+impl XRInputSourceEventMethods<crate::DomTypeHolder> for XRInputSourceEvent {
     // https://immersive-web.github.io/webxr/#dom-xrinputsourceeventinit-frame
     fn Frame(&self) -> DomRoot<XRFrame> {
         DomRoot::from_ref(&*self.frame)

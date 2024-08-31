@@ -54,7 +54,7 @@ impl TestWorklet {
     }
 }
 
-impl TestWorkletMethods for TestWorklet {
+impl TestWorkletMethods<crate::DomTypeHolder> for TestWorklet {
     #[allow(non_snake_case)]
     fn AddModule(
         &self,

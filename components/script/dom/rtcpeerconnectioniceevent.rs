@@ -89,7 +89,7 @@ impl RTCPeerConnectionIceEvent {
     }
 }
 
-impl RTCPeerConnectionIceEventMethods for RTCPeerConnectionIceEvent {
+impl RTCPeerConnectionIceEventMethods<crate::DomTypeHolder> for RTCPeerConnectionIceEvent {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnectioniceevent-candidate>
     fn GetCandidate(&self) -> Option<DomRoot<RTCIceCandidate>> {
         self.candidate.as_ref().map(|x| DomRoot::from_ref(&**x))

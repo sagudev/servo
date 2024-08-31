@@ -59,7 +59,7 @@ impl MessageChannel {
     }
 }
 
-impl MessageChannelMethods for MessageChannel {
+impl MessageChannelMethods<crate::DomTypeHolder> for MessageChannel {
     /// <https://html.spec.whatwg.org/multipage/#dom-messagechannel-port1>
     fn Port1(&self) -> DomRoot<MessagePort> {
         DomRoot::from_ref(&*self.port1)

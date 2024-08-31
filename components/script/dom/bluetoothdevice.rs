@@ -248,7 +248,7 @@ impl BluetoothDevice {
     }
 }
 
-impl BluetoothDeviceMethods for BluetoothDevice {
+impl BluetoothDeviceMethods<crate::DomTypeHolder> for BluetoothDevice {
     // https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothdevice-id
     fn Id(&self) -> DOMString {
         self.id.clone()

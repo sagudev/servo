@@ -331,7 +331,7 @@ impl XMLHttpRequest {
     }
 }
 
-impl XMLHttpRequestMethods for XMLHttpRequest {
+impl XMLHttpRequestMethods<crate::DomTypeHolder> for XMLHttpRequest {
     // https://xhr.spec.whatwg.org/#handler-xhr-onreadystatechange
     event_handler!(
         readystatechange,

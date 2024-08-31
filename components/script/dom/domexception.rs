@@ -166,7 +166,7 @@ impl DOMException {
     }
 }
 
-impl DOMExceptionMethods for DOMException {
+impl DOMExceptionMethods<crate::DomTypeHolder> for DOMException {
     // https://heycam.github.io/webidl/#dom-domexception-code
     fn Code(&self) -> u16 {
         match DOMErrorName::from(&self.name) {

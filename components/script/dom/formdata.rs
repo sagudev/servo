@@ -78,7 +78,7 @@ impl FormData {
     }
 }
 
-impl FormDataMethods for FormData {
+impl FormDataMethods<crate::DomTypeHolder> for FormData {
     // https://xhr.spec.whatwg.org/#dom-formdata-append
     fn Append(&self, name: USVString, str_value: USVString) {
         let datum = FormDatum {

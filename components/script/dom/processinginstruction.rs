@@ -48,7 +48,7 @@ impl ProcessingInstruction {
     }
 }
 
-impl ProcessingInstructionMethods for ProcessingInstruction {
+impl ProcessingInstructionMethods<crate::DomTypeHolder> for ProcessingInstruction {
     // https://dom.spec.whatwg.org/#dom-processinginstruction-target
     fn Target(&self) -> DOMString {
         self.target.clone()

@@ -106,7 +106,7 @@ impl ProgressEvent {
     }
 }
 
-impl ProgressEventMethods for ProgressEvent {
+impl ProgressEventMethods<crate::DomTypeHolder> for ProgressEvent {
     // https://xhr.spec.whatwg.org/#dom-progressevent-lengthcomputable
     fn LengthComputable(&self) -> bool {
         self.length_computable

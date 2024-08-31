@@ -85,9 +85,9 @@ pub struct XRSession {
 
     next_raf_id: Cell<i32>,
     #[ignore_malloc_size_of = "closures are hard"]
-    raf_callback_list: DomRefCell<Vec<(i32, Option<Rc<XRFrameRequestCallback>>)>>,
+    raf_callback_list: DomRefCell<Vec<(i32, Option<Rc<XRFrameRequestCallback<crate::DomTypeHolder>>>)>>,
     #[ignore_malloc_size_of = "closures are hard"]
-    current_raf_callback_list: DomRefCell<Vec<(i32, Option<Rc<XRFrameRequestCallback>>)>>,
+    current_raf_callback_list: DomRefCell<Vec<(i32, Option<Rc<XRFrameRequestCallback<crate::DomTypeHolder>>>)>>,
     input_sources: Dom<XRInputSourceArray>,
     // Any promises from calling end()
     #[ignore_malloc_size_of = "promises are hard"]
@@ -576,7 +576,7 @@ impl XRSession {
     }
 }
 
-impl XRSessionMethods for XRSession {
+impl XRSessionMethods<crate::DomTypeHolder> for XRSession {
     // https://immersive-web.github.io/webxr/#eventdef-xrsession-end
     event_handler!(end, GetOnend, SetOnend);
 
@@ -750,7 +750,7 @@ impl XRSessionMethods for XRSession {
     }
 
     /// <https://immersive-web.github.io/webxr/#dom-xrsession-requestanimationframe>
-    fn RequestAnimationFrame(&self, callback: Rc<XRFrameRequestCallback>) -> i32 {
+    fn RequestAnimationFrame(&self, callback: Rc<XRFrameRequestCallback<crate::DomTypeHolder>>) -> i32 {
         // queue up RAF callback, obtain ID
         let raf_id = self.next_raf_id.get();
         self.next_raf_id.set(raf_id + 1);

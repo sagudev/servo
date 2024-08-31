@@ -58,15 +58,15 @@ use crate::realms::{enter_realm, InRealm};
 
 #[derive(Clone, JSTraceable, MallocSizeOf, PartialEq)]
 pub enum CommonEventHandler {
-    EventHandler(#[ignore_malloc_size_of = "Rc"] Rc<EventHandlerNonNull>),
+    EventHandler(#[ignore_malloc_size_of = "Rc"] Rc<EventHandlerNonNull<crate::DomTypeHolder>>),
 
-    ErrorEventHandler(#[ignore_malloc_size_of = "Rc"] Rc<OnErrorEventHandlerNonNull>),
+    ErrorEventHandler(#[ignore_malloc_size_of = "Rc"] Rc<OnErrorEventHandlerNonNull<crate::DomTypeHolder>>),
 
-    BeforeUnloadEventHandler(#[ignore_malloc_size_of = "Rc"] Rc<OnBeforeUnloadEventHandlerNonNull>),
+    BeforeUnloadEventHandler(#[ignore_malloc_size_of = "Rc"] Rc<OnBeforeUnloadEventHandlerNonNull<crate::DomTypeHolder>>),
 }
 
 impl CommonEventHandler {
-    fn parent(&self) -> &CallbackFunction {
+    fn parent(&self) -> &CallbackFunction<crate::DomTypeHolder> {
         match *self {
             CommonEventHandler::EventHandler(ref handler) => &handler.parent,
             CommonEventHandler::ErrorEventHandler(ref handler) => &handler.parent,
@@ -126,7 +126,7 @@ impl InlineEventListener {
 
 #[derive(Clone, JSTraceable, MallocSizeOf, PartialEq)]
 enum EventListenerType {
-    Additive(#[ignore_malloc_size_of = "Rc"] Rc<EventListener>),
+    Additive(#[ignore_malloc_size_of = "Rc"] Rc<EventListener<crate::DomTypeHolder>>),
     Inline(InlineEventListener),
 }
 
@@ -150,7 +150,7 @@ impl EventListenerType {
 /// A representation of an EventListener/EventHandler object that has previously
 /// been compiled successfully, if applicable.
 pub enum CompiledEventListener {
-    Listener(Rc<EventListener>),
+    Listener(Rc<EventListener<crate::DomTypeHolder>>),
     Handler(CommonEventHandler),
 }
 
@@ -437,7 +437,7 @@ impl EventTarget {
         }
     }
 
-    pub fn remove_listener_if_once(&self, ty: &Atom, listener: &Rc<EventListener>) {
+    pub fn remove_listener_if_once(&self, ty: &Atom, listener: &Rc<EventListener<crate::DomTypeHolder>>) {
         let mut handlers = self.handlers.borrow_mut();
 
         let listener = EventListenerType::Additive(listener.clone());
@@ -586,7 +586,7 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn set_event_handler_common<T: CallbackContainer>(
+    pub fn set_event_handler_common<T: CallbackContainer<crate::DomTypeHolder>>(
         &self,
         ty: &str,
         listener: Option<Rc<T>>,
@@ -602,7 +602,7 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn set_error_event_handler<T: CallbackContainer>(&self, ty: &str, listener: Option<Rc<T>>) {
+    pub fn set_error_event_handler<T: CallbackContainer<crate::DomTypeHolder>>(&self, ty: &str, listener: Option<Rc<T>>) {
         let cx = GlobalScope::get_cx();
 
         let event_listener = listener.map(|listener| {
@@ -614,7 +614,7 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn set_beforeunload_event_handler<T: CallbackContainer>(
+    pub fn set_beforeunload_event_handler<T: CallbackContainer<crate::DomTypeHolder>>(
         &self,
         ty: &str,
         listener: Option<Rc<T>>,
@@ -630,7 +630,7 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn get_event_handler_common<T: CallbackContainer>(&self, ty: &str) -> Option<Rc<T>> {
+    pub fn get_event_handler_common<T: CallbackContainer<crate::DomTypeHolder>>(&self, ty: &str) -> Option<Rc<T>> {
         let cx = GlobalScope::get_cx();
         let listener = self.get_inline_event_listener(&Atom::from(ty));
         unsafe {
@@ -687,7 +687,7 @@ impl EventTarget {
     pub fn add_event_listener(
         &self,
         ty: DOMString,
-        listener: Option<Rc<EventListener>>,
+        listener: Option<Rc<EventListener<crate::DomTypeHolder>>>,
         options: AddEventListenerOptions,
     ) {
         let listener = match listener {
@@ -719,7 +719,7 @@ impl EventTarget {
     pub fn remove_event_listener(
         &self,
         ty: DOMString,
-        listener: Option<Rc<EventListener>>,
+        listener: Option<Rc<EventListener<crate::DomTypeHolder>>>,
         options: EventListenerOptions,
     ) {
         let Some(ref listener) = listener else {
@@ -745,12 +745,12 @@ impl EventTarget {
     }
 }
 
-impl EventTargetMethods for EventTarget {
+impl EventTargetMethods<crate::DomTypeHolder> for EventTarget {
     // https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener
     fn AddEventListener(
         &self,
         ty: DOMString,
-        listener: Option<Rc<EventListener>>,
+        listener: Option<Rc<EventListener<crate::DomTypeHolder>>>,
         options: AddEventListenerOptionsOrBoolean,
     ) {
         self.add_event_listener(ty, listener, options.into())
@@ -760,7 +760,7 @@ impl EventTargetMethods for EventTarget {
     fn RemoveEventListener(
         &self,
         ty: DOMString,
-        listener: Option<Rc<EventListener>>,
+        listener: Option<Rc<EventListener<crate::DomTypeHolder>>>,
         options: EventListenerOptionsOrBoolean,
     ) {
         self.remove_event_listener(ty, listener, options.into())

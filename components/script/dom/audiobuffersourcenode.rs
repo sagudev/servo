@@ -46,7 +46,7 @@ impl AudioBufferSourceNode {
     fn new_inherited(
         window: &Window,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions,
+        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
     ) -> Fallible<AudioBufferSourceNode> {
         let node_options = Default::default();
         let source_node = AudioScheduledSourceNode::new_inherited(
@@ -98,7 +98,7 @@ impl AudioBufferSourceNode {
     pub fn new(
         window: &Window,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions,
+        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         Self::new_with_proto(window, None, context, options)
     }
@@ -108,24 +108,23 @@ impl AudioBufferSourceNode {
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions,
+        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         let node = AudioBufferSourceNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl AudioBufferSourceNodeMethods<crate::DomTypeHolder> for AudioBufferSourceNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions,
+        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         AudioBufferSourceNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl AudioBufferSourceNodeMethods for AudioBufferSourceNode {
     // https://webaudio.github.io/web-audio-api/#dom-audiobuffersourcenode-buffer
     fn GetBuffer(&self) -> Fallible<Option<DomRoot<AudioBuffer>>> {
         Ok(self.buffer.get())
@@ -262,8 +261,8 @@ impl AudioBufferSourceNodeMethods for AudioBufferSourceNode {
     }
 }
 
-impl<'a> From<&'a AudioBufferSourceOptions> for AudioBufferSourceNodeOptions {
-    fn from(options: &'a AudioBufferSourceOptions) -> Self {
+impl<'a> From<&'a AudioBufferSourceOptions<crate::DomTypeHolder>> for AudioBufferSourceNodeOptions {
+    fn from(options: &'a AudioBufferSourceOptions<crate::DomTypeHolder>) -> Self {
         Self {
             buffer: options
                 .buffer

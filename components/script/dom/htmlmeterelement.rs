@@ -55,7 +55,7 @@ impl HTMLMeterElement {
     }
 }
 
-impl HTMLMeterElementMethods for HTMLMeterElement {
+impl HTMLMeterElementMethods<crate::DomTypeHolder> for HTMLMeterElement {
     // https://html.spec.whatwg.org/multipage/#dom-lfe-labels
     make_labels_getter!(Labels, labels_node_list);
 

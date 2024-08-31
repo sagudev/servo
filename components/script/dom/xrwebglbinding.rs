@@ -74,7 +74,7 @@ impl XRWebGLBinding {
     }
 }
 
-impl XRWebGLBindingMethods for XRWebGLBinding {
+impl XRWebGLBindingMethods<crate::DomTypeHolder> for XRWebGLBinding {
     /// <https://immersive-web.github.io/layers/#dom-xrwebglbinding-createprojectionlayer>
     fn CreateProjectionLayer(
         &self,

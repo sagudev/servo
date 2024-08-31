@@ -77,7 +77,7 @@ impl GPUUncapturedErrorEvent {
     }
 }
 
-impl GPUUncapturedErrorEventMethods for GPUUncapturedErrorEvent {
+impl GPUUncapturedErrorEventMethods<crate::DomTypeHolder> for GPUUncapturedErrorEvent {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpuuncapturederrorevent-error>
     fn Error(&self) -> DomRoot<GPUError> {
         DomRoot::from_ref(&self.gpu_error)

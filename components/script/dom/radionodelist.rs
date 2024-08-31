@@ -70,7 +70,7 @@ impl RadioNodeList {
     }
 }
 
-impl RadioNodeListMethods for RadioNodeList {
+impl RadioNodeListMethods<crate::DomTypeHolder> for RadioNodeList {
     // https://html.spec.whatwg.org/multipage/#dom-radionodelist-value
     fn Value(&self) -> DOMString {
         self.upcast::<NodeList>()

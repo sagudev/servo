@@ -97,7 +97,7 @@ impl IIRFilterNode {
     }
 }
 
-impl IIRFilterNodeMethods for IIRFilterNode {
+impl IIRFilterNodeMethods<crate::DomTypeHolder> for IIRFilterNode {
     #[allow(unsafe_code)]
     /// <https://webaudio.github.io/web-audio-api/#dom-iirfilternode-getfrequencyresponse>
     fn GetFrequencyResponse(

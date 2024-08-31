@@ -57,7 +57,7 @@ impl HTMLTemplateElement {
     }
 }
 
-impl HTMLTemplateElementMethods for HTMLTemplateElement {
+impl HTMLTemplateElementMethods<crate::DomTypeHolder> for HTMLTemplateElement {
     /// <https://html.spec.whatwg.org/multipage/#dom-template-content>
     fn Content(&self) -> DomRoot<DocumentFragment> {
         self.contents.or_init(|| {

@@ -59,7 +59,7 @@ impl Text {
     }
 }
 
-impl TextMethods for Text {
+impl TextMethods<crate::DomTypeHolder> for Text {
     // https://dom.spec.whatwg.org/#dom-text-splittext
     // https://dom.spec.whatwg.org/#concept-text-split
     fn SplitText(&self, offset: u32) -> Fallible<DomRoot<Text>> {

@@ -95,7 +95,7 @@ impl CustomEvent {
     }
 }
 
-impl CustomEventMethods for CustomEvent {
+impl CustomEventMethods<crate::DomTypeHolder> for CustomEvent {
     // https://dom.spec.whatwg.org/#dom-customevent-detail
     fn Detail(&self, _cx: JSContext) -> JSVal {
         self.detail.get()

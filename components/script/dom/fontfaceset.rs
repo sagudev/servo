@@ -42,7 +42,7 @@ impl FontFaceSet {
     }
 }
 
-impl FontFaceSetMethods for FontFaceSet {
+impl FontFaceSetMethods<crate::DomTypeHolder> for FontFaceSet {
     /// https://drafts.csswg.org/css-font-loading/#dom-fontfaceset-ready
     fn Ready(&self) -> Rc<Promise> {
         self.promise.clone()

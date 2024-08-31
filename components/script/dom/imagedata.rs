@@ -189,7 +189,7 @@ impl ImageData {
     }
 }
 
-impl ImageDataMethods for ImageData {
+impl ImageDataMethods<crate::DomTypeHolder> for ImageData {
     /// <https://html.spec.whatwg.org/multipage/#dom-imagedata-width>
     fn Width(&self) -> u32 {
         self.width

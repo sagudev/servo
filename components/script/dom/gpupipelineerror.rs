@@ -62,7 +62,7 @@ impl GPUPipelineError {
     }
 }
 
-impl GPUPipelineErrorMethods for GPUPipelineError {
+impl GPUPipelineErrorMethods<crate::DomTypeHolder> for GPUPipelineError {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpupipelineerror-reason>
     fn Reason(&self) -> GPUPipelineErrorReason {
         self.reason

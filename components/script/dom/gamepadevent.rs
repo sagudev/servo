@@ -100,7 +100,7 @@ impl GamepadEvent {
     }
 }
 
-impl GamepadEventMethods for GamepadEvent {
+impl GamepadEventMethods<crate::DomTypeHolder> for GamepadEvent {
     // https://w3c.github.io/gamepad/#gamepadevent-interface
     fn Gamepad(&self) -> DomRoot<Gamepad> {
         DomRoot::from_ref(&*self.gamepad)

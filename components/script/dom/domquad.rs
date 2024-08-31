@@ -109,7 +109,7 @@ impl DOMQuad {
     }
 }
 
-impl DOMQuadMethods for DOMQuad {
+impl DOMQuadMethods<crate::DomTypeHolder> for DOMQuad {
     // https://drafts.fxtf.org/geometry/#dom-domquad-p1
     fn P1(&self) -> DomRoot<DOMPoint> {
         DomRoot::from_ref(&self.p1)

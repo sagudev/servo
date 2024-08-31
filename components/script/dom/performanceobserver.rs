@@ -48,15 +48,15 @@ enum ObserverType {
 pub struct PerformanceObserver {
     reflector_: Reflector,
     #[ignore_malloc_size_of = "can't measure Rc values"]
-    callback: Rc<PerformanceObserverCallback>,
-    entries: DomRefCell<DOMPerformanceEntryList>,
+    callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
+    entries: DomRefCell<DOMPerformanceEntryList<crate::DomTypeHolder>>,
     observer_type: Cell<ObserverType>,
 }
 
 impl PerformanceObserver {
     fn new_inherited(
-        callback: Rc<PerformanceObserverCallback>,
-        entries: DomRefCell<DOMPerformanceEntryList>,
+        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
+        entries: DomRefCell<DOMPerformanceEntryList<crate::DomTypeHolder>>,
     ) -> PerformanceObserver {
         PerformanceObserver {
             reflector_: Reflector::new(),
@@ -68,8 +68,8 @@ impl PerformanceObserver {
 
     pub fn new(
         global: &GlobalScope,
-        callback: Rc<PerformanceObserverCallback>,
-        entries: DOMPerformanceEntryList,
+        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
+        entries: DOMPerformanceEntryList<crate::DomTypeHolder>,
     ) -> DomRoot<PerformanceObserver> {
         Self::new_with_proto(global, None, callback, entries)
     }
@@ -78,8 +78,8 @@ impl PerformanceObserver {
     fn new_with_proto(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        callback: Rc<PerformanceObserverCallback>,
-        entries: DOMPerformanceEntryList,
+        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
+        entries: DOMPerformanceEntryList<crate::DomTypeHolder>,
     ) -> DomRoot<PerformanceObserver> {
         let observer = PerformanceObserver::new_inherited(callback, DomRefCell::new(entries));
         reflect_dom_object_with_proto(Box::new(observer), global, proto)
@@ -89,7 +89,7 @@ impl PerformanceObserver {
     pub fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        callback: Rc<PerformanceObserverCallback>,
+        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
     ) -> Fallible<DomRoot<PerformanceObserver>> {
         Ok(PerformanceObserver::new_with_proto(
             global,
@@ -118,15 +118,15 @@ impl PerformanceObserver {
             .Call_(self, &observer_entry_list, self, ExceptionHandling::Report);
     }
 
-    pub fn callback(&self) -> Rc<PerformanceObserverCallback> {
+    pub fn callback(&self) -> Rc<PerformanceObserverCallback<crate::DomTypeHolder>> {
         self.callback.clone()
     }
 
-    pub fn entries(&self) -> DOMPerformanceEntryList {
+    pub fn entries(&self) -> DOMPerformanceEntryList<crate::DomTypeHolder> {
         self.entries.borrow().clone()
     }
 
-    pub fn set_entries(&self, entries: DOMPerformanceEntryList) {
+    pub fn set_entries(&self, entries: DOMPerformanceEntryList<crate::DomTypeHolder>) {
         *self.entries.borrow_mut() = entries;
     }
 
@@ -139,7 +139,7 @@ impl PerformanceObserver {
     }
 }
 
-impl PerformanceObserverMethods for PerformanceObserver {
+impl PerformanceObserverMethods<crate::DomTypeHolder> for PerformanceObserver {
     // https://w3c.github.io/performance-timeline/#dom-performanceobserver-observe()
     fn Observe(&self, options: &PerformanceObserverInit) -> Fallible<()> {
         // Step 1 is self

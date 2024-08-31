@@ -116,7 +116,7 @@ impl OscillatorNode {
     }
 }
 
-impl OscillatorNodeMethods for OscillatorNode {
+impl OscillatorNodeMethods<crate::DomTypeHolder> for OscillatorNode {
     // https://webaudio.github.io/web-audio-api/#dom-oscillatornode-frequency
     fn Frequency(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.frequency)

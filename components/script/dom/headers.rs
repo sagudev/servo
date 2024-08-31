@@ -70,7 +70,7 @@ impl Headers {
     }
 }
 
-impl HeadersMethods for Headers {
+impl HeadersMethods<crate::DomTypeHolder> for Headers {
     // https://fetch.spec.whatwg.org/#concept-headers-append
     fn Append(&self, name: ByteString, value: ByteString) -> ErrorResult {
         // Step 1

@@ -94,7 +94,7 @@ impl Attr {
     }
 }
 
-impl AttrMethods for Attr {
+impl AttrMethods<crate::DomTypeHolder> for Attr {
     // https://dom.spec.whatwg.org/#dom-attr-localname
     fn LocalName(&self) -> DOMString {
         // FIXME(ajeffrey): convert directly from LocalName to DOMString

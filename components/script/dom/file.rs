@@ -126,7 +126,7 @@ impl File {
     }
 }
 
-impl FileMethods for File {
+impl FileMethods<crate::DomTypeHolder> for File {
     // https://w3c.github.io/FileAPI/#dfn-name
     fn Name(&self) -> DOMString {
         self.name.clone()

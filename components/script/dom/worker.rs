@@ -227,7 +227,7 @@ impl Worker {
     }
 }
 
-impl WorkerMethods for Worker {
+impl WorkerMethods<crate::DomTypeHolder> for Worker {
     /// <https://html.spec.whatwg.org/multipage/#dom-worker-postmessage>
     fn PostMessage(
         &self,

@@ -50,7 +50,7 @@ impl VisibilityStateEntry {
     }
 }
 
-impl VisibilityStateEntryMethods for VisibilityStateEntry {
+impl VisibilityStateEntryMethods<crate::DomTypeHolder> for VisibilityStateEntry {
     /// <https://html.spec.whatwg.org/multipage/#visibilitystateentry-name>
     fn Name(&self) -> DOMString {
         self.entry.Name()

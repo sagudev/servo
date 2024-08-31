@@ -68,7 +68,7 @@ impl DocumentType {
     }
 }
 
-impl DocumentTypeMethods for DocumentType {
+impl DocumentTypeMethods<crate::DomTypeHolder> for DocumentType {
     // https://dom.spec.whatwg.org/#dom-documenttype-name
     fn Name(&self) -> DOMString {
         self.name.clone()

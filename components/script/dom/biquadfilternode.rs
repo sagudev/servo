@@ -142,7 +142,7 @@ impl BiquadFilterNode {
     }
 }
 
-impl BiquadFilterNodeMethods for BiquadFilterNode {
+impl BiquadFilterNodeMethods<crate::DomTypeHolder> for BiquadFilterNode {
     // https://webaudio.github.io/web-audio-api/#dom-biquadfilternode-gain
     fn Gain(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.gain)

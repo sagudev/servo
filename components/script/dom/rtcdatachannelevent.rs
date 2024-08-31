@@ -81,7 +81,7 @@ impl RTCDataChannelEvent {
     }
 }
 
-impl RTCDataChannelEventMethods for RTCDataChannelEvent {
+impl RTCDataChannelEventMethods<crate::DomTypeHolder> for RTCDataChannelEvent {
     // https://www.w3.org/TR/webrtc/#dom-datachannelevent-channel
     fn Channel(&self) -> DomRoot<RTCDataChannel> {
         DomRoot::from_ref(&*self.channel)

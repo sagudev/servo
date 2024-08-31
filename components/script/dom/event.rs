@@ -399,7 +399,7 @@ impl Event {
     }
 }
 
-impl EventMethods for Event {
+impl EventMethods<crate::DomTypeHolder> for Event {
     /// <https://dom.spec.whatwg.org/#dom-event-eventphase>
     fn EventPhase(&self) -> u16 {
         self.phase.get() as u16

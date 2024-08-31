@@ -77,8 +77,8 @@ pub enum BaseAudioContextOptions {
 #[derive(JSTraceable)]
 struct DecodeResolver {
     pub promise: Rc<Promise>,
-    pub success_callback: Option<Rc<DecodeSuccessCallback>>,
-    pub error_callback: Option<Rc<DecodeErrorCallback>>,
+    pub success_callback: Option<Rc<DecodeSuccessCallback<crate::DomTypeHolder>>>,
+    pub error_callback: Option<Rc<DecodeErrorCallback<crate::DomTypeHolder>>>,
 }
 
 type BoxedSliceOfPromises = Box<[Rc<Promise>]>;
@@ -275,7 +275,7 @@ impl BaseAudioContext {
     }
 }
 
-impl BaseAudioContextMethods for BaseAudioContext {
+impl BaseAudioContextMethods<crate::DomTypeHolder> for BaseAudioContext {
     /// <https://webaudio.github.io/web-audio-api/#dom-baseaudiocontext-samplerate>
     fn SampleRate(&self) -> Finite<f32> {
         Finite::wrap(self.sample_rate)
@@ -442,8 +442,8 @@ impl BaseAudioContextMethods for BaseAudioContext {
     fn DecodeAudioData(
         &self,
         audio_data: CustomAutoRooterGuard<ArrayBuffer>,
-        decode_success_callback: Option<Rc<DecodeSuccessCallback>>,
-        decode_error_callback: Option<Rc<DecodeErrorCallback>>,
+        decode_success_callback: Option<Rc<DecodeSuccessCallback<crate::DomTypeHolder>>>,
+        decode_error_callback: Option<Rc<DecodeErrorCallback<crate::DomTypeHolder>>>,
         comp: InRealm,
     ) -> Rc<Promise> {
         // Step 1.

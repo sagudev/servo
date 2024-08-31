@@ -855,7 +855,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-childnode-before>
-    pub fn before(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn before(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let parent = &self.parent_node;
 
@@ -884,7 +884,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-childnode-after>
-    pub fn after(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn after(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let parent = &self.parent_node;
 
@@ -907,7 +907,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-childnode-replacewith>
-    pub fn replace_with(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn replace_with(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let parent = if let Some(parent) = self.GetParentNode() {
             parent
@@ -930,7 +930,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-parentnode-prepend>
-    pub fn prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let doc = self.owner_doc();
         let node = doc.node_from_nodes_and_strings(nodes)?;
@@ -940,7 +940,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-parentnode-append>
-    pub fn append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let doc = self.owner_doc();
         let node = doc.node_from_nodes_and_strings(nodes)?;
@@ -949,7 +949,7 @@ impl Node {
     }
 
     /// <https://dom.spec.whatwg.org/#dom-parentnode-replacechildren>
-    pub fn replace_children(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    pub fn replace_children(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         // Step 1.
         let doc = self.owner_doc();
         let node = doc.node_from_nodes_and_strings(nodes)?;
@@ -1278,7 +1278,7 @@ impl Node {
 }
 
 /// Iterate through `nodes` until we find a `Node` that is not in `not_in`
-fn first_node_not_in<I>(mut nodes: I, not_in: &[NodeOrString]) -> Option<DomRoot<Node>>
+fn first_node_not_in<I>(mut nodes: I, not_in: &[NodeOrString<crate::DomTypeHolder>]) -> Option<DomRoot<Node>>
 where
     I: Iterator<Item = DomRoot<Node>>,
 {
@@ -2425,7 +2425,7 @@ impl Node {
     }
 }
 
-impl NodeMethods for Node {
+impl NodeMethods<crate::DomTypeHolder> for Node {
     /// <https://dom.spec.whatwg.org/#dom-node-nodetype>
     fn NodeType(&self) -> u16 {
         match self.type_id() {

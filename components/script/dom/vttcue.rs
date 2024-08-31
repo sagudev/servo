@@ -86,7 +86,7 @@ impl VTTCue {
     }
 }
 
-impl VTTCueMethods for VTTCue {
+impl VTTCueMethods<crate::DomTypeHolder> for VTTCue {
     // https://w3c.github.io/webvtt/#dom-vttcue-region
     fn GetRegion(&self) -> Option<DomRoot<VTTRegion>> {
         self.region

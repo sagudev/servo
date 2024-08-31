@@ -103,7 +103,7 @@ impl StereoPannerNode {
     }
 }
 
-impl StereoPannerNodeMethods for StereoPannerNode {
+impl StereoPannerNodeMethods<crate::DomTypeHolder> for StereoPannerNode {
     // https://webaudio.github.io/web-audio-api/#dom-stereopannernode-pan
     fn Pan(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.pan)

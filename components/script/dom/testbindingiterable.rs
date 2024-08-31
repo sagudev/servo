@@ -42,7 +42,7 @@ impl TestBindingIterable {
     }
 }
 
-impl TestBindingIterableMethods for TestBindingIterable {
+impl TestBindingIterableMethods<crate::DomTypeHolder> for TestBindingIterable {
     fn Add(&self, v: DOMString) {
         self.vals.borrow_mut().push(v);
     }

@@ -60,7 +60,7 @@ impl HTMLDetailsElement {
     }
 }
 
-impl HTMLDetailsElementMethods for HTMLDetailsElement {
+impl HTMLDetailsElementMethods<crate::DomTypeHolder> for HTMLDetailsElement {
     // https://html.spec.whatwg.org/multipage/#dom-details-open
     make_bool_getter!(Open, "open");
 

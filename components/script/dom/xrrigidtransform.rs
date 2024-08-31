@@ -102,7 +102,7 @@ impl XRRigidTransform {
     }
 }
 
-impl XRRigidTransformMethods for XRRigidTransform {
+impl XRRigidTransformMethods<crate::DomTypeHolder> for XRRigidTransform {
     // https://immersive-web.github.io/webxr/#dom-xrrigidtransform-position
     fn Position(&self) -> DomRoot<DOMPointReadOnly> {
         self.position.or_init(|| {

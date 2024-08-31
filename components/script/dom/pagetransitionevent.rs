@@ -90,7 +90,7 @@ impl PageTransitionEvent {
     }
 }
 
-impl PageTransitionEventMethods for PageTransitionEvent {
+impl PageTransitionEventMethods<crate::DomTypeHolder> for PageTransitionEvent {
     // https://html.spec.whatwg.org/multipage/#dom-pagetransitionevent-persisted
     fn Persisted(&self) -> bool {
         self.persisted.get()

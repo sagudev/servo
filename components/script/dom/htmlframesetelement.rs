@@ -49,7 +49,7 @@ impl HTMLFrameSetElement {
     }
 }
 
-impl HTMLFrameSetElementMethods for HTMLFrameSetElement {
+impl HTMLFrameSetElementMethods<crate::DomTypeHolder> for HTMLFrameSetElement {
     // https://html.spec.whatwg.org/multipage/#windoweventhandlers
     window_event_handlers!(ForwardToWindow);
 }

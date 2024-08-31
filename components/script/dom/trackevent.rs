@@ -107,7 +107,7 @@ impl TrackEvent {
 }
 
 #[allow(non_snake_case)]
-impl TrackEventMethods for TrackEvent {
+impl TrackEventMethods<crate::DomTypeHolder> for TrackEvent {
     // https://html.spec.whatwg.org/multipage/#dom-trackevent-track
     fn GetTrack(&self) -> Option<VideoTrackOrAudioTrackOrTextTrack> {
         match &self.track {

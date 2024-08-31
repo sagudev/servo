@@ -63,7 +63,7 @@ impl DOMPoint {
     }
 }
 
-impl DOMPointMethods for DOMPoint {
+impl DOMPointMethods<crate::DomTypeHolder> for DOMPoint {
     // https://dev.w3.org/fxtf/geometry/Overview.html#dom-dompointreadonly-x
     fn X(&self) -> f64 {
         self.point.X()

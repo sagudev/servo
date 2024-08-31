@@ -91,7 +91,7 @@ impl CloseEvent {
     }
 }
 
-impl CloseEventMethods for CloseEvent {
+impl CloseEventMethods<crate::DomTypeHolder> for CloseEvent {
     // https://html.spec.whatwg.org/multipage/#dom-closeevent-wasclean
     fn WasClean(&self) -> bool {
         self.was_clean

@@ -49,7 +49,7 @@ impl DOMParser {
     }
 }
 
-impl DOMParserMethods for DOMParser {
+impl DOMParserMethods<crate::DomTypeHolder> for DOMParser {
     // https://w3c.github.io/DOM-Parsing/#the-domparser-interface
     fn ParseFromString(
         &self,

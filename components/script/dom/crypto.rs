@@ -38,7 +38,7 @@ impl Crypto {
     }
 }
 
-impl CryptoMethods for Crypto {
+impl CryptoMethods<crate::DomTypeHolder> for Crypto {
     #[allow(unsafe_code)]
     // https://dvcs.w3.org/hg/webcrypto-api/raw-file/tip/spec/Overview.html#Crypto-method-getRandomValues
     fn GetRandomValues(

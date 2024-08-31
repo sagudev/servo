@@ -94,7 +94,7 @@ impl GainNode {
     }
 }
 
-impl GainNodeMethods for GainNode {
+impl GainNodeMethods<crate::DomTypeHolder> for GainNode {
     // https://webaudio.github.io/web-audio-api/#dom-gainnode-gain
     fn Gain(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.gain)

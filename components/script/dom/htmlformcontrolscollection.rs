@@ -59,7 +59,7 @@ impl HTMLFormControlsCollection {
     }
 }
 
-impl HTMLFormControlsCollectionMethods for HTMLFormControlsCollection {
+impl HTMLFormControlsCollectionMethods<crate::DomTypeHolder> for HTMLFormControlsCollection {
     // https://html.spec.whatwg.org/multipage/#dom-htmlformcontrolscollection-nameditem
     fn NamedItem(&self, name: DOMString) -> Option<RadioNodeListOrElement> {
         // Step 1

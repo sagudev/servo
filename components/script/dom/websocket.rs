@@ -301,7 +301,7 @@ impl WebSocket {
     }
 }
 
-impl WebSocketMethods for WebSocket {
+impl WebSocketMethods<crate::DomTypeHolder> for WebSocket {
     // https://html.spec.whatwg.org/multipage/#handler-websocket-onopen
     event_handler!(open, GetOnopen, SetOnopen);
 

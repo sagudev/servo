@@ -82,7 +82,7 @@ impl PopStateEvent {
     }
 }
 
-impl PopStateEventMethods for PopStateEvent {
+impl PopStateEventMethods<crate::DomTypeHolder> for PopStateEvent {
     // https://html.spec.whatwg.org/multipage/#dom-popstateevent-state
     fn State(&self, _cx: JSContext) -> JSVal {
         self.state.get()

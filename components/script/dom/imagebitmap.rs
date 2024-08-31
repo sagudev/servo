@@ -51,7 +51,7 @@ impl ImageBitmap {
     }
 }
 
-impl ImageBitmapMethods for ImageBitmap {
+impl ImageBitmapMethods<crate::DomTypeHolder> for ImageBitmap {
     // https://html.spec.whatwg.org/multipage/#dom-imagebitmap-height
     fn Height(&self) -> u32 {
         //to do: add a condition for checking detached internal slot

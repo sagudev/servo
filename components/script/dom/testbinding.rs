@@ -97,7 +97,7 @@ impl TestBinding {
     }
 }
 
-impl TestBindingMethods for TestBinding {
+impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn BooleanAttribute(&self) -> bool {
         false
     }
@@ -993,8 +993,8 @@ impl TestBindingMethods for TestBinding {
 
     fn PromiseNativeHandler(
         &self,
-        resolve: Option<Rc<SimpleCallback>>,
-        reject: Option<Rc<SimpleCallback>>,
+        resolve: Option<Rc<SimpleCallback<crate::DomTypeHolder>>>,
+        reject: Option<Rc<SimpleCallback<crate::DomTypeHolder>>>,
         comp: InRealm,
     ) -> Rc<Promise> {
         let global = self.global();
@@ -1010,10 +1010,10 @@ impl TestBindingMethods for TestBinding {
         #[derive(JSTraceable, MallocSizeOf)]
         struct SimpleHandler {
             #[ignore_malloc_size_of = "Rc has unclear ownership semantics"]
-            handler: Rc<SimpleCallback>,
+            handler: Rc<SimpleCallback<crate::DomTypeHolder>>,
         }
         impl SimpleHandler {
-            fn new(callback: Rc<SimpleCallback>) -> Box<dyn Callback> {
+            fn new(callback: Rc<SimpleCallback<crate::DomTypeHolder>>) -> Box<dyn Callback> {
                 Box::new(SimpleHandler { handler: callback })
             }
         }

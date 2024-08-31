@@ -77,7 +77,7 @@ impl HTMLBaseElement {
     }
 }
 
-impl HTMLBaseElementMethods for HTMLBaseElement {
+impl HTMLBaseElementMethods<crate::DomTypeHolder> for HTMLBaseElement {
     // https://html.spec.whatwg.org/multipage/#dom-base-href
     fn Href(&self) -> DOMString {
         // Step 1.

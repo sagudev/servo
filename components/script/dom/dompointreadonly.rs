@@ -73,7 +73,7 @@ impl DOMPointReadOnly {
 }
 
 #[allow(non_snake_case)]
-impl DOMPointReadOnlyMethods for DOMPointReadOnly {
+impl DOMPointReadOnlyMethods<crate::DomTypeHolder> for DOMPointReadOnly {
     // https://dev.w3.org/fxtf/geometry/Overview.html#dom-dompointreadonly-x
     fn X(&self) -> f64 {
         self.x.get()
@@ -103,7 +103,7 @@ pub trait DOMPointWriteMethods {
     fn SetW(&self, value: f64);
 }
 
-impl DOMPointWriteMethods for DOMPointReadOnly {
+impl DOMPointWriteMethods<crate::DomTypeHolder> for DOMPointReadOnly {
     fn SetX(&self, value: f64) {
         self.x.set(value);
     }

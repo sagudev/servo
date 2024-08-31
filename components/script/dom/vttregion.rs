@@ -55,7 +55,7 @@ impl VTTRegion {
     }
 }
 
-impl VTTRegionMethods for VTTRegion {
+impl VTTRegionMethods<crate::DomTypeHolder> for VTTRegion {
     // https://w3c.github.io/webvtt/#dom-vttregion-id
     fn Id(&self) -> DOMString {
         self.id.borrow().clone()

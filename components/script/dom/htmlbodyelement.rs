@@ -69,7 +69,7 @@ impl HTMLBodyElement {
     }
 }
 
-impl HTMLBodyElementMethods for HTMLBodyElement {
+impl HTMLBodyElementMethods<crate::DomTypeHolder> for HTMLBodyElement {
     // https://html.spec.whatwg.org/multipage/#dom-body-bgcolor
     make_getter!(BgColor, "bgcolor");
 

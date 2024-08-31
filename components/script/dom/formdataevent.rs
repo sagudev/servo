@@ -83,7 +83,7 @@ impl FormDataEvent {
     }
 }
 
-impl FormDataEventMethods for FormDataEvent {
+impl FormDataEventMethods<crate::DomTypeHolder> for FormDataEvent {
     // https://html.spec.whatwg.org/multipage/#dom-formdataevent-formdata
     fn FormData(&self) -> DomRoot<FormData> {
         DomRoot::from_ref(&*self.form_data)

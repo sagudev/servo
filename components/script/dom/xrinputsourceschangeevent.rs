@@ -115,7 +115,7 @@ impl XRInputSourcesChangeEvent {
     }
 }
 
-impl XRInputSourcesChangeEventMethods for XRInputSourcesChangeEvent {
+impl XRInputSourcesChangeEventMethods<crate::DomTypeHolder> for XRInputSourcesChangeEvent {
     // https://immersive-web.github.io/webxr/#dom-xrinputsourceschangeevent-session
     fn Session(&self) -> DomRoot<XRSession> {
         DomRoot::from_ref(&*self.session)

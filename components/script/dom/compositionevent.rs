@@ -97,7 +97,7 @@ impl CompositionEvent {
     }
 }
 
-impl CompositionEventMethods for CompositionEvent {
+impl CompositionEventMethods<crate::DomTypeHolder> for CompositionEvent {
     // https://w3c.github.io/uievents/#dom-compositionevent-data
     fn Data(&self) -> DOMString {
         self.data.clone()

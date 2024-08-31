@@ -48,7 +48,7 @@ impl PerformanceTiming {
     }
 }
 
-impl PerformanceTimingMethods for PerformanceTiming {
+impl PerformanceTimingMethods<crate::DomTypeHolder> for PerformanceTiming {
     // https://w3c.github.io/navigation-timing/#widl-PerformanceTiming-navigationStart
     fn NavigationStart(&self) -> u64 {
         self.navigation_start

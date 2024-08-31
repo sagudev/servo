@@ -186,7 +186,7 @@ impl Permissions {
 }
 
 #[allow(non_snake_case)]
-impl PermissionsMethods for Permissions {
+impl PermissionsMethods<crate::DomTypeHolder> for Permissions {
     // https://w3c.github.io/permissions/#dom-permissions-query
     fn Query(&self, cx: JSContext, permissionDesc: *mut JSObject) -> Rc<Promise> {
         self.manipulate(Operation::Query, cx, permissionDesc, None)

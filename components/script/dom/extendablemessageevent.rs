@@ -174,7 +174,7 @@ impl ExtendableMessageEvent {
     }
 }
 
-impl ExtendableMessageEventMethods for ExtendableMessageEvent {
+impl ExtendableMessageEventMethods<crate::DomTypeHolder> for ExtendableMessageEvent {
     // https://w3c.github.io/ServiceWorker/#extendablemessage-event-data-attribute
     fn Data(&self, _cx: JSContext) -> JSVal {
         self.data.get()

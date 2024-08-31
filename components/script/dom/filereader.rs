@@ -328,7 +328,7 @@ impl FileReader {
     }
 }
 
-impl FileReaderMethods for FileReader {
+impl FileReaderMethods<crate::DomTypeHolder> for FileReader {
     // https://w3c.github.io/FileAPI/#dfn-onloadstart
     event_handler!(loadstart, GetOnloadstart, SetOnloadstart);
 

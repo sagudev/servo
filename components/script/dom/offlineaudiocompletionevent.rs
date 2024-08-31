@@ -80,7 +80,7 @@ impl OfflineAudioCompletionEvent {
     }
 }
 
-impl OfflineAudioCompletionEventMethods for OfflineAudioCompletionEvent {
+impl OfflineAudioCompletionEventMethods<crate::DomTypeHolder> for OfflineAudioCompletionEvent {
     // https://webaudio.github.io/web-audio-api/#dom-offlineaudiocompletionevent-renderedbuffer
     fn RenderedBuffer(&self) -> DomRoot<AudioBuffer> {
         DomRoot::from_ref(&*self.rendered_buffer)

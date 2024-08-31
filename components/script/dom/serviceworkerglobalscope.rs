@@ -183,7 +183,7 @@ pub struct ServiceWorkerGlobalScope {
     control_receiver: Receiver<ServiceWorkerControlMsg>,
 }
 
-impl WorkerEventLoopMethods for ServiceWorkerGlobalScope {
+impl WorkerEventLoopMethods<crate::DomTypeHolder> for ServiceWorkerGlobalScope {
     type WorkerMsg = ServiceWorkerScriptMsg;
     type ControlMsg = ServiceWorkerControlMsg;
     type Event = MixedMessage;
@@ -497,7 +497,7 @@ unsafe extern "C" fn interrupt_callback(cx: *mut JSContext) -> bool {
     !worker.is_closing()
 }
 
-impl ServiceWorkerGlobalScopeMethods for ServiceWorkerGlobalScope {
+impl ServiceWorkerGlobalScopeMethods<crate::DomTypeHolder> for ServiceWorkerGlobalScope {
     // https://w3c.github.io/ServiceWorker/#dom-serviceworkerglobalscope-onmessage
     event_handler!(message, GetOnmessage, SetOnmessage);
 

@@ -101,7 +101,7 @@ impl UIEvent {
     }
 }
 
-impl UIEventMethods for UIEvent {
+impl UIEventMethods<crate::DomTypeHolder> for UIEvent {
     // https://w3c.github.io/uievents/#widl-UIEvent-view
     fn GetView(&self) -> Option<DomRoot<Window>> {
         self.view.get()

@@ -147,7 +147,7 @@ impl OffscreenCanvas {
     }
 }
 
-impl OffscreenCanvasMethods for OffscreenCanvas {
+impl OffscreenCanvasMethods<crate::DomTypeHolder> for OffscreenCanvas {
     // https://html.spec.whatwg.org/multipage/#dom-offscreencanvas-getcontext
     fn GetContext(
         &self,

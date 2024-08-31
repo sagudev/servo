@@ -206,7 +206,7 @@ fn collect_text(element: &Element, value: &mut String) {
     }
 }
 
-impl HTMLOptionElementMethods for HTMLOptionElement {
+impl HTMLOptionElementMethods<crate::DomTypeHolder> for HTMLOptionElement {
     // https://html.spec.whatwg.org/multipage/#dom-option-disabled
     make_bool_getter!(Disabled, "disabled");
 

@@ -95,7 +95,7 @@ impl TouchEvent {
     }
 }
 
-impl<'a> TouchEventMethods for &'a TouchEvent {
+impl<'a> TouchEventMethods<crate::DomTypeHolder> for &'a TouchEvent {
     /// <https://w3c.github.io/touch-events/#widl-TouchEvent-ctrlKey>
     fn CtrlKey(&self) -> bool {
         self.ctrl_key.get()

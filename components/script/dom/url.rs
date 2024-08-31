@@ -206,7 +206,7 @@ impl URL {
 }
 
 #[allow(non_snake_case)]
-impl URLMethods for URL {
+impl URLMethods<crate::DomTypeHolder> for URL {
     /// <https://url.spec.whatwg.org/#dom-url-hash>
     fn Hash(&self) -> USVString {
         UrlHelper::Hash(&self.url.borrow())

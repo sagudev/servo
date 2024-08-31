@@ -52,7 +52,7 @@ impl XRLayerEvent {
     }
 }
 
-impl XRLayerEventMethods for XRLayerEvent {
+impl XRLayerEventMethods<crate::DomTypeHolder> for XRLayerEvent {
     // https://immersive-web.github.io/layers/#dom-xrlayerevent-layer
     fn Layer(&self) -> DomRoot<XRLayer> {
         DomRoot::from_ref(&self.layer)

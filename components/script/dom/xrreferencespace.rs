@@ -72,7 +72,7 @@ impl XRReferenceSpace {
     }
 }
 
-impl XRReferenceSpaceMethods for XRReferenceSpace {
+impl XRReferenceSpaceMethods<crate::DomTypeHolder> for XRReferenceSpace {
     /// <https://immersive-web.github.io/webxr/#dom-xrreferencespace-getoffsetreferencespace>
     fn GetOffsetReferenceSpace(&self, new: &XRRigidTransform) -> DomRoot<Self> {
         let offset = new.transform().then(&self.offset.transform());

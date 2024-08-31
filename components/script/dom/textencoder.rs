@@ -44,7 +44,7 @@ impl TextEncoder {
     }
 }
 
-impl TextEncoderMethods for TextEncoder {
+impl TextEncoderMethods<crate::DomTypeHolder> for TextEncoder {
     // https://encoding.spec.whatwg.org/#dom-textencoder-encoding
     fn Encoding(&self) -> DOMString {
         DOMString::from("utf-8")

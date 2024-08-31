@@ -70,7 +70,7 @@ impl InputEvent {
     }
 }
 
-impl InputEventMethods for InputEvent {
+impl InputEventMethods<crate::DomTypeHolder> for InputEvent {
     // https://w3c.github.io/uievents/#dom-inputevent-data
     fn GetData(&self) -> Option<DOMString> {
         self.data.clone()

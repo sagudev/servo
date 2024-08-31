@@ -106,7 +106,7 @@ impl BluetoothAdvertisingEvent {
     }
 }
 
-impl BluetoothAdvertisingEventMethods for BluetoothAdvertisingEvent {
+impl BluetoothAdvertisingEventMethods<crate::DomTypeHolder> for BluetoothAdvertisingEvent {
     // https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-device
     fn Device(&self) -> DomRoot<BluetoothDevice> {
         DomRoot::from_ref(&*self.device)

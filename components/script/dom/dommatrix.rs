@@ -120,7 +120,7 @@ impl DOMMatrix {
 }
 
 #[allow(non_snake_case)]
-impl DOMMatrixMethods for DOMMatrix {
+impl DOMMatrixMethods<crate::DomTypeHolder> for DOMMatrix {
     // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-m11
     fn M11(&self) -> f64 {
         self.upcast::<DOMMatrixReadOnly>().M11()

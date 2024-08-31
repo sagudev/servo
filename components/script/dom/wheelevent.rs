@@ -118,7 +118,7 @@ impl WheelEvent {
     }
 }
 
-impl WheelEventMethods for WheelEvent {
+impl WheelEventMethods<crate::DomTypeHolder> for WheelEvent {
     // https://w3c.github.io/uievents/#widl-WheelEvent-deltaX
     fn DeltaX(&self) -> Finite<f64> {
         self.delta_x.get()

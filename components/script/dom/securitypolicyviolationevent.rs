@@ -112,7 +112,7 @@ impl SecurityPolicyViolationEvent {
 }
 
 #[allow(non_snake_case)]
-impl SecurityPolicyViolationEventMethods for SecurityPolicyViolationEvent {
+impl SecurityPolicyViolationEventMethods<crate::DomTypeHolder> for SecurityPolicyViolationEvent {
     /// <https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi>
     fn DocumentURI(&self) -> USVString {
         self.document_uri.clone()

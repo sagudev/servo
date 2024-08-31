@@ -1129,7 +1129,7 @@ impl TextControlElement for HTMLInputElement {
     }
 }
 
-impl HTMLInputElementMethods for HTMLInputElement {
+impl HTMLInputElementMethods<crate::DomTypeHolder> for HTMLInputElement {
     // https://html.spec.whatwg.org/multipage/#dom-input-accept
     make_getter!(Accept, "accept");
 

@@ -81,7 +81,7 @@ impl XRSessionEvent {
     }
 }
 
-impl XRSessionEventMethods for XRSessionEvent {
+impl XRSessionEventMethods<crate::DomTypeHolder> for XRSessionEvent {
     // https://immersive-web.github.io/webxr/#dom-xrsessioneventinit-session
     fn Session(&self) -> DomRoot<XRSession> {
         DomRoot::from_ref(&*self.session)

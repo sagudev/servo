@@ -94,16 +94,6 @@ impl AudioContext {
         Ok(context)
     }
 
-    // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        options: &AudioContextOptions,
-    ) -> Fallible<DomRoot<AudioContext>> {
-        AudioContext::new(window, proto, options)
-    }
-
     fn resume(&self) {
         // Step 5.
         if self.context.is_allowed_to_start() {
@@ -117,7 +107,16 @@ impl AudioContext {
     }
 }
 
-impl AudioContextMethods for AudioContext {
+impl AudioContextMethods<crate::DomTypeHolder> for AudioContext {
+    // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        options: &AudioContextOptions,
+    ) -> Fallible<DomRoot<AudioContext>> {
+        AudioContext::new(window, proto, options)
+    }
+
     // https://webaudio.github.io/web-audio-api/#dom-audiocontext-baselatency
     fn BaseLatency(&self) -> Finite<f64> {
         Finite::wrap(self.base_latency)

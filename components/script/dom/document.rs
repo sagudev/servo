@@ -4139,7 +4139,7 @@ impl ProfilerMetadataFactory for Document {
     }
 }
 
-impl DocumentMethods for Document {
+impl DocumentMethods<crate::DomTypeHolder> for Document {
     // https://w3c.github.io/editing/ActiveDocuments/execCommand.html#querycommandsupported()
     fn QueryCommandSupported(&self, _command: DOMString) -> bool {
         false
@@ -5496,7 +5496,7 @@ pub enum AnimationFrameCallback {
     },
     FrameRequestCallback {
         #[ignore_malloc_size_of = "Rc is hard"]
-        callback: Rc<FrameRequestCallback>,
+        callback: Rc<FrameRequestCallback<crate::DomTypeHolder>>,
     },
 }
 

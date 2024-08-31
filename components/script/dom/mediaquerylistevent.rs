@@ -92,7 +92,7 @@ impl MediaQueryListEvent {
     }
 }
 
-impl MediaQueryListEventMethods for MediaQueryListEvent {
+impl MediaQueryListEventMethods<crate::DomTypeHolder> for MediaQueryListEvent {
     // https://drafts.csswg.org/cssom-view/#dom-mediaquerylistevent-media
     fn Media(&self) -> DOMString {
         self.media.clone()

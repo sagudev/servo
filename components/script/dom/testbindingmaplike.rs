@@ -48,7 +48,7 @@ impl TestBindingMaplike {
     }
 }
 
-impl TestBindingMaplikeMethods for TestBindingMaplike {
+impl TestBindingMaplikeMethods<crate::DomTypeHolder> for TestBindingMaplike {
     fn SetInternal(&self, key: DOMString, value: i32) {
         self.internal.set(key, value)
     }

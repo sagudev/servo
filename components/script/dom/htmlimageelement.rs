@@ -1535,7 +1535,7 @@ fn get_correct_referrerpolicy_from_raw_token(token: &DOMString) -> DOMString {
     }
 }
 
-impl HTMLImageElementMethods for HTMLImageElement {
+impl HTMLImageElementMethods<crate::DomTypeHolder> for HTMLImageElement {
     // https://html.spec.whatwg.org/multipage/#dom-img-alt
     make_getter!(Alt, "alt");
     // https://html.spec.whatwg.org/multipage/#dom-img-alt

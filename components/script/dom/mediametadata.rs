@@ -67,7 +67,7 @@ impl MediaMetadata {
     }
 }
 
-impl MediaMetadataMethods for MediaMetadata {
+impl MediaMetadataMethods<crate::DomTypeHolder> for MediaMetadata {
     /// <https://w3c.github.io/mediasession/#dom-mediametadata-title>
     fn Title(&self) -> DOMString {
         self.title.borrow().clone()

@@ -613,7 +613,7 @@ impl Drop for EventSource {
     }
 }
 
-impl EventSourceMethods for EventSource {
+impl EventSourceMethods<crate::DomTypeHolder> for EventSource {
     // https://html.spec.whatwg.org/multipage/#handler-eventsource-onopen
     event_handler!(open, GetOnopen, SetOnopen);
 

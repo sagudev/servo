@@ -101,7 +101,7 @@ impl URLSearchParams {
     }
 }
 
-impl URLSearchParamsMethods for URLSearchParams {
+impl URLSearchParamsMethods<crate::DomTypeHolder> for URLSearchParams {
     /// <https://url.spec.whatwg.org/#dom-urlsearchparams-size>
     fn Size(&self) -> u32 {
         self.list.borrow().len() as u32

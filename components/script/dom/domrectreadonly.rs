@@ -77,7 +77,7 @@ impl DOMRectReadOnly {
     }
 }
 
-impl DOMRectReadOnlyMethods for DOMRectReadOnly {
+impl DOMRectReadOnlyMethods<crate::DomTypeHolder> for DOMRectReadOnly {
     // https://drafts.fxtf.org/geometry/#dom-domrectreadonly-x
     fn X(&self) -> f64 {
         self.x.get()

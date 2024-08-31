@@ -44,7 +44,7 @@ impl HTMLDivElement {
     }
 }
 
-impl HTMLDivElementMethods for HTMLDivElement {
+impl HTMLDivElementMethods<crate::DomTypeHolder> for HTMLDivElement {
     // https://html.spec.whatwg.org/multipage/#dom-div-align
     make_getter!(Align, "align");
 

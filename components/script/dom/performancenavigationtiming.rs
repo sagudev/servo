@@ -66,7 +66,7 @@ impl PerformanceNavigationTiming {
 }
 
 // https://w3c.github.io/navigation-timing/
-impl PerformanceNavigationTimingMethods for PerformanceNavigationTiming {
+impl PerformanceNavigationTimingMethods<crate::DomTypeHolder> for PerformanceNavigationTiming {
     // https://w3c.github.io/navigation-timing/#dom-performancenavigationtiming-unloadeventstart
     fn UnloadEventStart(&self) -> DOMHighResTimeStamp {
         Finite::wrap(self.document.get_unload_event_start() as f64)

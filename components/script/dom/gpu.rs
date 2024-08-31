@@ -100,7 +100,7 @@ pub fn response_async<T: AsyncWGPUListener + DomObject + 'static>(
     action_sender
 }
 
-impl GPUMethods for GPU {
+impl GPUMethods<crate::DomTypeHolder> for GPU {
     // https://gpuweb.github.io/gpuweb/#dom-gpu-requestadapter
     fn RequestAdapter(&self, options: &GPURequestAdapterOptions, comp: InRealm) -> Rc<Promise> {
         let global = &self.global();

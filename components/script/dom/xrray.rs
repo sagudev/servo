@@ -107,7 +107,7 @@ impl XRRay {
     }
 }
 
-impl XRRayMethods for XRRay {
+impl XRRayMethods<crate::DomTypeHolder> for XRRay {
     /// <https://immersive-web.github.io/hit-test/#dom-xrray-origin>
     fn Origin(&self) -> DomRoot<DOMPointReadOnly> {
         DOMPointReadOnly::new(

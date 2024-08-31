@@ -62,7 +62,7 @@ impl HTMLTableCellElement {
     }
 }
 
-impl HTMLTableCellElementMethods for HTMLTableCellElement {
+impl HTMLTableCellElementMethods<crate::DomTypeHolder> for HTMLTableCellElement {
     // https://html.spec.whatwg.org/multipage/#dom-tdth-colspan
     make_uint_getter!(ColSpan, "colspan", DEFAULT_COLSPAN);
 

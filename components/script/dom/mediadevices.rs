@@ -43,7 +43,7 @@ impl MediaDevices {
     }
 }
 
-impl MediaDevicesMethods for MediaDevices {
+impl MediaDevicesMethods<crate::DomTypeHolder> for MediaDevices {
     /// <https://w3c.github.io/mediacapture-main/#dom-mediadevices-getusermedia>
     #[allow(unsafe_code)]
     fn GetUserMedia(&self, constraints: &MediaStreamConstraints, comp: InRealm) -> Rc<Promise> {

@@ -43,7 +43,7 @@ def main():
         ("DomTypeHolder", "DomTypeHolder.rs"),
         #("PrototypeList", "PrototypeList.rs"),
         #("RegisterBindings", "RegisterBindings.rs"),
-        ("InterfaceObjectMap", "InterfaceObjectMap.rs"),
+        ("InterfaceObjectMap", "InterfaceObjectMapPhf.rs"),
         ("InterfaceObjectMapData", "InterfaceObjectMapData.json"),
         #("InterfaceTypes", "InterfaceTypes.rs"),
         ("ConcreteInheritTypes", "ConcreteInheritTypes.rs"),

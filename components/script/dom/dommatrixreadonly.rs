@@ -431,7 +431,7 @@ impl DOMMatrixReadOnly {
 }
 
 #[allow(non_snake_case)]
-impl DOMMatrixReadOnlyMethods for DOMMatrixReadOnly {
+impl DOMMatrixReadOnlyMethods<crate::DomTypeHolder> for DOMMatrixReadOnly {
     // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-m11
     fn M11(&self) -> f64 {
         self.matrix.borrow().m11

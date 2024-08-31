@@ -100,7 +100,7 @@ impl HashChangeEvent {
     }
 }
 
-impl HashChangeEventMethods for HashChangeEvent {
+impl HashChangeEventMethods<crate::DomTypeHolder> for HashChangeEvent {
     // https://html.spec.whatwg.org/multipage/#dom-hashchangeevent-oldurl
     fn OldURL(&self) -> USVString {
         USVString(self.old_url.clone())

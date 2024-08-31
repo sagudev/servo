@@ -80,7 +80,7 @@ impl TransitionEvent {
     }
 }
 
-impl TransitionEventMethods for TransitionEvent {
+impl TransitionEventMethods<crate::DomTypeHolder> for TransitionEvent {
     // https://drafts.csswg.org/css-transitions/#Events-TransitionEvent-propertyName
     fn PropertyName(&self) -> DOMString {
         DOMString::from(&*self.property_name)

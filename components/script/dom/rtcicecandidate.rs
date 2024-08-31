@@ -99,7 +99,7 @@ impl RTCIceCandidate {
     }
 }
 
-impl RTCIceCandidateMethods for RTCIceCandidate {
+impl RTCIceCandidateMethods<crate::DomTypeHolder> for RTCIceCandidate {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcicecandidate-candidate>
     fn Candidate(&self) -> DOMString {
         self.candidate.clone()

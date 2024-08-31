@@ -81,7 +81,7 @@ impl RTCTrackEvent {
     }
 }
 
-impl RTCTrackEventMethods for RTCTrackEvent {
+impl RTCTrackEventMethods<crate::DomTypeHolder> for RTCTrackEvent {
     // https://w3c.github.io/webrtc-pc/#dom-rtctrackevent-track
     fn Track(&self) -> DomRoot<MediaStreamTrack> {
         DomRoot::from_ref(&*self.track)

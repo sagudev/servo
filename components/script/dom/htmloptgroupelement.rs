@@ -72,7 +72,7 @@ impl HTMLOptGroupElement {
     }
 }
 
-impl HTMLOptGroupElementMethods for HTMLOptGroupElement {
+impl HTMLOptGroupElementMethods<crate::DomTypeHolder> for HTMLOptGroupElement {
     // https://html.spec.whatwg.org/multipage/#dom-optgroup-disabled
     make_bool_getter!(Disabled, "disabled");
 

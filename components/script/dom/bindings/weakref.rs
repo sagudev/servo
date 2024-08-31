@@ -26,7 +26,9 @@ use crate::dom::bindings::reflector::DomObject;
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::trace::JSTraceable;
 
-/// The index of the slot wherein a pointer to the weak holder cell is
+pub use script_bindings::weakref::*;
+
+/*/// The index of the slot wherein a pointer to the weak holder cell is
 /// stored for weak-referenceable bindings. We use slot 1 for holding it,
 /// this is unsafe for globals, we disallow weak-referenceable globals
 /// directly in codegen.
@@ -295,7 +297,7 @@ impl<'a, T: WeakReferenceable + 'a> Drop for WeakRefEntry<'a, T> {
     fn drop(&mut self) {
         *self.index += 1;
     }
-}
+}*/
 
 #[derive(MallocSizeOf)]
 pub struct DOMTracker<T: WeakReferenceable> {

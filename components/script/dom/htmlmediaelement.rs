@@ -295,9 +295,9 @@ enum SrcObject {
     Blob(Dom<Blob>),
 }
 
-impl From<MediaStreamOrBlob> for SrcObject {
+impl From<MediaStreamOrBlob<crate::DomTypeHolder>> for SrcObject {
     #[allow(crown::unrooted_must_root)]
-    fn from(src_object: MediaStreamOrBlob) -> SrcObject {
+    fn from(src_object: MediaStreamOrBlob<crate::DomTypeHolder>) -> SrcObject {
         match src_object {
             MediaStreamOrBlob::Blob(blob) => SrcObject::Blob(Dom::from_ref(&*blob)),
             MediaStreamOrBlob::MediaStream(stream) => {
@@ -2056,7 +2056,7 @@ impl Drop for HTMLMediaElement {
     }
 }
 
-impl HTMLMediaElementMethods for HTMLMediaElement {
+impl HTMLMediaElementMethods<crate::DomTypeHolder> for HTMLMediaElement {
     // https://html.spec.whatwg.org/multipage/#dom-media-networkstate
     fn NetworkState(&self) -> u16 {
         self.network_state.get() as u16

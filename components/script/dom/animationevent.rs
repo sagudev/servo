@@ -58,9 +58,10 @@ impl AnimationEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl AnimationEventMethods<crate::DomTypeHolder> for AnimationEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -68,9 +69,7 @@ impl AnimationEvent {
     ) -> DomRoot<AnimationEvent> {
         AnimationEvent::new_with_proto(window, proto, Atom::from(type_), init)
     }
-}
 
-impl AnimationEventMethods for AnimationEvent {
     // https://drafts.csswg.org/css-animations/#interface-animationevent-attributes
     fn AnimationName(&self) -> DOMString {
         DOMString::from(&*self.animation_name)

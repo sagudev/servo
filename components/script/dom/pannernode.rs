@@ -209,7 +209,7 @@ impl PannerNode {
     }
 }
 
-impl PannerNodeMethods for PannerNode {
+impl PannerNodeMethods<crate::DomTypeHolder> for PannerNode {
     // https://webaudio.github.io/web-audio-api/#dom-pannernode-positionx
     fn PositionX(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.position_x)

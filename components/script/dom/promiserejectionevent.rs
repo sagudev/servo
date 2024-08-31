@@ -113,7 +113,7 @@ impl PromiseRejectionEvent {
     }
 }
 
-impl PromiseRejectionEventMethods for PromiseRejectionEvent {
+impl PromiseRejectionEventMethods<crate::DomTypeHolder> for PromiseRejectionEvent {
     // https://html.spec.whatwg.org/multipage/#dom-promiserejectionevent-promise
     fn Promise(&self, _cx: JSContext) -> NonNull<JSObject> {
         NonNull::new(self.promise.get()).unwrap()
