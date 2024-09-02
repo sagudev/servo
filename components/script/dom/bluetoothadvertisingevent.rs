@@ -76,13 +76,15 @@ impl BluetoothAdvertisingEvent {
         }
         ev
     }
+}
 
+impl BluetoothAdvertisingEventMethods<crate::DomTypeHolder> for BluetoothAdvertisingEvent {
     // https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-bluetoothadvertisingevent
-    pub fn Constructor(
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &BluetoothAdvertisingEventInit,
+        init: &BluetoothAdvertisingEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<BluetoothAdvertisingEvent>> {
         let global = window.upcast::<GlobalScope>();
         let name = init.name.clone();
@@ -104,9 +106,7 @@ impl BluetoothAdvertisingEvent {
             rssi,
         ))
     }
-}
 
-impl BluetoothAdvertisingEventMethods<crate::DomTypeHolder> for BluetoothAdvertisingEvent {
     // https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-device
     fn Device(&self) -> DomRoot<BluetoothDevice> {
         DomRoot::from_ref(&*self.device)

@@ -12,7 +12,9 @@ use crate::dom::baseaudiocontext::BaseAudioContext;
 use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{
     ChannelCountMode, ChannelInterpretation,
 };
-use crate::dom::bindings::codegen::Bindings::ChannelMergerNodeBinding::ChannelMergerOptions;
+use crate::dom::bindings::codegen::Bindings::ChannelMergerNodeBinding::{
+    ChannelMergerOptions, ChannelMergerNodeMethods,
+};
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::reflector::reflect_dom_object_with_proto;
 use crate::dom::bindings::root::DomRoot;
@@ -72,16 +74,6 @@ impl ChannelMergerNode {
         let node = ChannelMergerNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
-
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        context: &BaseAudioContext,
-        options: &ChannelMergerOptions,
-    ) -> Fallible<DomRoot<ChannelMergerNode>> {
-        ChannelMergerNode::new_with_proto(window, proto, context, options)
-    }
 }
 
 impl<'a> From<&'a ChannelMergerOptions> for ChannelNodeOptions {
@@ -89,5 +81,16 @@ impl<'a> From<&'a ChannelMergerOptions> for ChannelNodeOptions {
         Self {
             channels: options.numberOfInputs as u8,
         }
+    }
+}
+
+impl ChannelMergerNodeMethods<crate::DomTypeHolder> for ChannelMergerNode {
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        context: &BaseAudioContext,
+        options: &ChannelMergerOptions,
+    ) -> Fallible<DomRoot<ChannelMergerNode>> {
+        ChannelMergerNode::new_with_proto(window, proto, context, options)
     }
 }

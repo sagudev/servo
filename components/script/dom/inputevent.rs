@@ -47,13 +47,14 @@ impl InputEvent {
             .InitUIEvent(type_, can_bubble, cancelable, view, detail);
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl InputEventMethods<crate::DomTypeHolder> for InputEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &InputEventBinding::InputEventInit,
+        init: &InputEventBinding::InputEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<InputEvent>> {
         let event = InputEvent::new(
             window,
@@ -68,9 +69,7 @@ impl InputEvent {
         );
         Ok(event)
     }
-}
 
-impl InputEventMethods<crate::DomTypeHolder> for InputEvent {
     // https://w3c.github.io/uievents/#dom-inputevent-data
     fn GetData(&self) -> Option<DOMString> {
         self.data.clone()

@@ -337,7 +337,7 @@ impl CanvasRenderingContext2DMethods<crate::DomTypeHolder> for CanvasRenderingCo
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-drawimage
-    fn DrawImage(&self, image: CanvasImageSource, dx: f64, dy: f64) -> ErrorResult {
+    fn DrawImage(&self, image: CanvasImageSource<crate::DomTypeHolder>, dx: f64, dy: f64) -> ErrorResult {
         self.canvas_state
             .draw_image(self.canvas.as_deref(), image, dx, dy)
     }
@@ -345,7 +345,7 @@ impl CanvasRenderingContext2DMethods<crate::DomTypeHolder> for CanvasRenderingCo
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-drawimage
     fn DrawImage_(
         &self,
-        image: CanvasImageSource,
+        image: CanvasImageSource<crate::DomTypeHolder>,
         dx: f64,
         dy: f64,
         dw: f64,
@@ -358,7 +358,7 @@ impl CanvasRenderingContext2DMethods<crate::DomTypeHolder> for CanvasRenderingCo
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-drawimage
     fn DrawImage__(
         &self,
-        image: CanvasImageSource,
+        image: CanvasImageSource<crate::DomTypeHolder>,
         sx: f64,
         sy: f64,
         sw: f64,
@@ -445,23 +445,23 @@ impl CanvasRenderingContext2DMethods<crate::DomTypeHolder> for CanvasRenderingCo
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn StrokeStyle(&self) -> StringOrCanvasGradientOrCanvasPattern {
+    fn StrokeStyle(&self) -> StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder> {
         self.canvas_state.stroke_style()
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn SetStrokeStyle(&self, value: StringOrCanvasGradientOrCanvasPattern) {
+    fn SetStrokeStyle(&self, value: StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder>) {
         self.canvas_state
             .set_stroke_style(self.canvas.as_deref(), value)
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn FillStyle(&self) -> StringOrCanvasGradientOrCanvasPattern {
+    fn FillStyle(&self) -> StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder> {
         self.canvas_state.fill_style()
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn SetFillStyle(&self, value: StringOrCanvasGradientOrCanvasPattern) {
+    fn SetFillStyle(&self, value: StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder>) {
         self.canvas_state
             .set_fill_style(self.canvas.as_deref(), value)
     }
@@ -559,7 +559,7 @@ impl CanvasRenderingContext2DMethods<crate::DomTypeHolder> for CanvasRenderingCo
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-createpattern
     fn CreatePattern(
         &self,
-        image: CanvasImageSource,
+        image: CanvasImageSource<crate::DomTypeHolder>,
         repetition: DOMString,
     ) -> Fallible<Option<DomRoot<CanvasPattern>>> {
         self.canvas_state

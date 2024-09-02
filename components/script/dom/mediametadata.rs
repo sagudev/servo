@@ -48,16 +48,6 @@ impl MediaMetadata {
         reflect_dom_object_with_proto(Box::new(MediaMetadata::new_inherited(init)), global, proto)
     }
 
-    /// <https://w3c.github.io/mediasession/#dom-mediametadata-mediametadata>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        init: &MediaMetadataInit,
-    ) -> Fallible<DomRoot<MediaMetadata>> {
-        Ok(MediaMetadata::new_with_proto(window, proto, init))
-    }
-
     fn queue_update_metadata_algorithm(&self) {
         if self.session.get().is_none() {}
     }
@@ -68,6 +58,15 @@ impl MediaMetadata {
 }
 
 impl MediaMetadataMethods<crate::DomTypeHolder> for MediaMetadata {
+    /// <https://w3c.github.io/mediasession/#dom-mediametadata-mediametadata>
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        init: &MediaMetadataInit,
+    ) -> Fallible<DomRoot<MediaMetadata>> {
+        Ok(MediaMetadata::new_with_proto(window, proto, init))
+    }
+
     /// <https://w3c.github.io/mediasession/#dom-mediametadata-title>
     fn Title(&self) -> DOMString {
         self.title.borrow().clone()

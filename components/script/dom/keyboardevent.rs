@@ -138,13 +138,24 @@ impl KeyboardEvent {
         ev.key_code.set(key_code);
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl KeyboardEvent {
+    pub fn key(&self) -> Key {
+        self.typed_key.borrow().clone()
+    }
+
+    pub fn modifiers(&self) -> Modifiers {
+        self.modifiers.get()
+    }
+}
+
+impl KeyboardEventMethods<crate::DomTypeHolder> for KeyboardEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &KeyboardEventBinding::KeyboardEventInit,
+        init: &KeyboardEventBinding::KeyboardEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<KeyboardEvent>> {
         let mut modifiers = Modifiers::empty();
         modifiers.set(Modifiers::CONTROL, init.parent.ctrlKey);
@@ -171,19 +182,7 @@ impl KeyboardEvent {
         *event.key.borrow_mut() = init.key.clone();
         Ok(event)
     }
-}
 
-impl KeyboardEvent {
-    pub fn key(&self) -> Key {
-        self.typed_key.borrow().clone()
-    }
-
-    pub fn modifiers(&self) -> Modifiers {
-        self.modifiers.get()
-    }
-}
-
-impl KeyboardEventMethods<crate::DomTypeHolder> for KeyboardEvent {
     // https://w3c.github.io/uievents/#widl-KeyboardEvent-initKeyboardEvent
     fn InitKeyboardEvent(
         &self,

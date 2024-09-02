@@ -177,12 +177,17 @@ impl MouseEvent {
         ev
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    pub fn point_in_target(&self) -> Option<Point2D<f32>> {
+        self.point_in_target.get()
+    }
+}
+
+impl MouseEventMethods<crate::DomTypeHolder> for MouseEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &MouseEventBinding::MouseEventInit,
+        init: &MouseEventBinding::MouseEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<MouseEvent>> {
         let bubbles = EventBubbles::from(init.parent.parent.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.parent.parent.cancelable);
@@ -210,12 +215,6 @@ impl MouseEvent {
         Ok(event)
     }
 
-    pub fn point_in_target(&self) -> Option<Point2D<f32>> {
-        self.point_in_target.get()
-    }
-}
-
-impl MouseEventMethods<crate::DomTypeHolder> for MouseEvent {
     // https://w3c.github.io/uievents/#widl-MouseEvent-screenX
     fn ScreenX(&self) -> i32 {
         self.screen_x.get()

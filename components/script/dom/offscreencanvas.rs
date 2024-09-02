@@ -71,17 +71,6 @@ impl OffscreenCanvas {
         )
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        width: u64,
-        height: u64,
-    ) -> Fallible<DomRoot<OffscreenCanvas>> {
-        let offscreencanvas = OffscreenCanvas::new(global, proto, width, height, None);
-        Ok(offscreencanvas)
-    }
-
     pub fn get_size(&self) -> Size2D<u64> {
         Size2D::new(self.Width(), self.Height())
     }
@@ -148,13 +137,23 @@ impl OffscreenCanvas {
 }
 
 impl OffscreenCanvasMethods<crate::DomTypeHolder> for OffscreenCanvas {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        width: u64,
+        height: u64,
+    ) -> Fallible<DomRoot<OffscreenCanvas>> {
+        let offscreencanvas = OffscreenCanvas::new(global, proto, width, height, None);
+        Ok(offscreencanvas)
+    }
+
     // https://html.spec.whatwg.org/multipage/#dom-offscreencanvas-getcontext
     fn GetContext(
         &self,
         _cx: JSContext,
         id: DOMString,
         _options: HandleValue,
-    ) -> Option<OffscreenRenderingContext> {
+    ) -> Option<OffscreenRenderingContext<crate::DomTypeHolder>> {
         match &*id {
             "2d" => self
                 .get_or_init_2d_context()

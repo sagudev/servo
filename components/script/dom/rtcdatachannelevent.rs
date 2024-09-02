@@ -62,9 +62,10 @@ impl RTCDataChannelEvent {
         }
         event
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCDataChannelEventMethods<crate::DomTypeHolder> for RTCDataChannelEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -79,9 +80,7 @@ impl RTCDataChannelEvent {
             &init.channel,
         )
     }
-}
 
-impl RTCDataChannelEventMethods<crate::DomTypeHolder> for RTCDataChannelEvent {
     // https://www.w3.org/TR/webrtc/#dom-datachannelevent-channel
     fn Channel(&self) -> DomRoot<RTCDataChannel> {
         DomRoot::from_ref(&*self.channel)

@@ -8,7 +8,9 @@ use servo_media::audio::node::AudioNodeInit;
 
 use crate::dom::audiocontext::AudioContext;
 use crate::dom::audionode::AudioNode;
-use crate::dom::bindings::codegen::Bindings::MediaStreamTrackAudioSourceNodeBinding::MediaStreamTrackAudioSourceOptions;
+use crate::dom::bindings::codegen::Bindings::MediaStreamTrackAudioSourceNodeBinding::{
+    MediaStreamTrackAudioSourceOptions, MediaStreamTrackAudioSourceNodeMethods,
+};
 use crate::dom::bindings::error::Fallible;
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::reflect_dom_object_with_proto;
@@ -59,13 +61,14 @@ impl MediaStreamTrackAudioSourceNode {
         let node = MediaStreamTrackAudioSourceNode::new_inherited(context, track)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl MediaStreamTrackAudioSourceNodeMethods<crate::DomTypeHolder> for MediaStreamTrackAudioSourceNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &AudioContext,
-        options: &MediaStreamTrackAudioSourceOptions,
+        options: &MediaStreamTrackAudioSourceOptions<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<MediaStreamTrackAudioSourceNode>> {
         MediaStreamTrackAudioSourceNode::new_with_proto(
             window,

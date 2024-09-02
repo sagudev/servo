@@ -70,19 +70,18 @@ impl MediaElementAudioSourceNode {
         let node = MediaElementAudioSourceNode::new_inherited(context, media_element)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
-
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        context: &AudioContext,
-        options: &MediaElementAudioSourceOptions,
-    ) -> Fallible<DomRoot<MediaElementAudioSourceNode>> {
-        MediaElementAudioSourceNode::new_with_proto(window, proto, context, &options.mediaElement)
-    }
 }
 
 impl MediaElementAudioSourceNodeMethods<crate::DomTypeHolder> for MediaElementAudioSourceNode {
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        context: &AudioContext,
+        options: &MediaElementAudioSourceOptions<crate::DomTypeHolder>,
+    ) -> Fallible<DomRoot<MediaElementAudioSourceNode>> {
+        MediaElementAudioSourceNode::new_with_proto(window, proto, context, &options.mediaElement)
+    }
+
     /// <https://webaudio.github.io/web-audio-api/#dom-mediaelementaudiosourcenode-mediaelement>
     fn MediaElement(&self) -> DomRoot<HTMLMediaElement> {
         DomRoot::from_ref(&*self.media_element)

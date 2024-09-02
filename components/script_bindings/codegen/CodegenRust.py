@@ -2742,9 +2742,6 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
     universal = [
         "crate::reflector::DomObject",
         "crate::reflector::DomGlobal<Self>",
-        "malloc_size_of::MallocSizeOf",
-        "crate::reflector::MutDomObject",
-        "js::conversions::ToJSValConvertible",
     ]
     for descriptor in descriptors:
         iface_name = descriptor.interface.identifier.name
@@ -2770,10 +2767,18 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                 traits += ["crate::like::Maplike<Key=crate::str::DOMString, Value=i32>"]
             if iterableDecl.isSetlike():
                 traits += ["crate::like::Setlike<Key=crate::str::DOMString>"]
-            traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
+            if iterableDecl.hasKeyType():
+                traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
 
         if descriptor.weakReferenceable:
             traits += ["crate::weakref::WeakReferenceable"]
+
+        if not descriptor.interface.isNamespace():
+            traits += [
+                "js::conversions::ToJSValConvertible",
+                "crate::reflector::MutDomObject",
+                "malloc_size_of::MallocSizeOf",
+            ]
 
         if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
             traits += [
@@ -2785,7 +2790,9 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
             traits += ["crate::reflector::DomObjectWrap<Self>"]
 
         if not descriptor.interface.isCallback() and not descriptor.interface.isIteratorInterface():
-            if descriptor.interface.members or descriptor.interface.ctor():
+            nonConstMembers = [m for m in descriptor.interface.members if not m.isConst()]
+            ctor = descriptor.interface.ctor()
+            if nonConstMembers or (ctor and not ctor.isHTMLConstructor()) or descriptor.interface.legacyFactoryFunctions:
                 traits += [f"crate::dom::bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(iface_name)}::{iface_name}Methods<Self>"]
             elements += [CGGeneric(f"    type {firstCap(iface_name)}: {' + '.join(traits)};\n")]
     elements += [CGGeneric("}\n")]
@@ -6618,7 +6625,7 @@ class CGInterfaceTrait(CGThing):
 
 
         ctor = descriptor.interface.ctor()
-        if ctor:
+        if ctor and not ctor.isHTMLConstructor():
             methods.extend(list(ctorMethod(ctor, "Constructor")))
 
         for ctor in descriptor.interface.legacyFactoryFunctions:
@@ -8133,7 +8140,7 @@ class GlobalGenRoots():
                 pairs.append((ctor.identifier.name, binding_mod, binding_ns))
         pairs.sort(key=operator.itemgetter(0))
         mappings = [
-            CGGeneric(f'"{pair[0]}": "codegen::Bindings::{pair[1]}::{pair[2]}::DefineDOMInterface"')
+            CGGeneric(f'"{pair[0]}": "codegen::Bindings::{pair[1]}::{pair[2]}::DefineDOMInterface::<crate::DomTypeHolder>"')
             for pair in pairs
         ]
         return CGWrapper(

@@ -183,7 +183,7 @@ pub struct ServiceWorkerGlobalScope {
     control_receiver: Receiver<ServiceWorkerControlMsg>,
 }
 
-impl WorkerEventLoopMethods<crate::DomTypeHolder> for ServiceWorkerGlobalScope {
+impl WorkerEventLoopMethods for ServiceWorkerGlobalScope {
     type WorkerMsg = ServiceWorkerScriptMsg;
     type ControlMsg = ServiceWorkerControlMsg;
     type Event = MixedMessage;

@@ -59,10 +59,11 @@ impl FormData {
             proto,
         )
     }
+}
 
+impl FormDataMethods<crate::DomTypeHolder> for FormData {
     // https://xhr.spec.whatwg.org/#dom-formdata
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         form: Option<&HTMLFormElement>,
@@ -76,9 +77,7 @@ impl FormData {
 
         Ok(FormData::new_with_proto(None, global, proto))
     }
-}
 
-impl FormDataMethods<crate::DomTypeHolder> for FormData {
     // https://xhr.spec.whatwg.org/#dom-formdata-append
     fn Append(&self, name: USVString, str_value: USVString) {
         let datum = FormDatum {
@@ -114,7 +113,7 @@ impl FormDataMethods<crate::DomTypeHolder> for FormData {
     }
 
     // https://xhr.spec.whatwg.org/#dom-formdata-get
-    fn Get(&self, name: USVString) -> Option<FileOrUSVString> {
+    fn Get(&self, name: USVString) -> Option<FileOrUSVString<crate::DomTypeHolder>> {
         self.data
             .borrow()
             .iter()
@@ -128,7 +127,7 @@ impl FormDataMethods<crate::DomTypeHolder> for FormData {
     }
 
     // https://xhr.spec.whatwg.org/#dom-formdata-getall
-    fn GetAll(&self, name: USVString) -> Vec<FileOrUSVString> {
+    fn GetAll(&self, name: USVString) -> Vec<FileOrUSVString<crate::DomTypeHolder>> {
         self.data
             .borrow()
             .iter()
@@ -231,13 +230,13 @@ impl FormData {
 
 impl Iterable for FormData {
     type Key = USVString;
-    type Value = FileOrUSVString;
+    type Value = FileOrUSVString<crate::DomTypeHolder>;
 
     fn get_iterable_length(&self) -> u32 {
         self.data.borrow().len() as u32
     }
 
-    fn get_value_at_index(&self, n: u32) -> FileOrUSVString {
+    fn get_value_at_index(&self, n: u32) -> FileOrUSVString<crate::DomTypeHolder> {
         let data = self.data.borrow();
         let datum = &data.get(n as usize).unwrap().1;
         match &datum.value {

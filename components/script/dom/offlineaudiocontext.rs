@@ -43,7 +43,6 @@ pub struct OfflineAudioContext {
     pending_rendering_promise: DomRefCell<Option<Rc<Promise>>>,
 }
 
-#[allow(non_snake_case)]
 impl OfflineAudioContext {
     #[allow(crown::unrooted_must_root)]
     fn new_inherited(
@@ -108,8 +107,10 @@ impl OfflineAudioContext {
             *options.sampleRate,
         )
     }
+}
 
-    pub fn Constructor_(
+impl OfflineAudioContextMethods<crate::DomTypeHolder> for OfflineAudioContext {
+    fn Constructor_(
         window: &Window,
         proto: Option<HandleObject>,
         number_of_channels: u32,
@@ -118,9 +119,7 @@ impl OfflineAudioContext {
     ) -> Fallible<DomRoot<OfflineAudioContext>> {
         OfflineAudioContext::new(window, proto, number_of_channels, length, *sample_rate)
     }
-}
 
-impl OfflineAudioContextMethods<crate::DomTypeHolder> for OfflineAudioContext {
     // https://webaudio.github.io/web-audio-api/#dom-offlineaudiocontext-oncomplete
     event_handler!(complete, GetOncomplete, SetOncomplete);
 

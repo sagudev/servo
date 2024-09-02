@@ -15,7 +15,9 @@ use js::conversions::ToJSValConvertible;
 use super::iterable::Iterable;
 use crate::dom::bindings::cell::DomRefCell;
 
-/// Every Setlike dom_struct must implement this to provide access to underlying storage
+pub use script_bindings::like::*;
+
+/*/// Every Setlike dom_struct must implement this to provide access to underlying storage
 /// so codegen can automatically generate all setlike methods
 ///
 /// In case you use a type that implements Setlike as underlying storage it's recommended to use `setlike` macro.
@@ -70,7 +72,7 @@ impl<T: Setlike> Maplike for T {
     fn delete(&self, _key: Self::Key) -> bool {
         unimplemented!()
     }
-}
+}*/
 
 impl<K> Setlike for DomRefCell<IndexSet<K>>
 where
@@ -109,7 +111,7 @@ where
     }
 }
 
-/// Usage:
+/*/// Usage:
 /// ```rust
 /// pub struct TestBindingSetlike {
 ///     // setlike<DOMString>
@@ -198,7 +200,7 @@ impl<T: Maplike> Iterable for T {
         // SAFETY: we are checking bounds manually
         self.get_index(index).unwrap().0
     }
-}
+}*/
 
 impl<K, V> Maplike for DomRefCell<IndexMap<K, V>>
 where
@@ -246,7 +248,7 @@ where
     }
 }
 
-/// Usage:
+/*/// Usage:
 /// ```rust
 /// pub struct TestBindingMaplike {
 ///     // maplike<DOMString, long>
@@ -297,3 +299,4 @@ macro_rules! maplike {
         }
     };
 }
+*/

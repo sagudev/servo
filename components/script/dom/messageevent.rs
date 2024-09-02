@@ -67,7 +67,6 @@ pub struct MessageEvent {
     frozen_ports: DomRefCell<Option<Heap<JSVal>>>,
 }
 
-#[allow(non_snake_case)]
 impl MessageEvent {
     pub fn new_inherited(
         origin: DOMString,
@@ -179,29 +178,6 @@ impl MessageEvent {
         ev
     }
 
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        type_: DOMString,
-        init: RootedTraceableBox<MessageEventBinding::MessageEventInit>,
-    ) -> Fallible<DomRoot<MessageEvent>> {
-        let ev = MessageEvent::new_with_proto(
-            global,
-            proto,
-            Atom::from(type_),
-            init.parent.bubbles,
-            init.parent.cancelable,
-            init.data.handle(),
-            init.origin.clone(),
-            init.source.as_ref(),
-            init.lastEventId.clone(),
-            init.ports.clone(),
-        );
-        Ok(ev)
-    }
-}
-
-impl MessageEvent {
     pub fn dispatch_jsval(
         target: &EventTarget,
         scope: &GlobalScope,
@@ -246,6 +222,27 @@ impl MessageEvent {
 }
 
 impl MessageEventMethods<crate::DomTypeHolder> for MessageEvent {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        type_: DOMString,
+        init: RootedTraceableBox<MessageEventBinding::MessageEventInit<crate::DomTypeHolder>>,
+    ) -> Fallible<DomRoot<MessageEvent>> {
+        let ev = MessageEvent::new_with_proto(
+            global,
+            proto,
+            Atom::from(type_),
+            init.parent.bubbles,
+            init.parent.cancelable,
+            init.data.handle(),
+            init.origin.clone(),
+            init.source.as_ref(),
+            init.lastEventId.clone(),
+            init.ports.clone(),
+        );
+        Ok(ev)
+    }
+
     /// <https://html.spec.whatwg.org/multipage/#dom-messageevent-data>
     fn Data(&self, _cx: JSContext) -> JSVal {
         self.data.get()

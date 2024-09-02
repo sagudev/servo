@@ -71,9 +71,10 @@ impl MediaQueryListEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl MediaQueryListEventMethods<crate::DomTypeHolder> for MediaQueryListEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -90,9 +91,7 @@ impl MediaQueryListEvent {
             init.matches,
         ))
     }
-}
 
-impl MediaQueryListEventMethods<crate::DomTypeHolder> for MediaQueryListEvent {
     // https://drafts.csswg.org/cssom-view/#dom-mediaquerylistevent-media
     fn Media(&self) -> DOMString {
         self.media.clone()

@@ -72,9 +72,10 @@ impl MediaStreamAudioDestinationNode {
         let node = MediaStreamAudioDestinationNode::new_inherited(context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl MediaStreamAudioDestinationNodeMethods<crate::DomTypeHolder> for MediaStreamAudioDestinationNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &AudioContext,
@@ -82,9 +83,7 @@ impl MediaStreamAudioDestinationNode {
     ) -> Fallible<DomRoot<MediaStreamAudioDestinationNode>> {
         MediaStreamAudioDestinationNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl MediaStreamAudioDestinationNodeMethods<crate::DomTypeHolder> for MediaStreamAudioDestinationNode {
     /// <https://webaudio.github.io/web-audio-api/#dom-mediastreamaudiodestinationnode-stream>
     fn Stream(&self) -> DomRoot<MediaStream> {
         DomRoot::from_ref(&self.stream)

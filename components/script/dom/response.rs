@@ -84,11 +84,63 @@ impl Response {
         reflect_dom_object_with_proto(Box::new(Response::new_inherited(global)), global, proto)
     }
 
+    pub fn error_stream(&self, error: Error) {
+        if let Some(body) = self.body_stream.get() {
+            body.error_native(error);
+        }
+    }
+}
+
+impl BodyMixin for Response {
+    fn is_disturbed(&self) -> bool {
+        self.body_stream
+            .get()
+            .map_or(false, |stream| stream.is_disturbed())
+    }
+
+    fn is_locked(&self) -> bool {
+        self.body_stream
+            .get()
+            .map_or(false, |stream| stream.is_locked())
+    }
+
+    fn body(&self) -> Option<DomRoot<ReadableStream>> {
+        self.body_stream.get()
+    }
+
+    fn get_mime_type(&self) -> Vec<u8> {
+        let headers = self.Headers();
+        headers.extract_mime_type()
+    }
+}
+
+// https://fetch.spec.whatwg.org/#redirect-status
+fn is_redirect_status(status: u16) -> bool {
+    status == 301 || status == 302 || status == 303 || status == 307 || status == 308
+}
+
+// https://tools.ietf.org/html/rfc7230#section-3.1.2
+fn is_valid_status_text(status_text: &ByteString) -> bool {
+    // reason-phrase  = *( HTAB / SP / VCHAR / obs-text )
+    for byte in status_text.iter() {
+        if !(*byte == b'\t' || *byte == b' ' || is_vchar(*byte) || is_obs_text(*byte)) {
+            return false;
+        }
+    }
+    true
+}
+
+// https://fetch.spec.whatwg.org/#null-body-status
+fn is_null_body_status(status: u16) -> bool {
+    status == 101 || status == 204 || status == 205 || status == 304
+}
+
+impl ResponseMethods<crate::DomTypeHolder> for Response {
     // https://fetch.spec.whatwg.org/#initialize-a-response
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        body: Option<BodyInit>,
+        body: Option<BodyInit<crate::DomTypeHolder>>,
         init: &ResponseBinding::ResponseInit,
     ) -> Fallible<DomRoot<Response>> {
         // Step 1
@@ -163,7 +215,7 @@ impl Response {
     }
 
     // https://fetch.spec.whatwg.org/#dom-response-error
-    pub fn Error(global: &GlobalScope) -> DomRoot<Response> {
+    fn Error(global: &GlobalScope) -> DomRoot<Response> {
         let r = Response::new(global);
         *r.response_type.borrow_mut() = DOMResponseType::Error;
         r.Headers().set_guard(Guard::Immutable);
@@ -172,7 +224,7 @@ impl Response {
     }
 
     // https://fetch.spec.whatwg.org/#dom-response-redirect
-    pub fn Redirect(
+    fn Redirect(
         global: &GlobalScope,
         url: USVString,
         status: u16,
@@ -214,58 +266,6 @@ impl Response {
         Ok(r)
     }
 
-    pub fn error_stream(&self, error: Error) {
-        if let Some(body) = self.body_stream.get() {
-            body.error_native(error);
-        }
-    }
-}
-
-impl BodyMixin for Response {
-    fn is_disturbed(&self) -> bool {
-        self.body_stream
-            .get()
-            .map_or(false, |stream| stream.is_disturbed())
-    }
-
-    fn is_locked(&self) -> bool {
-        self.body_stream
-            .get()
-            .map_or(false, |stream| stream.is_locked())
-    }
-
-    fn body(&self) -> Option<DomRoot<ReadableStream>> {
-        self.body_stream.get()
-    }
-
-    fn get_mime_type(&self) -> Vec<u8> {
-        let headers = self.Headers();
-        headers.extract_mime_type()
-    }
-}
-
-// https://fetch.spec.whatwg.org/#redirect-status
-fn is_redirect_status(status: u16) -> bool {
-    status == 301 || status == 302 || status == 303 || status == 307 || status == 308
-}
-
-// https://tools.ietf.org/html/rfc7230#section-3.1.2
-fn is_valid_status_text(status_text: &ByteString) -> bool {
-    // reason-phrase  = *( HTAB / SP / VCHAR / obs-text )
-    for byte in status_text.iter() {
-        if !(*byte == b'\t' || *byte == b' ' || is_vchar(*byte) || is_obs_text(*byte)) {
-            return false;
-        }
-    }
-    true
-}
-
-// https://fetch.spec.whatwg.org/#null-body-status
-fn is_null_body_status(status: u16) -> bool {
-    status == 101 || status == 204 || status == 205 || status == 304
-}
-
-impl ResponseMethods<crate::DomTypeHolder> for Response {
     // https://fetch.spec.whatwg.org/#dom-response-type
     fn Type(&self) -> DOMResponseType {
         *self.response_type.borrow() //into()

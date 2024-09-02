@@ -149,8 +149,8 @@ impl HTMLOptionsCollectionMethods<crate::DomTypeHolder> for HTMLOptionsCollectio
     /// <https://html.spec.whatwg.org/multipage/#dom-htmloptionscollection-add>
     fn Add(
         &self,
-        element: HTMLOptionElementOrHTMLOptGroupElement,
-        before: Option<HTMLElementOrLong>,
+        element: HTMLOptionElementOrHTMLOptGroupElement<crate::DomTypeHolder>,
+        before: Option<HTMLElementOrLong<crate::DomTypeHolder>>,
     ) -> ErrorResult {
         let root = self.upcast().root_node();
 

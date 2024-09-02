@@ -130,9 +130,10 @@ impl BiquadFilterNode {
         let node = BiquadFilterNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl BiquadFilterNodeMethods<crate::DomTypeHolder> for BiquadFilterNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
@@ -140,9 +141,7 @@ impl BiquadFilterNode {
     ) -> Fallible<DomRoot<BiquadFilterNode>> {
         BiquadFilterNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl BiquadFilterNodeMethods<crate::DomTypeHolder> for BiquadFilterNode {
     // https://webaudio.github.io/web-audio-api/#dom-biquadfilternode-gain
     fn Gain(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.gain)

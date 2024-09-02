@@ -59,13 +59,14 @@ impl OfflineAudioCompletionEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl OfflineAudioCompletionEventMethods<crate::DomTypeHolder> for OfflineAudioCompletionEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &OfflineAudioCompletionEventInit,
+        init: &OfflineAudioCompletionEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<OfflineAudioCompletionEvent>> {
         let bubbles = EventBubbles::from(init.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.cancelable);
@@ -78,9 +79,7 @@ impl OfflineAudioCompletionEvent {
             &init.renderedBuffer,
         ))
     }
-}
 
-impl OfflineAudioCompletionEventMethods<crate::DomTypeHolder> for OfflineAudioCompletionEvent {
     // https://webaudio.github.io/web-audio-api/#dom-offlineaudiocompletionevent-renderedbuffer
     fn RenderedBuffer(&self) -> DomRoot<AudioBuffer> {
         DomRoot::from_ref(&*self.rendered_buffer)

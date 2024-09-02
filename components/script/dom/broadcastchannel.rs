@@ -29,16 +29,6 @@ pub struct BroadcastChannel {
 }
 
 impl BroadcastChannel {
-    /// <https://html.spec.whatwg.org/multipage/#broadcastchannel>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        name: DOMString,
-    ) -> DomRoot<BroadcastChannel> {
-        BroadcastChannel::new(global, proto, name)
-    }
-
     fn new(
         global: &GlobalScope,
         proto: Option<HandleObject>,
@@ -75,6 +65,15 @@ impl BroadcastChannel {
 }
 
 impl BroadcastChannelMethods<crate::DomTypeHolder> for BroadcastChannel {
+    /// <https://html.spec.whatwg.org/multipage/#broadcastchannel>
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        name: DOMString,
+    ) -> DomRoot<BroadcastChannel> {
+        BroadcastChannel::new(global, proto, name)
+    }
+
     /// <https://html.spec.whatwg.org/multipage/#dom-messageport-postmessage>
     fn PostMessage(&self, cx: SafeJSContext, message: HandleValue) -> ErrorResult {
         // Step 3, if closed.

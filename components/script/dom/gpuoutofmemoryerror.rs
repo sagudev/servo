@@ -6,6 +6,7 @@ use dom_struct::dom_struct;
 use js::rust::HandleObject;
 
 use super::types::GPUError;
+use crate::dom::bindings::codegen::Bindings::GPUOutOfMemoryErrorBinding::GPUOutOfMemoryErrorMethods;
 use crate::dom::bindings::reflector::reflect_dom_object_with_proto;
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;
@@ -30,10 +31,11 @@ impl GPUOutOfMemoryError {
     ) -> DomRoot<Self> {
         reflect_dom_object_with_proto(Box::new(Self::new_inherited(message)), global, proto)
     }
+}
 
+impl GPUOutOfMemoryErrorMethods<crate::DomTypeHolder> for GPUOutOfMemoryError {
     /// <https://gpuweb.github.io/gpuweb/#dom-GPUOutOfMemoryError-GPUOutOfMemoryError>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         message: DOMString,
