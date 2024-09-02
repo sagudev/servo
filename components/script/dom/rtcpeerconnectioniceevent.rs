@@ -67,13 +67,14 @@ impl RTCPeerConnectionIceEvent {
         evt.set_trusted(trusted);
         e
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCPeerConnectionIceEventMethods<crate::DomTypeHolder> for RTCPeerConnectionIceEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         ty: DOMString,
-        init: &RTCPeerConnectionIceEventInit,
+        init: &RTCPeerConnectionIceEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<RTCPeerConnectionIceEvent>> {
         Ok(RTCPeerConnectionIceEvent::new_with_proto(
             &window.global(),
@@ -87,9 +88,7 @@ impl RTCPeerConnectionIceEvent {
             false,
         ))
     }
-}
 
-impl RTCPeerConnectionIceEventMethods<crate::DomTypeHolder> for RTCPeerConnectionIceEvent {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnectioniceevent-candidate>
     fn GetCandidate(&self) -> Option<DomRoot<RTCIceCandidate>> {
         self.candidate.as_ref().map(|x| DomRoot::from_ref(&**x))

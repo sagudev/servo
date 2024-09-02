@@ -17,7 +17,7 @@ use crate::dom::bindings::reflector::{reflect_dom_object_with_proto, Reflector};
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;
 use crate::dom::globalscope::GlobalScope;
-use crate::maplike;
+use crate::dom::bindings::like::maplike;
 
 /// maplike<DOMString, long>
 #[dom_struct]

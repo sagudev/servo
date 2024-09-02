@@ -410,7 +410,7 @@ impl HTMLFormElementMethods<crate::DomTypeHolder> for HTMLFormElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#the-form-element%3Adetermine-the-value-of-a-named-property
-    fn NamedGetter(&self, name: DOMString) -> Option<RadioNodeListOrElement> {
+    fn NamedGetter(&self, name: DOMString) -> Option<RadioNodeListOrElement<crate::DomTypeHolder>> {
         let window = window_from_node(self);
 
         let name = Atom::from(name);

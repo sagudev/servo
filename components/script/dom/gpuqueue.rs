@@ -166,7 +166,7 @@ impl GPUQueueMethods<crate::DomTypeHolder> for GPUQueue {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writetexture>
     fn WriteTexture(
         &self,
-        destination: &GPUImageCopyTexture,
+        destination: &GPUImageCopyTexture<crate::DomTypeHolder>,
         data: BufferSource,
         data_layout: &GPUImageDataLayout,
         size: GPUExtent3D,

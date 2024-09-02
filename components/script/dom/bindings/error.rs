@@ -31,6 +31,9 @@ use crate::dom::globalscope::GlobalScope;
 use crate::realms::InRealm;
 use crate::script_runtime::JSContext as SafeJSContext;
 
+#[cfg(feature = "js_backtrace")]
+use script_bindings::error::LAST_EXCEPTION_BACKTRACE;
+
 /*#[cfg(feature = "js_backtrace")]
 thread_local! {
     /// An optional stringified JS backtrace and stringified native backtrace from the

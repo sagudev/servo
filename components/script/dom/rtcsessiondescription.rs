@@ -43,9 +43,10 @@ impl RTCSessionDescription {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCSessionDescriptionMethods<crate::DomTypeHolder> for RTCSessionDescription {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         config: &RTCSessionDescriptionInit,
@@ -57,9 +58,7 @@ impl RTCSessionDescription {
             config.sdp.clone(),
         ))
     }
-}
 
-impl RTCSessionDescriptionMethods<crate::DomTypeHolder> for RTCSessionDescription {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcsessiondescription-type>
     fn Type(&self) -> RTCSdpType {
         self.ty

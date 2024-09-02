@@ -76,9 +76,10 @@ impl RTCIceCandidate {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCIceCandidateMethods<crate::DomTypeHolder> for RTCIceCandidate {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         config: &RTCIceCandidateInit,
@@ -97,9 +98,7 @@ impl RTCIceCandidate {
             config.usernameFragment.clone(),
         ))
     }
-}
 
-impl RTCIceCandidateMethods<crate::DomTypeHolder> for RTCIceCandidate {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcicecandidate-candidate>
     fn Candidate(&self) -> DOMString {
         self.candidate.clone()

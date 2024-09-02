@@ -93,8 +93,10 @@ impl OfflineAudioContext {
             proto,
         ))
     }
+}
 
-    pub fn Constructor(
+impl OfflineAudioContextMethods<crate::DomTypeHolder> for OfflineAudioContext {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         options: &OfflineAudioContextOptions,
@@ -107,9 +109,7 @@ impl OfflineAudioContext {
             *options.sampleRate,
         )
     }
-}
 
-impl OfflineAudioContextMethods<crate::DomTypeHolder> for OfflineAudioContext {
     fn Constructor_(
         window: &Window,
         proto: Option<HandleObject>,

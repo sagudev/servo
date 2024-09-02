@@ -59,13 +59,14 @@ impl FormDataEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl FormDataEventMethods<crate::DomTypeHolder> for FormDataEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &FormDataEventBinding::FormDataEventInit,
+        init: &FormDataEventBinding::FormDataEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<FormDataEvent>> {
         let bubbles = EventBubbles::from(init.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.cancelable);
@@ -81,9 +82,7 @@ impl FormDataEvent {
 
         Ok(event)
     }
-}
 
-impl FormDataEventMethods<crate::DomTypeHolder> for FormDataEvent {
     // https://html.spec.whatwg.org/multipage/#dom-formdataevent-formdata
     fn FormData(&self) -> DomRoot<FormData> {
         DomRoot::from_ref(&*self.form_data)

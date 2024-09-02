@@ -49,10 +49,11 @@ impl GPUPipelineError {
     ) -> DomRoot<Self> {
         Self::new_with_proto(global, None, message, reason)
     }
+}
 
+impl GPUPipelineErrorMethods<crate::DomTypeHolder> for GPUPipelineError {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpupipelineerror-constructor>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         message: DOMString,
@@ -60,9 +61,7 @@ impl GPUPipelineError {
     ) -> DomRoot<Self> {
         Self::new_with_proto(global, proto, message, options.reason)
     }
-}
 
-impl GPUPipelineErrorMethods<crate::DomTypeHolder> for GPUPipelineError {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpupipelineerror-reason>
     fn Reason(&self) -> GPUPipelineErrorReason {
         self.reason

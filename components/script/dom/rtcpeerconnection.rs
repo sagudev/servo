@@ -228,15 +228,6 @@ impl RTCPeerConnection {
         this
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        config: &RTCConfiguration,
-    ) -> Fallible<DomRoot<RTCPeerConnection>> {
-        Ok(RTCPeerConnection::new(&window.global(), proto, config))
-    }
-
     pub fn get_webrtc_controller(&self) -> &DomRefCell<Option<WebRtcController>> {
         &self.controller
     }
@@ -516,6 +507,14 @@ impl RTCPeerConnection {
 }
 
 impl RTCPeerConnectionMethods<crate::DomTypeHolder> for RTCPeerConnection {
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        config: &RTCConfiguration,
+    ) -> Fallible<DomRoot<RTCPeerConnection>> {
+        Ok(RTCPeerConnection::new(&window.global(), proto, config))
+    }
+
     // https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-icecandidate
     event_handler!(icecandidate, GetOnicecandidate, SetOnicecandidate);
 
@@ -770,8 +769,8 @@ impl RTCPeerConnectionMethods<crate::DomTypeHolder> for RTCPeerConnection {
     /// <https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-addtransceiver>
     fn AddTransceiver(
         &self,
-        _track_or_kind: MediaStreamTrackOrString,
-        init: &RTCRtpTransceiverInit,
+        _track_or_kind: MediaStreamTrackOrString<crate::DomTypeHolder>,
+        init: &RTCRtpTransceiverInit<crate::DomTypeHolder>,
     ) -> DomRoot<RTCRtpTransceiver> {
         RTCRtpTransceiver::new(&self.global(), init.direction)
     }

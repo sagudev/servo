@@ -16,7 +16,7 @@ debugmozjs = ['js/debugmozjs']
 jitspew = ['js/jitspew']
 profilemozjs = ['js/profilemozjs']
 webgl_backtrace = ["canvas_traits/webgl_backtrace"]
-js_backtrace = []
+js_backtrace = ['script_bindings/js_backtrace']
 refcell_backtrace = ["accountable-refcell"]
 
 [build-dependencies]

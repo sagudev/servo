@@ -25,7 +25,7 @@ pub struct GPUUncapturedErrorEvent {
 }
 
 impl GPUUncapturedErrorEvent {
-    fn new_inherited(init: &GPUUncapturedErrorEventInit) -> Self {
+    fn new_inherited(init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>) -> Self {
         Self {
             gpu_error: Dom::from_ref(&init.error),
             event: Event::new_inherited(),
@@ -35,7 +35,7 @@ impl GPUUncapturedErrorEvent {
     pub fn new(
         global: &GlobalScope,
         type_: DOMString,
-        init: &GPUUncapturedErrorEventInit,
+        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
     ) -> DomRoot<Self> {
         Self::new_with_proto(global, None, type_, init)
     }
@@ -44,7 +44,7 @@ impl GPUUncapturedErrorEvent {
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &GPUUncapturedErrorEventInit,
+        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
     ) -> DomRoot<Self> {
         let ev = reflect_dom_object_with_proto(
             Box::new(GPUUncapturedErrorEvent::new_inherited(init)),
@@ -58,17 +58,6 @@ impl GPUUncapturedErrorEvent {
         );
         ev
     }
-
-    /// <https://gpuweb.github.io/gpuweb/#dom-gpuuncapturederrorevent-gpuuncapturederrorevent>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        type_: DOMString,
-        init: &GPUUncapturedErrorEventInit,
-    ) -> DomRoot<Self> {
-        GPUUncapturedErrorEvent::new_with_proto(global, proto, type_, init)
-    }
 }
 
 impl GPUUncapturedErrorEvent {
@@ -78,6 +67,16 @@ impl GPUUncapturedErrorEvent {
 }
 
 impl GPUUncapturedErrorEventMethods<crate::DomTypeHolder> for GPUUncapturedErrorEvent {
+    /// <https://gpuweb.github.io/gpuweb/#dom-gpuuncapturederrorevent-gpuuncapturederrorevent>
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        type_: DOMString,
+        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
+    ) -> DomRoot<Self> {
+        GPUUncapturedErrorEvent::new_with_proto(global, proto, type_, init)
+    }
+
     /// <https://gpuweb.github.io/gpuweb/#dom-gpuuncapturederrorevent-error>
     fn Error(&self) -> DomRoot<GPUError> {
         DomRoot::from_ref(&self.gpu_error)

@@ -82,9 +82,10 @@ impl ProgressEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl ProgressEventMethods<crate::DomTypeHolder> for ProgressEvent {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -104,9 +105,7 @@ impl ProgressEvent {
         );
         Ok(ev)
     }
-}
 
-impl ProgressEventMethods<crate::DomTypeHolder> for ProgressEvent {
     // https://xhr.spec.whatwg.org/#dom-progressevent-lengthcomputable
     fn LengthComputable(&self) -> bool {
         self.length_computable

@@ -495,7 +495,7 @@ impl PaintWorkletGlobalScopeMethods<crate::DomTypeHolder> for PaintWorkletGlobal
     #[allow(unsafe_code)]
     #[allow(crown::unrooted_must_root)]
     /// <https://drafts.css-houdini.org/css-paint-api/#dom-paintworkletglobalscope-registerpaint>
-    fn RegisterPaint(&self, name: DOMString, paint_ctor: Rc<VoidFunction>) -> Fallible<()> {
+    fn RegisterPaint(&self, name: DOMString, paint_ctor: Rc<VoidFunction<crate::DomTypeHolder>>) -> Fallible<()> {
         let name = Atom::from(name);
         let cx = WorkletGlobalScope::get_cx();
         rooted!(in(*cx) let paint_obj = paint_ctor.callback_holder().get());

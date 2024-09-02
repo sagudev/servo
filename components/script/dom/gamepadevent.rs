@@ -80,14 +80,15 @@ impl GamepadEvent {
 
         GamepadEvent::new(global, name.into(), false, false, gamepad)
     }
+}
 
+impl GamepadEventMethods<crate::DomTypeHolder> for GamepadEvent {
     // https://w3c.github.io/gamepad/#gamepadevent-interface
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &GamepadEventBinding::GamepadEventInit,
+        init: &GamepadEventBinding::GamepadEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<GamepadEvent>> {
         Ok(GamepadEvent::new_with_proto(
             &window.global(),
@@ -98,9 +99,7 @@ impl GamepadEvent {
             &init.gamepad,
         ))
     }
-}
 
-impl GamepadEventMethods<crate::DomTypeHolder> for GamepadEvent {
     // https://w3c.github.io/gamepad/#gamepadevent-interface
     fn Gamepad(&self) -> DomRoot<Gamepad> {
         DomRoot::from_ref(&*self.gamepad)

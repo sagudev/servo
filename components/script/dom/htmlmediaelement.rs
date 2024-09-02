@@ -2129,7 +2129,7 @@ impl HTMLMediaElementMethods<crate::DomTypeHolder> for HTMLMediaElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-media-srcobject
-    fn GetSrcObject(&self) -> Option<MediaStreamOrBlob> {
+    fn GetSrcObject(&self) -> Option<MediaStreamOrBlob<crate::DomTypeHolder>> {
         (*self.src_object.borrow())
             .as_ref()
             .map(|src_object| match src_object {
@@ -2141,7 +2141,7 @@ impl HTMLMediaElementMethods<crate::DomTypeHolder> for HTMLMediaElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-media-srcobject
-    fn SetSrcObject(&self, value: Option<MediaStreamOrBlob>) {
+    fn SetSrcObject(&self, value: Option<MediaStreamOrBlob<crate::DomTypeHolder>>) {
         *self.src_object.borrow_mut() = value.map(|value| value.into());
         self.media_element_load_algorithm();
     }

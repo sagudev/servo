@@ -508,10 +508,20 @@ impl EventSource {
     pub fn url(&self) -> &ServoUrl {
         &self.url
     }
+}
 
+// https://html.spec.whatwg.org/multipage/#garbage-collection-2
+impl Drop for EventSource {
+    fn drop(&mut self) {
+        // If an EventSource object is garbage collected while its connection is still open,
+        // the user agent must abort any instance of the fetch algorithm opened by this EventSource.
+        self.canceller.borrow_mut().cancel();
+    }
+}
+
+impl EventSourceMethods<crate::DomTypeHolder> for EventSource {
     // https://html.spec.whatwg.org/multipage/#dom-eventsource
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         url: DOMString,
@@ -602,18 +612,7 @@ impl EventSource {
         // Step 13
         Ok(ev)
     }
-}
 
-// https://html.spec.whatwg.org/multipage/#garbage-collection-2
-impl Drop for EventSource {
-    fn drop(&mut self) {
-        // If an EventSource object is garbage collected while its connection is still open,
-        // the user agent must abort any instance of the fetch algorithm opened by this EventSource.
-        self.canceller.borrow_mut().cancel();
-    }
-}
-
-impl EventSourceMethods<crate::DomTypeHolder> for EventSource {
     // https://html.spec.whatwg.org/multipage/#handler-eventsource-onopen
     event_handler!(open, GetOnopen, SetOnopen);
 

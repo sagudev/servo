@@ -70,7 +70,7 @@ pub struct MessageEvent {
 impl MessageEvent {
     pub fn new_inherited(
         origin: DOMString,
-        source: Option<&WindowProxyOrMessagePortOrServiceWorker>,
+        source: Option<&WindowProxyOrMessagePortOrServiceWorker<crate::DomTypeHolder>>,
         lastEventId: DOMString,
         ports: Vec<DomRoot<MessagePort>>,
     ) -> MessageEvent {

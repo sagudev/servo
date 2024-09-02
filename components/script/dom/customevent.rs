@@ -61,23 +61,6 @@ impl CustomEvent {
         ev
     }
 
-    #[allow(unsafe_code, non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        type_: DOMString,
-        init: RootedTraceableBox<CustomEventBinding::CustomEventInit>,
-    ) -> Fallible<DomRoot<CustomEvent>> {
-        Ok(CustomEvent::new(
-            global,
-            proto,
-            Atom::from(type_),
-            init.parent.bubbles,
-            init.parent.cancelable,
-            init.detail.handle(),
-        ))
-    }
-
     fn init_custom_event(
         &self,
         type_: Atom,
@@ -96,6 +79,22 @@ impl CustomEvent {
 }
 
 impl CustomEventMethods<crate::DomTypeHolder> for CustomEvent {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        type_: DOMString,
+        init: RootedTraceableBox<CustomEventBinding::CustomEventInit>,
+    ) -> Fallible<DomRoot<CustomEvent>> {
+        Ok(CustomEvent::new(
+            global,
+            proto,
+            Atom::from(type_),
+            init.parent.bubbles,
+            init.parent.cancelable,
+            init.detail.handle(),
+        ))
+    }
+
     // https://dom.spec.whatwg.org/#dom-customevent-detail
     fn Detail(&self, _cx: JSContext) -> JSVal {
         self.detail.get()

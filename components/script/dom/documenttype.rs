@@ -85,17 +85,17 @@ impl DocumentTypeMethods<crate::DomTypeHolder> for DocumentType {
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-before
-    fn Before(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Before(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().before(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-after
-    fn After(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn After(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().after(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    fn ReplaceWith(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn ReplaceWith(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().replace_with(nodes)
     }
 

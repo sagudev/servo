@@ -133,30 +133,6 @@ impl ImageData {
 
         Ok(reflect_dom_object_with_proto(imagedata, global, proto))
     }
-    /// <https://html.spec.whatwg.org/multipage/#pixel-manipulation:dom-imagedata-3>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        width: u32,
-        height: u32,
-    ) -> Fallible<DomRoot<Self>> {
-        Self::new_without_jsobject(global, proto, width, height)
-    }
-
-    /// <https://html.spec.whatwg.org/multipage/#pixel-manipulation:dom-imagedata-4>
-    #[allow(unused_variables, non_snake_case)]
-    pub fn Constructor_(
-        cx: JSContext,
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        jsobject: *mut JSObject,
-        width: u32,
-        opt_height: Option<u32>,
-    ) -> Fallible<DomRoot<Self>> {
-        Self::new_with_jsobject(global, proto, width, opt_height, jsobject)
-    }
-
     /// Nothing must change the array on the JS side while the slice is live.
     #[allow(unsafe_code)]
     pub unsafe fn as_slice(&self) -> &[u8] {
@@ -190,6 +166,28 @@ impl ImageData {
 }
 
 impl ImageDataMethods<crate::DomTypeHolder> for ImageData {
+    /// <https://html.spec.whatwg.org/multipage/#pixel-manipulation:dom-imagedata-3>
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        width: u32,
+        height: u32,
+    ) -> Fallible<DomRoot<Self>> {
+        Self::new_without_jsobject(global, proto, width, height)
+    }
+
+    /// <https://html.spec.whatwg.org/multipage/#pixel-manipulation:dom-imagedata-4>
+    fn Constructor_(
+        cx: JSContext,
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        jsobject: *mut JSObject,
+        width: u32,
+        opt_height: Option<u32>,
+    ) -> Fallible<DomRoot<Self>> {
+        Self::new_with_jsobject(global, proto, width, opt_height, jsobject)
+    }
+
     /// <https://html.spec.whatwg.org/multipage/#dom-imagedata-width>
     fn Width(&self) -> u32 {
         self.width

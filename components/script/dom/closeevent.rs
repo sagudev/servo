@@ -25,7 +25,6 @@ pub struct CloseEvent {
     reason: DOMString,
 }
 
-#[allow(non_snake_case)]
 impl CloseEvent {
     pub fn new_inherited(was_clean: bool, code: u16, reason: DOMString) -> CloseEvent {
         CloseEvent {
@@ -69,8 +68,10 @@ impl CloseEvent {
         }
         ev
     }
+}
 
-    pub fn Constructor(
+impl CloseEventMethods<crate::DomTypeHolder> for CloseEvent {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -89,9 +90,7 @@ impl CloseEvent {
             init.reason.clone(),
         ))
     }
-}
 
-impl CloseEventMethods<crate::DomTypeHolder> for CloseEvent {
     // https://html.spec.whatwg.org/multipage/#dom-closeevent-wasclean
     fn WasClean(&self) -> bool {
         self.was_clean

@@ -152,7 +152,7 @@ impl HTMLElementMethods<crate::DomTypeHolder> for HTMLElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#handler-onerror
-    fn GetOnerror(&self) -> Option<Rc<OnErrorEventHandlerNonNull>> {
+    fn GetOnerror(&self) -> Option<Rc<OnErrorEventHandlerNonNull<crate::DomTypeHolder>>> {
         if self.is_body_or_frameset() {
             let document = document_from_node(self);
             if document.has_browsing_context() {
@@ -167,7 +167,7 @@ impl HTMLElementMethods<crate::DomTypeHolder> for HTMLElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#handler-onerror
-    fn SetOnerror(&self, listener: Option<Rc<OnErrorEventHandlerNonNull>>) {
+    fn SetOnerror(&self, listener: Option<Rc<OnErrorEventHandlerNonNull<crate::DomTypeHolder>>>) {
         if self.is_body_or_frameset() {
             let document = document_from_node(self);
             if document.has_browsing_context() {

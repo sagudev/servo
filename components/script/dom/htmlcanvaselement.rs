@@ -360,7 +360,7 @@ impl HTMLCanvasElementMethods<crate::DomTypeHolder> for HTMLCanvasElement {
         cx: JSContext,
         id: DOMString,
         options: HandleValue,
-    ) -> Option<RenderingContext> {
+    ) -> Option<RenderingContext<crate::DomTypeHolder>> {
         match &*id {
             "2d" => self
                 .get_or_init_2d_context()

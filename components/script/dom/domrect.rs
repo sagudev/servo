@@ -43,9 +43,10 @@ impl DOMRect {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl DOMRectMethods<crate::DomTypeHolder> for DOMRect {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         x: f64,
@@ -55,9 +56,7 @@ impl DOMRect {
     ) -> Fallible<DomRoot<DOMRect>> {
         Ok(DOMRect::new_with_proto(global, proto, x, y, width, height))
     }
-}
 
-impl DOMRectMethods<crate::DomTypeHolder> for DOMRect {
     // https://drafts.fxtf.org/geometry/#dom-domrect-x
     fn X(&self) -> f64 {
         self.rect.X()

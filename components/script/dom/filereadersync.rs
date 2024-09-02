@@ -37,20 +37,19 @@ impl FileReaderSync {
         reflect_dom_object_with_proto(Box::new(FileReaderSync::new_inherited()), global, proto)
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<FileReaderSync>> {
-        Ok(FileReaderSync::new(global, proto))
-    }
-
     fn get_blob_bytes(blob: &Blob) -> Result<Vec<u8>, Error> {
         blob.get_bytes().map_err(|_| Error::NotReadable)
     }
 }
 
 impl FileReaderSyncMethods<crate::DomTypeHolder> for FileReaderSync {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+    ) -> Fallible<DomRoot<FileReaderSync>> {
+        Ok(FileReaderSync::new(global, proto))
+    }
+
     /// <https://w3c.github.io/FileAPI/#readAsBinaryStringSyncSection>
     fn ReadAsBinaryString(&self, blob: &Blob) -> Fallible<DOMString> {
         // step 1

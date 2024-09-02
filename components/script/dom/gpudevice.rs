@@ -215,7 +215,7 @@ impl GPUDevice {
 
     fn get_pipeline_layout_data(
         &self,
-        layout: &GPUPipelineLayoutOrGPUAutoLayoutMode,
+        layout: &GPUPipelineLayoutOrGPUAutoLayoutMode<crate::DomTypeHolder>,
     ) -> (
         Option<PipelineLayoutId>,
         Option<(PipelineLayoutId, Vec<BindGroupLayoutId>)>,
@@ -600,7 +600,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createpipelinelayout>
     fn CreatePipelineLayout(
         &self,
-        descriptor: &GPUPipelineLayoutDescriptor,
+        descriptor: &GPUPipelineLayoutDescriptor<crate::DomTypeHolder>,
     ) -> DomRoot<GPUPipelineLayout> {
         let desc = wgpu_bind::PipelineLayoutDescriptor {
             label: convert_label(&descriptor.parent),
@@ -643,7 +643,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     }
 
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createbindgroup>
-    fn CreateBindGroup(&self, descriptor: &GPUBindGroupDescriptor) -> DomRoot<GPUBindGroup> {
+    fn CreateBindGroup(&self, descriptor: &GPUBindGroupDescriptor<crate::DomTypeHolder>) -> DomRoot<GPUBindGroup> {
         let entries = descriptor
             .entries
             .iter()
@@ -733,7 +733,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createcomputepipeline>
     fn CreateComputePipeline(
         &self,
-        descriptor: &GPUComputePipelineDescriptor,
+        descriptor: &GPUComputePipelineDescriptor<crate::DomTypeHolder>,
     ) -> DomRoot<GPUComputePipeline> {
         let compute_pipeline_id = self
             .global()
@@ -781,7 +781,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createcomputepipelineasync>
     fn CreateComputePipelineAsync(
         &self,
-        descriptor: &GPUComputePipelineDescriptor,
+        descriptor: &GPUComputePipelineDescriptor<crate::DomTypeHolder>,
         comp: InRealm,
     ) -> Rc<Promise> {
         let promise = Promise::new_in_current_realm(comp);
@@ -961,7 +961,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createrenderpipeline>
     fn CreateRenderPipeline(
         &self,
-        descriptor: &GPURenderPipelineDescriptor,
+        descriptor: &GPURenderPipelineDescriptor<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<GPURenderPipeline>> {
         let (implicit_ids, desc) = self.parse_render_pipeline(&descriptor)?;
 
@@ -994,7 +994,7 @@ impl GPUDeviceMethods<crate::DomTypeHolder> for GPUDevice {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-createrenderpipelineasync>
     fn CreateRenderPipelineAsync(
         &self,
-        descriptor: &GPURenderPipelineDescriptor,
+        descriptor: &GPURenderPipelineDescriptor<crate::DomTypeHolder>,
         comp: InRealm,
     ) -> Fallible<Rc<Promise>> {
         let (implicit_ids, desc) = self.parse_render_pipeline(&descriptor)?;

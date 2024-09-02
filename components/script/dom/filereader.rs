@@ -157,14 +157,6 @@ impl FileReader {
         reflect_dom_object_with_proto(Box::new(FileReader::new_inherited()), global, proto)
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<FileReader>> {
-        Ok(FileReader::new(global, proto))
-    }
-
     //https://w3c.github.io/FileAPI/#dfn-error-steps
     pub fn process_read_error(
         filereader: TrustedFileReader,
@@ -329,6 +321,13 @@ impl FileReader {
 }
 
 impl FileReaderMethods<crate::DomTypeHolder> for FileReader {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+    ) -> Fallible<DomRoot<FileReader>> {
+        Ok(FileReader::new(global, proto))
+    }
+
     // https://w3c.github.io/FileAPI/#dfn-onloadstart
     event_handler!(loadstart, GetOnloadstart, SetOnloadstart);
 

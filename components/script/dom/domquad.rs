@@ -61,8 +61,10 @@ impl DOMQuad {
             proto,
         )
     }
+}
 
-    pub fn Constructor(
+impl DOMQuadMethods<crate::DomTypeHolder> for DOMQuad {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         p1: &DOMPointInit,
@@ -81,7 +83,7 @@ impl DOMQuad {
     }
 
     // https://drafts.fxtf.org/geometry/#dom-domquad-fromrect
-    pub fn FromRect(global: &GlobalScope, other: &DOMRectInit) -> DomRoot<DOMQuad> {
+    fn FromRect(global: &GlobalScope, other: &DOMRectInit) -> DomRoot<DOMQuad> {
         DOMQuad::new(
             global,
             &DOMPoint::new(global, other.x, other.y, 0f64, 1f64),
@@ -98,7 +100,7 @@ impl DOMQuad {
     }
 
     // https://drafts.fxtf.org/geometry/#dom-domquad-fromquad
-    pub fn FromQuad(global: &GlobalScope, other: &DOMQuadInit) -> DomRoot<DOMQuad> {
+    fn FromQuad(global: &GlobalScope, other: &DOMQuadInit) -> DomRoot<DOMQuad> {
         DOMQuad::new(
             global,
             &DOMPoint::new_from_init(global, &other.p1),
@@ -107,9 +109,7 @@ impl DOMQuad {
             &DOMPoint::new_from_init(global, &other.p4),
         )
     }
-}
 
-impl DOMQuadMethods<crate::DomTypeHolder> for DOMQuad {
     // https://drafts.fxtf.org/geometry/#dom-domquad-p1
     fn P1(&self) -> DomRoot<DOMPoint> {
         DomRoot::from_ref(&self.p1)

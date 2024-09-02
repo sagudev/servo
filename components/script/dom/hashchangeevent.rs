@@ -80,9 +80,10 @@ impl HashChangeEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl HashChangeEventMethods<crate::DomTypeHolder> for HashChangeEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -98,9 +99,7 @@ impl HashChangeEvent {
             init.newURL.0.clone(),
         ))
     }
-}
 
-impl HashChangeEventMethods<crate::DomTypeHolder> for HashChangeEvent {
     // https://html.spec.whatwg.org/multipage/#dom-hashchangeevent-oldurl
     fn OldURL(&self) -> USVString {
         USVString(self.old_url.clone())

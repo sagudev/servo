@@ -54,6 +54,11 @@ impl Console {
             chan.send(devtools_message).unwrap();
         }
     }
+
+    // Directly logs a DOMString, without processing the message
+    fn internal_warn(global: &GlobalScope, message: DOMString) {
+        console_message(global, message, LogLevel::Warn)
+    }
 }
 
 // In order to avoid interleaving the stdout output of the Console API methods
@@ -245,10 +250,6 @@ impl consoleMethods<crate::DomTypeHolder> for Console {
     // https://developer.mozilla.org/en-US/docs/Web/API/Console/warn
     fn Warn(_cx: JSContext, global: &GlobalScope, messages: Vec<HandleValue>) {
         console_messages(global, messages, LogLevel::Warn)
-    }
-    // Directly logs a DOMString, without processing the message
-    fn internal_warn(global: &GlobalScope, message: DOMString) {
-        console_message(global, message, LogLevel::Warn)
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Console/error

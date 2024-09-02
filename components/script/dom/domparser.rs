@@ -39,17 +39,16 @@ impl DOMParser {
     fn new(window: &Window, proto: Option<HandleObject>) -> DomRoot<DOMParser> {
         reflect_dom_object_with_proto(Box::new(DOMParser::new_inherited(window)), window, proto)
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl DOMParserMethods<crate::DomTypeHolder> for DOMParser {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<DOMParser>> {
         Ok(DOMParser::new(window, proto))
     }
-}
 
-impl DOMParserMethods<crate::DomTypeHolder> for DOMParser {
     // https://w3c.github.io/DOM-Parsing/#the-domparser-interface
     fn ParseFromString(
         &self,

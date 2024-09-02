@@ -54,8 +54,13 @@ impl DocumentFragment {
         )
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    pub fn id_map(&self) -> &DomRefCell<HashMapTracedValues<Atom, Vec<Dom<Element>>>> {
+        &self.id_map
+    }
+}
+
+impl DocumentFragmentMethods<crate::DomTypeHolder> for DocumentFragment {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<DocumentFragment>> {
@@ -64,12 +69,6 @@ impl DocumentFragment {
         Ok(DocumentFragment::new_with_proto(&document, proto))
     }
 
-    pub fn id_map(&self) -> &DomRefCell<HashMapTracedValues<Atom, Vec<Dom<Element>>>> {
-        &self.id_map
-    }
-}
-
-impl DocumentFragmentMethods<crate::DomTypeHolder> for DocumentFragment {
     // https://dom.spec.whatwg.org/#dom-parentnode-children
     fn Children(&self) -> DomRoot<HTMLCollection> {
         let window = window_from_node(self);
@@ -104,17 +103,17 @@ impl DocumentFragmentMethods<crate::DomTypeHolder> for DocumentFragment {
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-    fn Prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().prepend(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-append
-    fn Append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().append(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
-    fn ReplaceChildren(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn ReplaceChildren(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().replace_children(nodes)
     }
 

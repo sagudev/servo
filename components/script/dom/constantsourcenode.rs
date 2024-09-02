@@ -80,9 +80,10 @@ impl ConstantSourceNode {
         let node = ConstantSourceNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl ConstantSourceNodeMethods<crate::DomTypeHolder> for ConstantSourceNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
@@ -90,9 +91,7 @@ impl ConstantSourceNode {
     ) -> Fallible<DomRoot<ConstantSourceNode>> {
         ConstantSourceNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl ConstantSourceNodeMethods<crate::DomTypeHolder> for ConstantSourceNode {
     // https://webaudio.github.io/web-audio-api/#dom-constantsourcenode-offset
     fn Offset(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.offset)

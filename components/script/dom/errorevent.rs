@@ -93,9 +93,10 @@ impl ErrorEvent {
         ev.error.set(error.get());
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl ErrorEventMethods<crate::DomTypeHolder> for ErrorEvent {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -133,9 +134,7 @@ impl ErrorEvent {
         );
         Ok(event)
     }
-}
 
-impl ErrorEventMethods<crate::DomTypeHolder> for ErrorEvent {
     // https://html.spec.whatwg.org/multipage/#dom-errorevent-lineno
     fn Lineno(&self) -> u32 {
         self.lineno.get()

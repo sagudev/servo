@@ -85,20 +85,6 @@ impl PerformanceObserver {
         reflect_dom_object_with_proto(Box::new(observer), global, proto)
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
-    ) -> Fallible<DomRoot<PerformanceObserver>> {
-        Ok(PerformanceObserver::new_with_proto(
-            global,
-            proto,
-            callback,
-            Vec::new(),
-        ))
-    }
-
     /// Buffer a new performance entry.
     pub fn queue_entry(&self, entry: &PerformanceEntry) {
         self.entries.borrow_mut().push(DomRoot::from_ref(entry));
@@ -129,17 +115,29 @@ impl PerformanceObserver {
     pub fn set_entries(&self, entries: DOMPerformanceEntryList<crate::DomTypeHolder>) {
         *self.entries.borrow_mut() = entries;
     }
+}
+
+impl PerformanceObserverMethods<crate::DomTypeHolder> for PerformanceObserver {
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        callback: Rc<PerformanceObserverCallback<crate::DomTypeHolder>>,
+    ) -> Fallible<DomRoot<PerformanceObserver>> {
+        Ok(PerformanceObserver::new_with_proto(
+            global,
+            proto,
+            callback,
+            Vec::new(),
+        ))
+    }
 
     // https://w3c.github.io/performance-timeline/#supportedentrytypes-attribute
-    #[allow(non_snake_case)]
-    pub fn SupportedEntryTypes(cx: JSContext, global: &GlobalScope) -> JSVal {
+    fn SupportedEntryTypes(cx: JSContext, global: &GlobalScope) -> JSVal {
         // While this is exposed through a method of PerformanceObserver,
         // it is specified as associated with the global scope.
         global.supported_performance_entry_types(cx)
     }
-}
 
-impl PerformanceObserverMethods<crate::DomTypeHolder> for PerformanceObserver {
     // https://w3c.github.io/performance-timeline/#dom-performanceobserver-observe()
     fn Observe(&self, options: &PerformanceObserverInit) -> Fallible<()> {
         // Step 1 is self

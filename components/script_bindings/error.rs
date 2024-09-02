@@ -37,7 +37,7 @@ use crate::codegen::DomTypes::DomTypes;
 thread_local! {
     /// An optional stringified JS backtrace and stringified native backtrace from the
     /// the last DOM exception that was reported.
-    static LAST_EXCEPTION_BACKTRACE: DomRefCell<Option<(Option<String>, String)>> = DomRefCell::new(None);
+    pub static LAST_EXCEPTION_BACKTRACE: DomRefCell<Option<(Option<String>, String)>> = DomRefCell::new(None);
 }
 
 /// DOM exceptions that can be thrown by a native DOM method.

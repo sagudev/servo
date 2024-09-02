@@ -24,7 +24,6 @@ pub struct DOMPointReadOnly {
     w: Cell<f64>,
 }
 
-#[allow(non_snake_case)]
 impl DOMPointReadOnly {
     pub fn new_inherited(x: f64, y: f64, z: f64, w: f64) -> DOMPointReadOnly {
         DOMPointReadOnly {
@@ -54,8 +53,11 @@ impl DOMPointReadOnly {
             proto,
         )
     }
+}
 
-    pub fn Constructor(
+#[allow(non_snake_case)]
+impl DOMPointReadOnlyMethods<crate::DomTypeHolder> for DOMPointReadOnly {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         x: f64,
@@ -67,13 +69,10 @@ impl DOMPointReadOnly {
     }
 
     // https://drafts.fxtf.org/geometry/#dom-dompointreadonly-frompoint
-    pub fn FromPoint(global: &GlobalScope, init: &DOMPointInit) -> DomRoot<Self> {
+    fn FromPoint(global: &GlobalScope, init: &DOMPointInit) -> DomRoot<Self> {
         Self::new(global, init.x, init.y, init.z, init.w)
     }
-}
 
-#[allow(non_snake_case)]
-impl DOMPointReadOnlyMethods<crate::DomTypeHolder> for DOMPointReadOnly {
     // https://dev.w3.org/fxtf/geometry/Overview.html#dom-dompointreadonly-x
     fn X(&self) -> f64 {
         self.x.get()
@@ -103,7 +102,7 @@ pub trait DOMPointWriteMethods {
     fn SetW(&self, value: f64);
 }
 
-impl DOMPointWriteMethods<crate::DomTypeHolder> for DOMPointReadOnly {
+impl DOMPointWriteMethods for DOMPointReadOnly {
     fn SetX(&self, value: f64) {
         self.x.set(value);
     }

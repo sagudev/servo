@@ -2740,7 +2740,6 @@ def UnionTypes(descriptors, dictionaries, callbacks, typedefs, config):
 def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs, config):
     elements = [CGGeneric("pub trait DomTypes: crate::utils::DomHelpers<Self> + js::rust::Trace + malloc_size_of::MallocSizeOf + Sized where Self: 'static {\n")]
     universal = [
-        "crate::reflector::DomObject",
         "crate::reflector::DomGlobal<Self>",
     ]
     for descriptor in descriptors:
@@ -2778,16 +2777,18 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                 "js::conversions::ToJSValConvertible",
                 "crate::reflector::MutDomObject",
                 "malloc_size_of::MallocSizeOf",
+                "crate::reflector::DomObject",
             ]
 
-        if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
-            traits += [
-                "crate::conversions::IDLInterface",
-                "PartialEq",
-            ]
+        if descriptor.register:
+            if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
+                traits += [
+                    "crate::conversions::IDLInterface",
+                    "PartialEq",
+                ]
 
-        if descriptor.concrete:
-            traits += ["crate::reflector::DomObjectWrap<Self>"]
+            if descriptor.concrete:
+                traits += ["crate::reflector::DomObjectWrap<Self>"]
 
         if not descriptor.interface.isCallback() and not descriptor.interface.isIteratorInterface():
             nonConstMembers = [m for m in descriptor.interface.members if not m.isConst()]

@@ -103,7 +103,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-begincomputepass>
     fn BeginComputePass(
         &self,
-        descriptor: &GPUComputePassDescriptor,
+        descriptor: &GPUComputePassDescriptor<crate::DomTypeHolder>,
     ) -> DomRoot<GPUComputePassEncoder> {
         let compute_pass_id = self
             .global()
@@ -246,8 +246,8 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copybuffertotexture>
     fn CopyBufferToTexture(
         &self,
-        source: &GPUImageCopyBuffer,
-        destination: &GPUImageCopyTexture,
+        source: &GPUImageCopyBuffer<crate::DomTypeHolder>,
+        destination: &GPUImageCopyTexture<crate::DomTypeHolder>,
         copy_size: GPUExtent3D,
     ) {
         self.buffers
@@ -268,8 +268,8 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copybuffertotexture>
     fn CopyTextureToBuffer(
         &self,
-        source: &GPUImageCopyTexture,
-        destination: &GPUImageCopyBuffer,
+        source: &GPUImageCopyTexture<crate::DomTypeHolder>,
+        destination: &GPUImageCopyBuffer<crate::DomTypeHolder>,
         copy_size: GPUExtent3D,
     ) {
         self.buffers
@@ -290,8 +290,8 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#GPUCommandEncoder-copyTextureToTexture>
     fn CopyTextureToTexture(
         &self,
-        source: &GPUImageCopyTexture,
-        destination: &GPUImageCopyTexture,
+        source: &GPUImageCopyTexture<crate::DomTypeHolder>,
+        destination: &GPUImageCopyTexture<crate::DomTypeHolder>,
         copy_size: GPUExtent3D,
     ) {
         self.channel

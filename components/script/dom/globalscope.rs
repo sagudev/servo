@@ -2815,7 +2815,7 @@ impl GlobalScope {
 
     pub fn create_image_bitmap(
         &self,
-        image: ImageBitmapSource,
+        image: ImageBitmapSource<crate::DomTypeHolder>,
         options: &ImageBitmapOptions,
     ) -> Rc<Promise> {
         let in_realm_proof = AlreadyInRealm::assert();

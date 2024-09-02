@@ -72,12 +72,17 @@ impl CompositionEvent {
         ev
     }
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    pub fn data(&self) -> &str {
+        &self.data
+    }
+}
+
+impl CompositionEventMethods<crate::DomTypeHolder> for CompositionEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &CompositionEventBinding::CompositionEventInit,
+        init: &CompositionEventBinding::CompositionEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<CompositionEvent>> {
         let event = CompositionEvent::new_with_proto(
             window,
@@ -92,12 +97,6 @@ impl CompositionEvent {
         Ok(event)
     }
 
-    pub fn data(&self) -> &str {
-        &self.data
-    }
-}
-
-impl CompositionEventMethods<crate::DomTypeHolder> for CompositionEvent {
     // https://w3c.github.io/uievents/#dom-compositionevent-data
     fn Data(&self) -> DOMString {
         self.data.clone()

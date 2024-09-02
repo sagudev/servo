@@ -82,9 +82,10 @@ impl GainNode {
         let node = GainNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl GainNodeMethods<crate::DomTypeHolder> for GainNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
@@ -92,9 +93,7 @@ impl GainNode {
     ) -> Fallible<DomRoot<GainNode>> {
         GainNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl GainNodeMethods<crate::DomTypeHolder> for GainNode {
     // https://webaudio.github.io/web-audio-api/#dom-gainnode-gain
     fn Gain(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.gain)

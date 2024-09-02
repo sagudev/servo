@@ -50,18 +50,18 @@ impl HTMLFormControlsCollection {
             window,
         )
     }
+}
 
+impl HTMLFormControlsCollectionMethods<crate::DomTypeHolder> for HTMLFormControlsCollection {
     // FIXME: This shouldn't need to be implemented here since HTMLCollection (the parent of
     // HTMLFormControlsCollection) implements Length
     #[allow(non_snake_case)]
     pub fn Length(&self) -> u32 {
         self.collection.Length()
     }
-}
 
-impl HTMLFormControlsCollectionMethods<crate::DomTypeHolder> for HTMLFormControlsCollection {
     // https://html.spec.whatwg.org/multipage/#dom-htmlformcontrolscollection-nameditem
-    fn NamedItem(&self, name: DOMString) -> Option<RadioNodeListOrElement> {
+    fn NamedItem(&self, name: DOMString) -> Option<RadioNodeListOrElement<crate::DomTypeHolder>> {
         // Step 1
         if name.is_empty() {
             return None;
@@ -102,7 +102,7 @@ impl HTMLFormControlsCollectionMethods<crate::DomTypeHolder> for HTMLFormControl
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-htmlformcontrolscollection-nameditem
-    fn NamedGetter(&self, name: DOMString) -> Option<RadioNodeListOrElement> {
+    fn NamedGetter(&self, name: DOMString) -> Option<RadioNodeListOrElement<crate::DomTypeHolder>> {
         self.NamedItem(name)
     }
 

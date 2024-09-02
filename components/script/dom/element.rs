@@ -380,7 +380,7 @@ impl Element {
         self.ensure_rare_data().custom_element_definition = None;
     }
 
-    pub fn push_callback_reaction(&self, function: Rc<Function>, args: Box<[Heap<JSVal>]>) {
+    pub fn push_callback_reaction(&self, function: Rc<Function<crate::DomTypeHolder>>, args: Box<[Heap<JSVal>]>) {
         self.ensure_rare_data()
             .custom_element_reaction_queue
             .push(CustomElementReaction::Callback(function, args));
@@ -2756,17 +2756,17 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-    fn Prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().prepend(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-append
-    fn Append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().append(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
-    fn ReplaceChildren(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn ReplaceChildren(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().replace_children(nodes)
     }
 
@@ -2783,17 +2783,17 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-before
-    fn Before(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Before(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().before(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-after
-    fn After(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn After(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().after(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    fn ReplaceWith(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn ReplaceWith(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().replace_with(nodes)
     }
 

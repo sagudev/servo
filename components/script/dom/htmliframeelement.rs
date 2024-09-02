@@ -508,7 +508,7 @@ pub trait HTMLIFrameElementLayoutMethods {
     fn get_height(self) -> LengthOrPercentageOrAuto;
 }
 
-impl HTMLIFrameElementLayoutMethods<crate::DomTypeHolder> for LayoutDom<'_, HTMLIFrameElement> {
+impl HTMLIFrameElementLayoutMethods for LayoutDom<'_, HTMLIFrameElement> {
     #[inline]
     fn pipeline_id(self) -> Option<PipelineId> {
         (self.unsafe_get()).pipeline_id.get()

@@ -66,45 +66,6 @@ impl DOMMatrixReadOnly {
         }
     }
 
-    // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-dommatrixreadonly
-    pub fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-        init: Option<StringOrUnrestrictedDoubleSequence>,
-    ) -> Fallible<DomRoot<Self>> {
-        if init.is_none() {
-            return Ok(Self::new_with_proto(
-                global,
-                proto,
-                true,
-                Transform3D::identity(),
-            ));
-        }
-        match init.unwrap() {
-            StringOrUnrestrictedDoubleSequence::String(ref s) => {
-                if global.downcast::<Window>().is_none() {
-                    return Err(error::Error::Type(
-                        "String constructor is only supported in the main thread.".to_owned(),
-                    ));
-                }
-                if s.is_empty() {
-                    return Ok(Self::new(global, true, Transform3D::identity()));
-                }
-                transform_to_matrix(s.to_string())
-                    .map(|(is2D, matrix)| Self::new_with_proto(global, proto, is2D, matrix))
-            },
-            StringOrUnrestrictedDoubleSequence::UnrestrictedDoubleSequence(ref entries) => {
-                entries_to_matrix(&entries[..])
-                    .map(|(is2D, matrix)| Self::new_with_proto(global, proto, is2D, matrix))
-            },
-        }
-    }
-
-    // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-frommatrix
-    pub fn FromMatrix(global: &GlobalScope, other: &DOMMatrixInit) -> Fallible<DomRoot<Self>> {
-        dommatrixinit_to_matrix(other).map(|(is2D, matrix)| Self::new(global, is2D, matrix))
-    }
-
     pub fn matrix(&self) -> Ref<Transform3D<f64>> {
         self.matrix.borrow()
     }
@@ -400,10 +361,52 @@ impl DOMMatrixReadOnly {
         })
         // Step 3 in DOMMatrix.InvertSelf
     }
+}
+
+#[allow(non_snake_case)]
+impl DOMMatrixReadOnlyMethods<crate::DomTypeHolder> for DOMMatrixReadOnly {
+    // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-dommatrixreadonly
+    fn Constructor(
+        global: &GlobalScope,
+        proto: Option<HandleObject>,
+        init: Option<StringOrUnrestrictedDoubleSequence>,
+    ) -> Fallible<DomRoot<Self>> {
+        if init.is_none() {
+            return Ok(Self::new_with_proto(
+                global,
+                proto,
+                true,
+                Transform3D::identity(),
+            ));
+        }
+        match init.unwrap() {
+            StringOrUnrestrictedDoubleSequence::String(ref s) => {
+                if global.downcast::<Window>().is_none() {
+                    return Err(error::Error::Type(
+                        "String constructor is only supported in the main thread.".to_owned(),
+                    ));
+                }
+                if s.is_empty() {
+                    return Ok(Self::new(global, true, Transform3D::identity()));
+                }
+                transform_to_matrix(s.to_string())
+                    .map(|(is2D, matrix)| Self::new_with_proto(global, proto, is2D, matrix))
+            },
+            StringOrUnrestrictedDoubleSequence::UnrestrictedDoubleSequence(ref entries) => {
+                entries_to_matrix(&entries[..])
+                    .map(|(is2D, matrix)| Self::new_with_proto(global, proto, is2D, matrix))
+            },
+        }
+    }
+
+    // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-frommatrix
+    fn FromMatrix(global: &GlobalScope, other: &DOMMatrixInit) -> Fallible<DomRoot<Self>> {
+        dommatrixinit_to_matrix(other).map(|(is2D, matrix)| Self::new(global, is2D, matrix))
+    }
 
     // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-fromfloat32array
     #[allow(unsafe_code)]
-    pub fn FromFloat32Array(
+    fn FromFloat32Array(
         global: &GlobalScope,
         array: CustomAutoRooterGuard<Float32Array>,
     ) -> Fallible<DomRoot<DOMMatrixReadOnly>> {
@@ -417,7 +420,7 @@ impl DOMMatrixReadOnly {
 
     // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-fromfloat64array
     #[allow(unsafe_code)]
-    pub fn FromFloat64Array(
+    fn FromFloat64Array(
         global: &GlobalScope,
         array: CustomAutoRooterGuard<Float64Array>,
     ) -> Fallible<DomRoot<DOMMatrixReadOnly>> {
@@ -428,10 +431,7 @@ impl DOMMatrixReadOnly {
             Some(StringOrUnrestrictedDoubleSequence::UnrestrictedDoubleSequence(vec)),
         )
     }
-}
 
-#[allow(non_snake_case)]
-impl DOMMatrixReadOnlyMethods<crate::DomTypeHolder> for DOMMatrixReadOnly {
     // https://drafts.fxtf.org/geometry-1/#dom-dommatrixreadonly-m11
     fn M11(&self) -> f64 {
         self.matrix.borrow().m11

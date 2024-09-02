@@ -91,12 +91,17 @@ impl File {
         )
     }
 
+    pub fn name(&self) -> &DOMString {
+        &self.name
+    }
+}
+
+impl FileMethods<crate::DomTypeHolder> for File {
     // https://w3c.github.io/FileAPI/#file-constructor
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        fileBits: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString>,
+        fileBits: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString<crate::DomTypeHolder>>,
         filename: DOMString,
         filePropertyBag: &FileBinding::FilePropertyBag,
     ) -> Fallible<DomRoot<File>> {
@@ -121,12 +126,6 @@ impl File {
         ))
     }
 
-    pub fn name(&self) -> &DOMString {
-        &self.name
-    }
-}
-
-impl FileMethods<crate::DomTypeHolder> for File {
     // https://w3c.github.io/FileAPI/#dfn-name
     fn Name(&self) -> DOMString {
         self.name.clone()

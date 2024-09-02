@@ -118,13 +118,6 @@ impl Range {
         range
     }
 
-    /// <https://dom.spec.whatwg.org/#dom-range>
-    #[allow(non_snake_case)]
-    pub fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<Range>> {
-        let document = window.Document();
-        Ok(Range::new_with_doc(&document, proto))
-    }
-
     /// <https://dom.spec.whatwg.org/#contained>
     fn contains(&self, node: &Node) -> bool {
         matches!(
@@ -325,6 +318,12 @@ impl Range {
 }
 
 impl RangeMethods<crate::DomTypeHolder> for Range {
+    /// <https://dom.spec.whatwg.org/#dom-range>
+    fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<Range>> {
+        let document = window.Document();
+        Ok(Range::new_with_doc(&document, proto))
+    }
+
     /// <https://dom.spec.whatwg.org/#dom-range-commonancestorcontainer>
     fn CommonAncestorContainer(&self) -> DomRoot<Node> {
         self.end_container()

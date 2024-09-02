@@ -56,10 +56,11 @@ impl Headers {
     fn new_with_proto(global: &GlobalScope, proto: Option<HandleObject>) -> DomRoot<Headers> {
         reflect_dom_object_with_proto(Box::new(Headers::new_inherited()), global, proto)
     }
+}
 
+impl HeadersMethods<crate::DomTypeHolder> for Headers {
     // https://fetch.spec.whatwg.org/#dom-headers
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         init: Option<HeadersInit>,
@@ -68,9 +69,7 @@ impl Headers {
         dom_headers_new.fill(init)?;
         Ok(dom_headers_new)
     }
-}
 
-impl HeadersMethods<crate::DomTypeHolder> for Headers {
     // https://fetch.spec.whatwg.org/#concept-headers-append
     fn Append(&self, name: ByteString, value: ByteString) -> ErrorResult {
         // Step 1

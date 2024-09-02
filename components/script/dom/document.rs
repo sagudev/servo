@@ -4601,7 +4601,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
         &self,
         root: &Node,
         what_to_show: u32,
-        filter: Option<Rc<NodeFilter>>,
+        filter: Option<Rc<NodeFilter<crate::DomTypeHolder>>>,
     ) -> DomRoot<NodeIterator> {
         NodeIterator::new(self, root, what_to_show, filter)
     }
@@ -4611,7 +4611,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
         &self,
         root: &Node,
         what_to_show: u32,
-        filter: Option<Rc<NodeFilter>>,
+        filter: Option<Rc<NodeFilter<crate::DomTypeHolder>>>,
     ) -> DomRoot<TreeWalker> {
         TreeWalker::new(self, root, what_to_show, filter)
     }
@@ -4879,17 +4879,17 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-    fn Prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().prepend(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-append
-    fn Append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn Append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().append(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
-    fn ReplaceChildren(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
+    fn ReplaceChildren(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
         self.upcast::<Node>().replace_children(nodes)
     }
 
@@ -4986,7 +4986,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
 
     #[allow(unsafe_code)]
     /// <https://html.spec.whatwg.org/multipage/#dom-tree-accessors:dom-document-nameditem-filter>
-    fn NamedGetter(&self, name: DOMString) -> Option<NamedPropertyValue> {
+    fn NamedGetter(&self, name: DOMString) -> Option<NamedPropertyValue<crate::DomTypeHolder>> {
         if name.is_empty() {
             return None;
         }
