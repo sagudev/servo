@@ -103,7 +103,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-begincomputepass>
     fn BeginComputePass(
         &self,
-        descriptor: &GPUComputePassDescriptor<crate::DomTypeHolder>,
+        descriptor: &GPUComputePassDescriptor,
     ) -> DomRoot<GPUComputePassEncoder> {
         let compute_pass_id = self
             .global()
@@ -131,7 +131,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-beginrenderpass>
     fn BeginRenderPass(
         &self,
-        descriptor: &GPURenderPassDescriptor,
+        descriptor: &GPURenderPassDescriptor<crate::DomTypeHolder>,
     ) -> DomRoot<GPURenderPassEncoder> {
         let depth_stencil_attachment = descriptor.depthStencilAttachment.as_ref().map(|depth| {
             wgpu_com::RenderPassDepthStencilAttachment {

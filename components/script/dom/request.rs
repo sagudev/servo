@@ -152,8 +152,7 @@ fn request_is_locked(input: &Request) -> bool {
 
 impl RequestMethods<crate::DomTypeHolder> for Request {
     // https://fetch.spec.whatwg.org/#dom-request
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         mut input: RequestInfo<crate::DomTypeHolder>,

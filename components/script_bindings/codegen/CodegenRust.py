@@ -2739,12 +2739,9 @@ def UnionTypes(descriptors, dictionaries, callbacks, typedefs, config):
 
 def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs, config):
     elements = [CGGeneric("pub trait DomTypes: crate::utils::DomHelpers<Self> + js::rust::Trace + malloc_size_of::MallocSizeOf + Sized where Self: 'static {\n")]
-    universal = [
-        "crate::reflector::DomGlobal<Self>",
-    ]
     for descriptor in descriptors:
         iface_name = descriptor.interface.identifier.name
-        traits = list(universal)
+        traits = []
 
         chain = descriptor.prototypeChain
         upcast = descriptor.hasDescendants()
@@ -2778,6 +2775,7 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                 "crate::reflector::MutDomObject",
                 "malloc_size_of::MallocSizeOf",
                 "crate::reflector::DomObject",
+                "crate::reflector::DomGlobal<Self>",
             ]
 
         if descriptor.register:
@@ -2803,7 +2801,7 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
 def DomTypeHolder(descriptors, descriptorProvider, dictionaries, callbacks, typedefs, config):
     elements = [
         CGGeneric(
-            "#[derive(JSTraceable, MallocSizeOf)]\n"
+            "#[derive(JSTraceable, MallocSizeOf, PartialEq)]\n"
             "pub struct DomTypeHolder;\n"
             "impl script_bindings::DomTypes for DomTypeHolder {\n"
         ),
@@ -3268,7 +3266,7 @@ impl <D: DomTypes> DomObjectWrap<D> for {firstCap(ifaceName)} {{
         &D::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
-    ) -> Root<Dom<Self>> = {bindingModule}::Wrap;
+    ) -> Root<Dom<Self>> = {bindingModule}::Wrap::<crate::DomTypeHolder>;
 }}
 """
 
@@ -3292,7 +3290,7 @@ impl <D: DomTypes> DomObjectIteratorWrap<D> for {name} {{
         &D::GlobalScope,
         Option<HandleObject>,
         Box<IterableIterator<D, Self>>,
-    ) -> Root<Dom<IterableIterator<D, Self>>> = {bindingModule}::Wrap;
+    ) -> Root<Dom<IterableIterator<D, Self>>> = {bindingModule}::Wrap::<crate::DomTypeHolder>;
 }}
 """
 

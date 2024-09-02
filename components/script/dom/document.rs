@@ -1893,7 +1893,7 @@ impl Document {
     // https://dom.spec.whatwg.org/#converting-nodes-into-a-node
     pub fn node_from_nodes_and_strings(
         &self,
-        mut nodes: Vec<NodeOrString>,
+        mut nodes: Vec<NodeOrString<crate::DomTypeHolder>>,
     ) -> Fallible<DomRoot<Node>> {
         if nodes.len() == 1 {
             Ok(match nodes.pop().unwrap() {

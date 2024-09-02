@@ -95,7 +95,7 @@ impl FocusEventMethods<crate::DomTypeHolder> for FocusEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &FocusEventBinding::FocusEventInit,
+        init: &FocusEventBinding::FocusEventInit<crate::DomTypeHolder>,
     ) -> Fallible<DomRoot<FocusEvent>> {
         let bubbles = EventBubbles::from(init.parent.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.parent.cancelable);

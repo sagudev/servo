@@ -84,7 +84,7 @@ impl ChannelSplitterNodeMethods<crate::DomTypeHolder> for ChannelSplitterNode {
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
         options: &ChannelSplitterOptions,
-    ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
+    ) -> Fallible<DomRoot<ChannelSplitterNode>> {
         ChannelSplitterNode::new_with_proto(window, proto, context, options)
     }
 }

@@ -233,7 +233,7 @@ pub fn get_constructor_object_from_local_name(
 ) -> bool {
     macro_rules! get_constructor(
         ($binding:ident) => ({
-            $binding::GetConstructorObject(cx, global, rval);
+            $binding::GetConstructorObject::<crate::DomTypeHolder>(cx, global, rval);
             true
         })
     );

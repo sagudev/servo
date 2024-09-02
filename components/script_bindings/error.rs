@@ -20,7 +20,7 @@ use js::rust::{HandleObject, HandleValue, MutableHandleValue};
 use libc::c_uint;
 
 #[cfg(feature = "js_backtrace")]
-use crate::dom::bindings::cell::DomRefCell;
+use std::cell::RefCell;
 use crate::dom::bindings::codegen::PrototypeList::proto_id_to_name;
 use crate::dom::bindings::conversions::{
     root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
@@ -37,7 +37,7 @@ use crate::codegen::DomTypes::DomTypes;
 thread_local! {
     /// An optional stringified JS backtrace and stringified native backtrace from the
     /// the last DOM exception that was reported.
-    pub static LAST_EXCEPTION_BACKTRACE: DomRefCell<Option<(Option<String>, String)>> = DomRefCell::new(None);
+    pub static LAST_EXCEPTION_BACKTRACE: RefCell<Option<(Option<String>, String)>> = RefCell::new(None);
 }
 
 /// DOM exceptions that can be thrown by a native DOM method.
