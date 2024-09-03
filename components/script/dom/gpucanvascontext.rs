@@ -39,7 +39,7 @@ use crate::dom::node::{document_from_node, Node, NodeDamage};
 pub struct WebGPUContextId(pub u64);
 
 // TODO: make all this derivables available via new Bindings.conf option
-impl Clone for GPUCanvasConfiguration<crate::DomTypeHolder> {
+impl Clone for GPUCanvasConfiguration {
     fn clone(&self) -> Self {
         Self {
             alphaMode: self.alphaMode,
@@ -205,7 +205,7 @@ impl GPUCanvasContextMethods<crate::DomTypeHolder> for GPUCanvasContext {
     }
 
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-configure>
-    fn Configure(&self, descriptor: &GPUCanvasConfiguration<crate::DomTypeHolder>) -> Fallible<()> {
+    fn Configure(&self, descriptor: &GPUCanvasConfiguration) -> Fallible<()> {
         // Step 1 is let
         // Step 2
         descriptor

@@ -46,7 +46,7 @@ impl AudioBufferSourceNode {
     fn new_inherited(
         window: &Window,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
+        options: &AudioBufferSourceOptions,
     ) -> Fallible<AudioBufferSourceNode> {
         let node_options = Default::default();
         let source_node = AudioScheduledSourceNode::new_inherited(
@@ -98,7 +98,7 @@ impl AudioBufferSourceNode {
     pub fn new(
         window: &Window,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
+        options: &AudioBufferSourceOptions,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         Self::new_with_proto(window, None, context, options)
     }
@@ -108,7 +108,7 @@ impl AudioBufferSourceNode {
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
+        options: &AudioBufferSourceOptions,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         let node = AudioBufferSourceNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
@@ -120,7 +120,7 @@ impl AudioBufferSourceNodeMethods<crate::DomTypeHolder> for AudioBufferSourceNod
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
-        options: &AudioBufferSourceOptions<crate::DomTypeHolder>,
+        options: &AudioBufferSourceOptions,
     ) -> Fallible<DomRoot<AudioBufferSourceNode>> {
         AudioBufferSourceNode::new_with_proto(window, proto, context, options)
     }
@@ -261,8 +261,8 @@ impl AudioBufferSourceNodeMethods<crate::DomTypeHolder> for AudioBufferSourceNod
     }
 }
 
-impl<'a> From<&'a AudioBufferSourceOptions<crate::DomTypeHolder>> for AudioBufferSourceNodeOptions {
-    fn from(options: &'a AudioBufferSourceOptions<crate::DomTypeHolder>) -> Self {
+impl<'a> From<&'a AudioBufferSourceOptions> for AudioBufferSourceNodeOptions {
+    fn from(options: &'a AudioBufferSourceOptions) -> Self {
         Self {
             buffer: options
                 .buffer

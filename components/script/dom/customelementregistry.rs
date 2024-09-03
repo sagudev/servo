@@ -307,7 +307,7 @@ fn get_callback(
     cx: JSContext,
     prototype: HandleObject,
     name: &CStr,
-) -> Fallible<Option<Rc<Function<crate::DomTypeHolder>>>> {
+) -> Fallible<Option<Rc<Function>>> {
     rooted!(in(*cx) let mut callback = UndefinedValue());
     unsafe {
         // Step 10.4.1
@@ -338,7 +338,7 @@ impl CustomElementRegistryMethods<crate::DomTypeHolder> for CustomElementRegistr
     fn Define(
         &self,
         name: DOMString,
-        constructor_: Rc<CustomElementConstructor<crate::DomTypeHolder>>,
+        constructor_: Rc<CustomElementConstructor>,
         options: &ElementDefinitionOptions,
     ) -> ErrorResult {
         let cx = GlobalScope::get_cx();
@@ -562,7 +562,7 @@ impl CustomElementRegistryMethods<crate::DomTypeHolder> for CustomElementRegistr
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-customelementregistry-getname>
-    fn GetName(&self, constructor: Rc<CustomElementConstructor<crate::DomTypeHolder>>) -> Option<DOMString> {
+    fn GetName(&self, constructor: Rc<CustomElementConstructor>) -> Option<DOMString> {
         self.definitions
             .borrow()
             .0
@@ -627,28 +627,28 @@ impl CustomElementRegistryMethods<crate::DomTypeHolder> for CustomElementRegistr
 #[derive(Clone, JSTraceable, MallocSizeOf)]
 pub struct LifecycleCallbacks {
     #[ignore_malloc_size_of = "Rc"]
-    connected_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    connected_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    disconnected_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    disconnected_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    adopted_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    adopted_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    attribute_changed_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    attribute_changed_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    form_associated_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    form_associated_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    form_reset_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    form_reset_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    form_disabled_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    form_disabled_callback: Option<Rc<Function>>,
 
     #[ignore_malloc_size_of = "Rc"]
-    form_state_restore_callback: Option<Rc<Function<crate::DomTypeHolder>>>,
+    form_state_restore_callback: Option<Rc<Function>>,
 }
 
 #[derive(Clone, JSTraceable, MallocSizeOf)]
@@ -667,7 +667,7 @@ pub struct CustomElementDefinition {
     pub local_name: LocalName,
 
     #[ignore_malloc_size_of = "Rc"]
-    pub constructor: Rc<CustomElementConstructor<crate::DomTypeHolder>>,
+    pub constructor: Rc<CustomElementConstructor>,
 
     pub observed_attributes: Vec<DOMString>,
 
@@ -687,7 +687,7 @@ impl CustomElementDefinition {
     fn new(
         name: LocalName,
         local_name: LocalName,
-        constructor: Rc<CustomElementConstructor<crate::DomTypeHolder>>,
+        constructor: Rc<CustomElementConstructor>,
         observed_attributes: Vec<DOMString>,
         callbacks: LifecycleCallbacks,
         form_associated: bool,
@@ -895,7 +895,7 @@ pub fn upgrade_element(definition: Rc<CustomElementDefinition>, element: &Elemen
 /// Steps 8.1-8.3
 #[allow(unsafe_code)]
 fn run_upgrade_constructor(
-    constructor: &Rc<CustomElementConstructor<crate::DomTypeHolder>>,
+    constructor: &Rc<CustomElementConstructor>,
     element: &Element,
 ) -> ErrorResult {
     let window = window_from_node(element);
@@ -974,7 +974,7 @@ pub fn try_upgrade_element(element: &Element) {
 pub enum CustomElementReaction {
     Upgrade(#[ignore_malloc_size_of = "Rc"] Rc<CustomElementDefinition>),
     Callback(
-        #[ignore_malloc_size_of = "Rc"] Rc<Function<crate::DomTypeHolder>>,
+        #[ignore_malloc_size_of = "Rc"] Rc<Function>,
         #[ignore_malloc_size_of = "mozjs"] Box<[Heap<JSVal>]>,
     ),
 }

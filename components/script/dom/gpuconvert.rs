@@ -426,7 +426,7 @@ pub fn convert_ic_buffer(ic_buffer: &GPUImageCopyBuffer<crate::DomTypeHolder>) -
     }
 }
 
-pub fn convert_ic_texture(ic_texture: &GPUImageCopyTexture<crate::DomTypeHolder>) -> wgpu_com::ImageCopyTexture {
+pub fn convert_ic_texture(ic_texture: &GPUImageCopyTexture) -> wgpu_com::ImageCopyTexture {
     wgpu_com::ImageCopyTexture {
         texture: ic_texture.texture.id().0,
         mip_level: ic_texture.mipLevel,

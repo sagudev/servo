@@ -84,7 +84,7 @@ impl BluetoothAdvertisingEventMethods<crate::DomTypeHolder> for BluetoothAdverti
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &BluetoothAdvertisingEventInit<crate::DomTypeHolder>,
+        init: &BluetoothAdvertisingEventInit,
     ) -> Fallible<DomRoot<BluetoothAdvertisingEvent>> {
         let global = window.upcast::<GlobalScope>();
         let name = init.name.clone();

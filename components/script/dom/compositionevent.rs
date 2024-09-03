@@ -82,7 +82,7 @@ impl CompositionEventMethods<crate::DomTypeHolder> for CompositionEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &CompositionEventBinding::CompositionEventInit<crate::DomTypeHolder>,
+        init: &CompositionEventBinding::CompositionEventInit,
     ) -> Fallible<DomRoot<CompositionEvent>> {
         let event = CompositionEvent::new_with_proto(
             window,

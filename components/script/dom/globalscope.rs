@@ -2775,7 +2775,7 @@ impl GlobalScope {
         self.timers.clear_timeout_or_interval(self, handle);
     }
 
-    pub fn queue_function_as_microtask(&self, callback: Rc<VoidFunction<crate::DomTypeHolder>>) {
+    pub fn queue_function_as_microtask(&self, callback: Rc<VoidFunction>) {
         self.enqueue_microtask(Microtask::User(UserMicrotask {
             callback,
             pipeline: self.pipeline_id(),
@@ -2815,7 +2815,7 @@ impl GlobalScope {
 
     pub fn create_image_bitmap(
         &self,
-        image: ImageBitmapSource<crate::DomTypeHolder>,
+        image: ImageBitmapSource,
         options: &ImageBitmapOptions,
     ) -> Rc<Promise> {
         let in_realm_proof = AlreadyInRealm::assert();

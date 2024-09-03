@@ -25,7 +25,7 @@ def main():
 
     import WebIDL
     from Configuration import Configuration
-    from CodegenRust import CGBindingRoot
+    from CodegenRust import CGConcreteBindingRoot
 
     parser = WebIDL.Parser(make_dir(os.path.join(out_dir, "cache")))
     webidls = [name for name in os.listdir(webidls_dir) if name.endswith(".webidl")]
@@ -48,20 +48,20 @@ def main():
         #("InterfaceTypes", "InterfaceTypes.rs"),
         ("ConcreteInheritTypes", "ConcreteInheritTypes.rs"),
         ("ConcreteBindingRoot", "ConcreteBindingRoot.rs"),
-        #("Bindings", "Bindings/mod.rs"),
+        ("Bindings", "Bindings/mod.rs"),
         #("UnionTypes", "UnionTypes.rs"),
     ]:
         generate(config, name, os.path.join(out_dir, filename))
     make_dir(doc_servo)
     generate(config, "SupportedDomApis", os.path.join(doc_servo, "apis.html"))
 
-    #for webidl in webidls:
-    #    filename = os.path.join(webidls_dir, webidl)
-    #    prefix = "Bindings/%sBinding" % webidl[:-len(".webidl")]
-    #    module = CGBindingRoot(config, prefix, filename).define()
-    #    if module:
-    #        with open(os.path.join(out_dir, prefix + ".rs"), "wb") as f:
-    #            f.write(module.encode("utf-8"))
+    for webidl in webidls:
+        filename = os.path.join(webidls_dir, webidl)
+        prefix = "Bindings/%sBinding" % webidl[:-len(".webidl")]
+        module = CGConcreteBindingRoot(config, prefix, filename).define()
+        if module:
+            with open(os.path.join(out_dir, prefix + ".rs"), "wb") as f:
+                f.write(module.encode("utf-8"))
 
 
 def make_dir(path):

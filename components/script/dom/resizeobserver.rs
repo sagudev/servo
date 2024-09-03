@@ -43,13 +43,13 @@ pub struct ResizeObserver {
     reflector_: Reflector,
     /// <https://drafts.csswg.org/resize-observer/#dom-resizeobserver-callback-slot>
     #[ignore_malloc_size_of = "Rc are hard"]
-    callback: Rc<ResizeObserverCallback<crate::DomTypeHolder>>,
+    callback: Rc<ResizeObserverCallback>,
     /// <https://drafts.csswg.org/resize-observer/#dom-resizeobserver-observationtargets-slot>
     observation_targets: DomRefCell<Vec<(ResizeObservation, Dom<Element>)>>,
 }
 
 impl ResizeObserver {
-    pub fn new_inherited(callback: Rc<ResizeObserverCallback<crate::DomTypeHolder>>) -> ResizeObserver {
+    pub fn new_inherited(callback: Rc<ResizeObserverCallback>) -> ResizeObserver {
         ResizeObserver {
             reflector_: Reflector::new(),
             callback,
@@ -60,7 +60,7 @@ impl ResizeObserver {
     fn new(
         window: &Window,
         proto: Option<HandleObject>,
-        callback: Rc<ResizeObserverCallback<crate::DomTypeHolder>>,
+        callback: Rc<ResizeObserverCallback>,
     ) -> DomRoot<ResizeObserver> {
         let observer = Box::new(ResizeObserver::new_inherited(callback));
         reflect_dom_object_with_proto(observer, window, proto)
@@ -156,7 +156,7 @@ impl ResizeObserverMethods<crate::DomTypeHolder> for ResizeObserver {
     fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
-        callback: Rc<ResizeObserverCallback<crate::DomTypeHolder>>,
+        callback: Rc<ResizeObserverCallback>,
     ) -> DomRoot<ResizeObserver> {
         let rooted_observer = ResizeObserver::new(window, proto, callback);
         let document = window.Document();

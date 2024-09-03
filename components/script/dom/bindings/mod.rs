@@ -177,15 +177,19 @@ pub mod xmlname;
 /// Generated JS-Rust bindings.
 #[allow(missing_docs, non_snake_case)]
 pub mod codegen {
-    pub use script_bindings::codegen::*;
+    //pub use script_bindings::codegen::*;
     pub mod DomTypeHolder {
         include!(concat!(env!("OUT_DIR"), "/DomTypeHolder.rs"));
     }
-    
-    /*#[allow(dead_code, crown::unrooted_must_root)]
+
+    pub use script_bindings::codegen::PrototypeList;
+    pub use script_bindings::codegen::UnionTypes;
+    pub use script_bindings::codegen::RegisterBindings;
+
+    #[allow(dead_code, crown::unrooted_must_root)]
     pub mod Bindings {
         include!(concat!(env!("OUT_DIR"), "/Bindings/mod.rs"));
-    }*/
+    }
     pub mod InterfaceObjectMap {
         pub use script_bindings::codegen::InterfaceObjectMap::*;
         include!(concat!(env!("OUT_DIR"), "/InterfaceObjectMapPhf.rs"));

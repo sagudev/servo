@@ -2649,7 +2649,7 @@ impl Window {
             current_event: DomRefCell::new(None),
         });
 
-        unsafe { WindowBinding::Wrap(JSContext::from_ptr(runtime.cx()), win) }
+        unsafe { WindowBinding::GenericBindings::Wrap::<crate::DomTypeHolder>(JSContext::from_ptr(runtime.cx()), win) }
     }
 
     pub fn pipeline_id(&self) -> PipelineId {

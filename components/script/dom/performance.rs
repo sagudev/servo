@@ -58,11 +58,11 @@ const INVALID_ENTRY_NAMES: &[&str] = &[
 #[derive(JSTraceable, MallocSizeOf)]
 pub struct PerformanceEntryList {
     /// <https://w3c.github.io/performance-timeline/#dfn-performance-entry-buffer>
-    entries: DOMPerformanceEntryList<crate::DomTypeHolder>,
+    entries: DOMPerformanceEntryList,
 }
 
 impl PerformanceEntryList {
-    pub fn new(entries: DOMPerformanceEntryList<crate::DomTypeHolder>) -> Self {
+    pub fn new(entries: DOMPerformanceEntryList) -> Self {
         PerformanceEntryList { entries }
     }
 

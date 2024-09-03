@@ -247,7 +247,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     fn CopyBufferToTexture(
         &self,
         source: &GPUImageCopyBuffer<crate::DomTypeHolder>,
-        destination: &GPUImageCopyTexture<crate::DomTypeHolder>,
+        destination: &GPUImageCopyTexture,
         copy_size: GPUExtent3D,
     ) {
         self.buffers
@@ -268,7 +268,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copybuffertotexture>
     fn CopyTextureToBuffer(
         &self,
-        source: &GPUImageCopyTexture<crate::DomTypeHolder>,
+        source: &GPUImageCopyTexture,
         destination: &GPUImageCopyBuffer<crate::DomTypeHolder>,
         copy_size: GPUExtent3D,
     ) {
@@ -290,8 +290,8 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#GPUCommandEncoder-copyTextureToTexture>
     fn CopyTextureToTexture(
         &self,
-        source: &GPUImageCopyTexture<crate::DomTypeHolder>,
-        destination: &GPUImageCopyTexture<crate::DomTypeHolder>,
+        source: &GPUImageCopyTexture,
+        destination: &GPUImageCopyTexture,
         copy_size: GPUExtent3D,
     ) {
         self.channel

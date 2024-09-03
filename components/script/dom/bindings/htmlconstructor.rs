@@ -118,7 +118,7 @@ unsafe fn html_constructor(
             // Since this element is autonomous, its active function object must be the HTMLElement
 
             // Retrieve the constructor object for HTMLElement
-            HTMLElementBinding::GetConstructorObject(
+            HTMLElementBinding::GenericBindings::GetConstructorObject(
                 cx,
                 global_object.handle(),
                 constructor.handle_mut(),
@@ -233,7 +233,7 @@ pub fn get_constructor_object_from_local_name(
 ) -> bool {
     macro_rules! get_constructor(
         ($binding:ident) => ({
-            $binding::GetConstructorObject::<crate::DomTypeHolder>(cx, global, rval);
+            $binding::GenericBindings::GetConstructorObject(cx, global, rval);
             true
         })
     );

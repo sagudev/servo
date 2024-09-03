@@ -366,7 +366,7 @@ macro_rules! event_handler(
 macro_rules! error_event_handler(
     ($event_type: ident, $getter: ident, $setter: ident) => (
         define_event_handler!(
-            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnErrorEventHandlerNonNull<crate::DomTypeHolder>,
+            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnErrorEventHandlerNonNull,
             $event_type,
             $getter,
             $setter,
@@ -378,7 +378,7 @@ macro_rules! error_event_handler(
 macro_rules! beforeunload_event_handler(
     ($event_type: ident, $getter: ident, $setter: ident) => (
         define_event_handler!(
-            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnBeforeUnloadEventHandlerNonNull<crate::DomTypeHolder>,
+            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnBeforeUnloadEventHandlerNonNull,
             $event_type,
             $getter,
             $setter,
@@ -401,7 +401,7 @@ macro_rules! window_owned_event_handler(
 macro_rules! window_owned_beforeunload_event_handler(
     ($event_type: ident, $getter: ident, $setter: ident) => (
         define_window_owned_event_handler!(
-            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnBeforeUnloadEventHandlerNonNull<crate::DomTypeHolder>,
+            crate::dom::bindings::codegen::Bindings::EventHandlerBinding::OnBeforeUnloadEventHandlerNonNull,
             $event_type,
             $getter,
             $setter

@@ -41,7 +41,7 @@ pub struct MediaSession {
     /// <https://w3c.github.io/mediasession/#supported-media-session-actions>
     #[ignore_malloc_size_of = "Rc"]
     action_handlers:
-        DomRefCell<HashMapTracedValues<MediaSessionActionType, Rc<MediaSessionActionHandler<crate::DomTypeHolder>>>>,
+        DomRefCell<HashMapTracedValues<MediaSessionActionType, Rc<MediaSessionActionHandler>>>,
     /// The media instance controlled by this media session.
     /// For now only HTMLMediaElements are controlled by media sessions.
     media_instance: MutNullableDom<HTMLMediaElement>,
@@ -181,7 +181,7 @@ impl MediaSessionMethods<crate::DomTypeHolder> for MediaSession {
     fn SetActionHandler(
         &self,
         action: MediaSessionAction,
-        handler: Option<Rc<MediaSessionActionHandler<crate::DomTypeHolder>>>,
+        handler: Option<Rc<MediaSessionActionHandler>>,
     ) {
         match handler {
             Some(handler) => self

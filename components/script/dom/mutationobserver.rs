@@ -28,7 +28,7 @@ use crate::script_thread::ScriptThread;
 pub struct MutationObserver {
     reflector_: Reflector,
     #[ignore_malloc_size_of = "can't measure Rc values"]
-    callback: Rc<MutationCallback<crate::DomTypeHolder>>,
+    callback: Rc<MutationCallback>,
     record_queue: DomRefCell<Vec<DomRoot<MutationRecord>>>,
     node_list: DomRefCell<Vec<DomRoot<Node>>>,
 }
@@ -71,13 +71,13 @@ impl MutationObserver {
     fn new_with_proto(
         global: &Window,
         proto: Option<HandleObject>,
-        callback: Rc<MutationCallback<crate::DomTypeHolder>>,
+        callback: Rc<MutationCallback>,
     ) -> DomRoot<MutationObserver> {
         let boxed_observer = Box::new(MutationObserver::new_inherited(callback));
         reflect_dom_object_with_proto(boxed_observer, global, proto)
     }
 
-    fn new_inherited(callback: Rc<MutationCallback<crate::DomTypeHolder>>) -> MutationObserver {
+    fn new_inherited(callback: Rc<MutationCallback>) -> MutationObserver {
         MutationObserver {
             reflector_: Reflector::new(),
             callback,
@@ -249,7 +249,7 @@ impl MutationObserverMethods<crate::DomTypeHolder> for MutationObserver {
     fn Constructor(
         global: &Window,
         proto: Option<HandleObject>,
-        callback: Rc<MutationCallback<crate::DomTypeHolder>>,
+        callback: Rc<MutationCallback>,
     ) -> Fallible<DomRoot<MutationObserver>> {
         global.set_exists_mut_observer();
         let observer = MutationObserver::new_with_proto(global, proto, callback);

@@ -140,7 +140,7 @@ impl ResponseMethods<crate::DomTypeHolder> for Response {
     fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        body: Option<BodyInit<crate::DomTypeHolder>>,
+        body: Option<BodyInit>,
         init: &ResponseBinding::ResponseInit,
     ) -> Fallible<DomRoot<Response>> {
         // Step 1

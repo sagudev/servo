@@ -70,7 +70,7 @@ impl DissimilarOriginWindow {
             window_proxy: Dom::from_ref(window_proxy),
             location: Default::default(),
         });
-        unsafe { DissimilarOriginWindowBinding::Wrap(cx, win) }
+        unsafe { DissimilarOriginWindowBinding::GenericBindings::Wrap::<crate::DomTypeHolder>(cx, win) }
     }
 
     pub fn window_proxy(&self) -> DomRoot<WindowProxy> {

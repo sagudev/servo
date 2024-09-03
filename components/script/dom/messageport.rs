@@ -88,7 +88,7 @@ impl MessagePort {
     }
 
     /// <https://html.spec.whatwg.org/multipage/#handler-messageport-onmessage>
-    fn set_onmessage(&self, listener: Option<Rc<EventHandlerNonNull<crate::DomTypeHolder>>>) {
+    fn set_onmessage(&self, listener: Option<Rc<EventHandlerNonNull>>) {
         let eventtarget = self.upcast::<EventTarget>();
         eventtarget.set_event_handler_common("message", listener);
     }
@@ -322,7 +322,7 @@ impl MessagePortMethods<crate::DomTypeHolder> for MessagePort {
     }
 
     /// <https://html.spec.whatwg.org/multipage/#handler-messageport-onmessage>
-    fn GetOnmessage(&self) -> Option<Rc<EventHandlerNonNull<crate::DomTypeHolder>>> {
+    fn GetOnmessage(&self) -> Option<Rc<EventHandlerNonNull>> {
         if self.detached.get() {
             return None;
         }
@@ -331,7 +331,7 @@ impl MessagePortMethods<crate::DomTypeHolder> for MessagePort {
     }
 
     /// <https://html.spec.whatwg.org/multipage/#handler-messageport-onmessage>
-    fn SetOnmessage(&self, listener: Option<Rc<EventHandlerNonNull<crate::DomTypeHolder>>>) {
+    fn SetOnmessage(&self, listener: Option<Rc<EventHandlerNonNull>>) {
         if self.detached.get() {
             return;
         }

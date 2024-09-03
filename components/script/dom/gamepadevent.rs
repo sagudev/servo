@@ -88,7 +88,7 @@ impl GamepadEventMethods<crate::DomTypeHolder> for GamepadEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &GamepadEventBinding::GamepadEventInit<crate::DomTypeHolder>,
+        init: &GamepadEventBinding::GamepadEventInit,
     ) -> Fallible<DomRoot<GamepadEvent>> {
         Ok(GamepadEvent::new_with_proto(
             &window.global(),

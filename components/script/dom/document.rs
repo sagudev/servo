@@ -4986,7 +4986,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
 
     #[allow(unsafe_code)]
     /// <https://html.spec.whatwg.org/multipage/#dom-tree-accessors:dom-document-nameditem-filter>
-    fn NamedGetter(&self, name: DOMString) -> Option<NamedPropertyValue<crate::DomTypeHolder>> {
+    fn NamedGetter(&self, name: DOMString) -> Option<NamedPropertyValue> {
         if name.is_empty() {
             return None;
         }
@@ -5496,7 +5496,7 @@ pub enum AnimationFrameCallback {
     },
     FrameRequestCallback {
         #[ignore_malloc_size_of = "Rc is hard"]
-        callback: Rc<FrameRequestCallback<crate::DomTypeHolder>>,
+        callback: Rc<FrameRequestCallback>,
     },
 }
 
