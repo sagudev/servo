@@ -99,7 +99,7 @@ pub trait DomObject: JSTraceable + 'static {
     /// Returns the receiver's reflector.
     fn reflector(&self) -> &Reflector;
 
-    /// Returns the global scope of the realm that the DomObject was created in.
+    /*/// Returns the global scope of the realm that the DomObject was created in.
     fn global<D: DomTypes>(&self) -> DomRoot<D::GlobalScope>
     where
         Self: Sized,
@@ -107,10 +107,10 @@ pub trait DomObject: JSTraceable + 'static {
         /*let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
         GlobalScope::from_reflector(self, &realm)*/
         todo!()
-    }
+    }*/
 }
 
-/*pub trait DomGlobal<D: DomTypes>: DomObject {
+pub trait DomGlobal<D: DomTypes>: DomObject {
     /// Returns the global scope of the realm that the DomObject was created in.
     fn global(&self) -> DomRoot<D::GlobalScope>
     where
@@ -120,9 +120,9 @@ pub trait DomObject: JSTraceable + 'static {
         GlobalScope::from_reflector(self, &realm)*/
         todo!()
     }
-}*/
+}
 
-//impl <D: DomTypes, T: DomObject> DomGlobal<D> for T {}
+impl <D: DomTypes, T: DomObject> DomGlobal<D> for T {}
 
 impl DomObject for Reflector {
     fn reflector(&self) -> &Self {
@@ -143,7 +143,7 @@ impl MutDomObject for Reflector {
 }
 
 /// A trait to provide a function pointer to wrap function for DOM objects.
-pub trait DomObjectWrap<D: DomTypes>: Sized + DomObject /*+ DomGlobal<D>*/ {
+pub trait DomObjectWrap<D: DomTypes>: Sized + DomObject + DomGlobal<D> {
     /// Function pointer to the general wrap function type
     const WRAP: unsafe fn(
         JSContext,

@@ -2776,7 +2776,7 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                 "crate::reflector::MutDomObject",
                 "malloc_size_of::MallocSizeOf",
                 "crate::reflector::DomObject",
-                #"crate::reflector::DomGlobal<Self>",
+                "crate::reflector::DomGlobal<Self>",
             ]
 
         if descriptor.register:
@@ -3926,7 +3926,7 @@ class CGCallGenerator(CGThing):
             if static:
                 glob = "global.upcast::<D::GlobalScope>()"
             else:
-                glob = "&this.global::<D>()"
+                glob = "&this.global()"
 
             self.cgRoot.append(CGGeneric(
                 "let result = match result {\n"
@@ -8317,7 +8317,10 @@ class GlobalGenRoots():
 
             if descriptor.concrete and not descriptor.proxy and not descriptor.interface.isIteratorInterface():
                 cgThings.append(CGAssertInheritance(descriptor))
-                
+
+            if descriptor.concrete and not descriptor.interface.isIteratorInterface() and not descriptor.interface.isNamespace():
+                cgThings.append(CGGeneric(f"impl {descriptor.interface.identifier.name} {{\npub fn global(&self) -> DomRoot<crate::dom::globalscope::GlobalScope> {{\n crate::dom::bindings::reflector::global(self)\n }}\n }}\n"))
+
 
         # And make sure we have the right number of newlines at the end
         curr = CGWrapper(CGList(cgThings, "\n\n"), post="\n\n")

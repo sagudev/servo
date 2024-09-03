@@ -48,6 +48,8 @@ use crate::dom::bindings::trace::trace_object;
 use crate::dom::windowproxy::WindowProxyHandler;
 use crate::script_runtime::JSContext as SafeJSContext;
 
+pub use script_bindings::utils::*;
+
 #[derive(JSTraceable, MallocSizeOf)]
 /// Static data associated with a global object.
 pub struct GlobalStaticData {
@@ -65,7 +67,7 @@ impl GlobalStaticData {
     }
 }
 
-/// The index of the slot where the object holder of that interface's
+/*/// The index of the slot where the object holder of that interface's
 /// unforgeable members are defined.
 pub const DOM_PROTO_UNFORGEABLE_HOLDER_SLOT: u32 = 0;
 
@@ -115,7 +117,7 @@ impl Clone for DOMJSClass {
     }
 }
 unsafe impl Sync for DOMJSClass {}
-
+*/
 /// Returns a JSVal representing a frozen array of ports
 pub fn to_frozen_array<T: ToJSValConvertible>(convertibles: &[T], cx: SafeJSContext) -> JSVal {
     rooted!(in(*cx) let mut ports = UndefinedValue());
@@ -126,7 +128,7 @@ pub fn to_frozen_array<T: ToJSValConvertible>(convertibles: &[T], cx: SafeJSCont
     *ports
 }
 
-/// Returns the ProtoOrIfaceArray for the given global object.
+/*/// Returns the ProtoOrIfaceArray for the given global object.
 /// Fails if `global` is not a DOM global object.
 pub fn get_proto_or_iface_array(global: *mut JSObject) -> *mut ProtoOrIfaceArray {
     unsafe {
@@ -662,3 +664,4 @@ pub unsafe fn exception_to_promise(cx: *mut JSContext, rval: RawMutableHandleVal
         false
     }
 }
+*/

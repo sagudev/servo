@@ -545,7 +545,7 @@ impl LayoutDom<'_, Node> {
     }
 }*/
 
-/// A holder that provides interior mutability for GC-managed values such as
+/*/// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`.  Essentially a `Cell<Dom<T>>`, but safer.
 ///
 /// This should only be used as a field in other DOM objects; see warning
@@ -597,7 +597,7 @@ impl<T: DomObject + PartialEq> PartialEq<T> for MutDom<T> {
     fn eq(&self, other: &T) -> bool {
         unsafe { **self.val.get() == *other }
     }
-}
+}*/
 
 pub fn assert_in_script() {
     debug_assert!(thread_state::get().is_script());
@@ -607,7 +607,7 @@ pub(crate) fn assert_in_layout() {
     debug_assert!(thread_state::get().is_layout());
 }
 
-/// A holder that provides interior mutability for GC-managed values such as
+/*/// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`, with nullability represented by an enclosing Option wrapper.
 /// Essentially a `Cell<Option<Dom<T>>>`, but safer.
 ///
@@ -703,9 +703,9 @@ impl<T: DomObject> MallocSizeOf for MutNullableDom<T> {
         // See comment on MallocSizeOf for Dom<T>.
         0
     }
-}
+}*/
 
-/// A holder that allows to lazily initialize the value only once
+/*/// A holder that allows to lazily initialize the value only once
 /// `Dom<T>`, using OnceCell
 /// Essentially a `OnceCell<Dom<T>>`.
 ///
@@ -756,7 +756,7 @@ unsafe impl<T: DomObject> JSTraceable for DomOnceCell<T> {
             ptr.trace(trc);
         }
     }
-}
+}*/
 
 /*impl<'dom, T> LayoutDom<'dom, T>
 where

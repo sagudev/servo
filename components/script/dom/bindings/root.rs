@@ -297,9 +297,9 @@ pub unsafe fn trace_roots(tracer: *mut JSTracer) {
             (**root).trace(tracer);
         }
     });
-}
+}*/
 
-/// Get a slice of references to DOM objects.
+/*/// Get a slice of references to DOM objects.
 pub trait DomSlice<T>
 where
     T: JSTraceable + DomObject,
@@ -317,9 +317,9 @@ where
         let _ = mem::transmute::<Dom<T>, &T>;
         unsafe { &*(self as *const [Dom<T>] as *const [&T]) }
     }
-}
+}*/
 
-/// A traced reference to a DOM object
+/*/// A traced reference to a DOM object
 ///
 /// This type is critical to making garbage collection work with the DOM,
 /// but it is very dangerous; if garbage collection happens with a `Dom<T>`
@@ -386,10 +386,10 @@ unsafe impl<T: DomObject> JSTraceable for Dom<T> {
         };
         trace_reflector(trc, trace_info, (*self.ptr.as_ptr()).reflector());
     }
-}
-pub use script_bindings::root::Dom;
+}*/
+//pub use script_bindings::root::Dom;
 
-/// A traced reference to a DOM object that may not be reflected yet.
+/*/// A traced reference to a DOM object that may not be reflected yet.
 #[crown::unrooted_must_root_lint::must_root]
 pub struct MaybeUnreflectedDom<T> {
     ptr: ptr::NonNull<T>,
@@ -547,7 +547,7 @@ impl LayoutDom<'_, Node> {
         }
     }
 }
-/*
+
 /// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`.  Essentially a `Cell<Dom<T>>`, but safer.
 ///
@@ -602,14 +602,14 @@ impl<T: DomObject + PartialEq> PartialEq<T> for MutDom<T> {
     }
 }
 
-pub(crate) fn assert_in_script() {
+/*pub(crate) fn assert_in_script() {
     debug_assert!(thread_state::get().is_script());
 }
-*/
+
 pub(crate) fn assert_in_layout() {
     debug_assert!(thread_state::get().is_layout());
-}
-/*
+}*/
+
 /// A holder that provides interior mutability for GC-managed values such as
 /// `Dom<T>`, with nullability represented by an enclosing Option wrapper.
 /// Essentially a `Cell<Option<Dom<T>>>`, but safer.
@@ -781,4 +781,3 @@ where
         &*(slice as *const [Dom<T>] as *const [LayoutDom<T>])
     }
 }
-*/

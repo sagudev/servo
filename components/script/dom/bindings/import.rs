@@ -102,7 +102,7 @@ pub mod module {
     };
     pub use crate::dom::bindings::codegen::Bindings::EventTargetBinding::EventTarget_Binding;
     pub use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList, RegisterBindings};
-    pub use crate::dom::bindings::constant::{ConstantSpec, ConstantVal};
+    //pub use crate::dom::bindings::constant::{ConstantSpec, ConstantVal};
     pub use crate::dom::bindings::conversions::{
         is_array_like, jsid_to_string, native_from_handlevalue, native_from_object_static,
         IDLInterface, StringificationBehavior, ToJSValConvertible, DOM_OBJECT_SLOT,
@@ -125,7 +125,7 @@ pub mod module {
     };
     pub use crate::dom::bindings::iterable::{Iterable, IteratorType};
     pub use crate::dom::bindings::like::{Maplike, Setlike};
-    pub use crate::dom::bindings::namespace::{create_namespace_object, NamespaceObjectClass};
+    //pub use crate::dom::bindings::namespace::{create_namespace_object, NamespaceObjectClass};
     pub use crate::dom::bindings::proxyhandler;
     pub use crate::dom::bindings::proxyhandler::{
         ensure_expando_object, get_expando_object, set_property_descriptor,

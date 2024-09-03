@@ -216,7 +216,7 @@ pub mod dom {
                 pub use crate::dom::bindings::error::Error::JSFailed;
                 pub use crate::dom::bindings::error::{/*throw_dom_exception,*/ Fallible};
                 pub use crate::dom::bindings::num::Finite;
-                pub use crate::dom::bindings::reflector::{DomObject/*, DomGlobal*/};
+                pub use crate::dom::bindings::reflector::{DomObject, DomGlobal};
                 pub use crate::dom::bindings::root::DomRoot;
                 pub use crate::dom::bindings::str::{ByteString, DOMString, USVString};
                 pub use crate::dom::bindings::trace::RootedTraceableBox;
@@ -340,6 +340,6 @@ pub mod dom {
 // export traits to be available for derive macros
 pub use crate::codegen::DomTypes::DomTypes;
 pub use crate::inheritance::HasParent;
-pub use crate::reflector::{DomObject/*, DomGlobal*/, MutDomObject, Reflector};
+pub use crate::reflector::{DomObject, DomGlobal, MutDomObject, Reflector};
 pub use crate::trace::{CustomTraceable, JSTraceable};
 pub use crate::dom::bindings::utils::DomHelpers;

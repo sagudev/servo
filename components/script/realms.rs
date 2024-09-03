@@ -50,5 +50,5 @@ pub fn enter_realm(object: &impl DomObject) -> JSAutoRealm {
         *GlobalScope::get_cx(),
         object.reflector().get_jsobject().get(),
 )*/
-    script_bindings::realms::enter_realm::<crate::DomTypeHolder>
+    script_bindings::realms::enter_realm::<crate::DomTypeHolder>()
 }
