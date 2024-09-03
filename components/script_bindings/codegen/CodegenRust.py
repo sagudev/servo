@@ -6974,9 +6974,10 @@ class CGDictionary(CGThing):
             else:
                 memberDefaults = [f"        {self.makeMemberName(m[0].identifier.name)}: Default::default(),"
                                   for m in self.memberInfo]
+                joinedDefaults = '\n'.join(memberDefaults)
                 impl = (
                     "        Self {\n"
-                    f"            {inheritanceDefault}{'\n'.join(memberDefaults)}"
+                    f"            {inheritanceDefault}{joinedDefaults}"
                     "        }\n"
                 )
 
