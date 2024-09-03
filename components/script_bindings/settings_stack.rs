@@ -8,9 +8,9 @@ use std::thread;
 use js::jsapi::{GetScriptedCallerGlobal, HideScriptedCaller, JSTracer, UnhideScriptedCaller};
 use js::rust::Runtime;
 
-use crate::{DomHelpers, DomTypes};
 use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::trace::JSTraceable;
+use crate::{DomHelpers, DomTypes};
 //use crate::dom::globalscope::GlobalScope;
 
 thread_local!(static STACK: RefCell<Vec<StackEntry>> = const { RefCell::new(Vec::new()) });
@@ -51,14 +51,14 @@ pub struct AutoEntryScript<D: DomTypes> {
     global: DomRoot<D::GlobalScope>,
 }
 
-impl <D: DomTypes> AutoEntryScript<D> {
+impl<D: DomTypes> AutoEntryScript<D> {
     /// <https://html.spec.whatwg.org/multipage/#prepare-to-run-script>
     pub fn new(global: &D::GlobalScope) -> Self {
         STACK.with(|stack| {
             trace!("Prepare to run script with {:p}", global);
             let mut stack = stack.borrow_mut();
             stack.push(StackEntry {
-                global: global as *const _ as *const std::ffi::c_void,//Dom::from_ref(global),
+                global: global as *const _ as *const std::ffi::c_void, //Dom::from_ref(global),
                 kind: StackEntryKind::Entry,
             });
             AutoEntryScript {
@@ -68,7 +68,7 @@ impl <D: DomTypes> AutoEntryScript<D> {
     }
 }
 
-impl <D: DomTypes> Drop for AutoEntryScript<D> {
+impl<D: DomTypes> Drop for AutoEntryScript<D> {
     /// <https://html.spec.whatwg.org/multipage/#clean-up-after-running-script>
     fn drop(&mut self) {
         STACK.with(|stack| {
@@ -111,7 +111,7 @@ pub struct AutoIncumbentScript<D: DomTypes> {
     _marker: std::marker::PhantomData<D>,
 }
 
-impl <D: DomTypes> AutoIncumbentScript<D> {
+impl<D: DomTypes> AutoIncumbentScript<D> {
     /// <https://html.spec.whatwg.org/multipage/#prepare-to-run-a-callback>
     pub fn new(global: &D::GlobalScope) -> Self {
         // Step 2-3.
@@ -137,7 +137,7 @@ impl <D: DomTypes> AutoIncumbentScript<D> {
     }
 }
 
-impl <D: DomTypes> Drop for AutoIncumbentScript<D> {
+impl<D: DomTypes> Drop for AutoIncumbentScript<D> {
     /// <https://html.spec.whatwg.org/multipage/#clean-up-after-running-a-callback>
     fn drop(&mut self) {
         STACK.with(|stack| {
@@ -150,10 +150,9 @@ impl <D: DomTypes> Drop for AutoIncumbentScript<D> {
                 "Dropped AutoIncumbentScript out of order."
             );
             assert_eq!(entry.kind, StackEntryKind::Incumbent);
-            trace!(
-                "Clean up after running a callback with {:p}",
-                unsafe { &*entry.global }
-            );
+            trace!("Clean up after running a callback with {:p}", unsafe {
+                &*entry.global
+            });
         });
         unsafe {
             // Step 1-2.

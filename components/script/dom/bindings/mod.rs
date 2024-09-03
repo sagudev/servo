@@ -146,11 +146,10 @@ pub mod error;
 pub mod htmlconstructor;
 pub mod import;
 //pub mod inheritance;
-pub use script_bindings::inheritance;
-pub use script_bindings::interface;
 //pub mod interface;
 //pub mod iterable;
 pub use script_bindings::iterable;
+pub use script_bindings::{inheritance, interface};
 pub mod like;
 //pub mod namespace;
 //pub mod num;
@@ -183,8 +182,7 @@ pub mod codegen {
         include!(concat!(env!("OUT_DIR"), "/DomTypeHolder.rs"));
     }
 
-    pub use script_bindings::codegen::PrototypeList;
-    pub use script_bindings::codegen::RegisterBindings;
+    pub use script_bindings::codegen::{PrototypeList, RegisterBindings};
 
     #[allow(dead_code, crown::unrooted_must_root)]
     pub mod Bindings {

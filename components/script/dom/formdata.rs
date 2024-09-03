@@ -6,8 +6,8 @@ use dom_struct::dom_struct;
 use html5ever::LocalName;
 use js::rust::HandleObject;
 use script_traits::serializable::BlobImpl;
-//use crate::dom::bindings::reflector::DomGlobal2;
 
+//use crate::dom::bindings::reflector::DomGlobal2;
 use super::bindings::trace::NoTrace;
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::FormDataBinding::FormDataMethods;

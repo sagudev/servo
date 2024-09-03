@@ -52,10 +52,7 @@ impl MessageChannel {
 
 impl MessageChannelMethods<crate::DomTypeHolder> for MessageChannel {
     /// <https://html.spec.whatwg.org/multipage/#dom-messagechannel>
-    fn Constructor(
-        global: &GlobalScope,
-        proto: Option<HandleObject>,
-    ) -> DomRoot<MessageChannel> {
+    fn Constructor(global: &GlobalScope, proto: Option<HandleObject>) -> DomRoot<MessageChannel> {
         MessageChannel::new(global, proto)
     }
 

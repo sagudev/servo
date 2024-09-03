@@ -789,7 +789,8 @@ impl From<SessionDescription> for LocalFrom<RTCSessionDescriptionInit> {
         RTCSessionDescriptionInit {
             type_,
             sdp: desc.sdp.into(),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -804,7 +805,8 @@ impl<'a> From<&'a RTCSessionDescriptionInit> for LocalFrom<SessionDescription> {
         SessionDescription {
             type_,
             sdp: desc.sdp.to_string(),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -814,7 +816,8 @@ impl From<GatheringState> for LocalFrom<RTCIceGatheringState> {
             GatheringState::New => RTCIceGatheringState::New,
             GatheringState::Gathering => RTCIceGatheringState::Gathering,
             GatheringState::Complete => RTCIceGatheringState::Complete,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -828,7 +831,8 @@ impl From<IceConnectionState> for LocalFrom<RTCIceConnectionState> {
             IceConnectionState::Disconnected => RTCIceConnectionState::Disconnected,
             IceConnectionState::Failed => RTCIceConnectionState::Failed,
             IceConnectionState::Closed => RTCIceConnectionState::Closed,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -841,6 +845,7 @@ impl From<SignalingState> for LocalFrom<RTCSignalingState> {
             SignalingState::HaveLocalPranswer => RTCSignalingState::Have_local_pranswer,
             SignalingState::HaveRemotePranswer => RTCSignalingState::Have_remote_pranswer,
             SignalingState::Closed => RTCSignalingState::Closed,
-        }.into()
+        }
+        .into()
     }
 }

@@ -31,7 +31,7 @@ impl GPUInternalError {
     ) -> DomRoot<Self> {
         reflect_dom_object_with_proto(Box::new(Self::new_inherited(message)), global, proto)
     }
- }
+}
 
 impl GPUInternalErrorMethods<crate::DomTypeHolder> for GPUInternalError {
     /// <https://gpuweb.github.io/gpuweb/#dom-GPUInternalError-GPUInternalError>

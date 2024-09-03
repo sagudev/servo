@@ -4,6 +4,8 @@
 
 //! Utilities to throw exceptions from Rust bindings.
 
+#[cfg(feature = "js_backtrace")]
+use std::cell::RefCell;
 use std::slice::from_raw_parts;
 
 #[cfg(feature = "js_backtrace")]
@@ -19,8 +21,7 @@ use js::rust::wrappers::{JS_ErrorFromException, JS_GetPendingException, JS_SetPe
 use js::rust::{HandleObject, HandleValue, MutableHandleValue};
 use libc::c_uint;
 
-#[cfg(feature = "js_backtrace")]
-use std::cell::RefCell;
+use crate::codegen::DomTypes::DomTypes;
 use crate::dom::bindings::codegen::PrototypeList::proto_id_to_name;
 use crate::dom::bindings::conversions::{
     root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
@@ -31,7 +32,6 @@ use crate::dom::bindings::utils::DomHelpers;
 //use crate::dom::globalscope::GlobalScope;
 use crate::realms::InRealm;
 use crate::script_runtime::JSContext as SafeJSContext;
-use crate::codegen::DomTypes::DomTypes;
 
 #[cfg(feature = "js_backtrace")]
 thread_local! {
@@ -218,7 +218,10 @@ impl ErrorInfo {
         })
     }
 
-    fn from_dom_exception<D: DomTypes>(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
+    fn from_dom_exception<D: DomTypes>(
+        object: HandleObject,
+        cx: *mut JSContext,
+    ) -> Option<ErrorInfo> {
         let exception = match root_from_object::<D::DOMException>(object.get(), cx) {
             Ok(exception) => exception,
             Err(_) => return None,
@@ -232,7 +235,10 @@ impl ErrorInfo {
         })
     }
 
-    unsafe fn from_object<D: DomTypes>(object: HandleObject, cx: *mut JSContext) -> Option<ErrorInfo> {
+    unsafe fn from_object<D: DomTypes>(
+        object: HandleObject,
+        cx: *mut JSContext,
+    ) -> Option<ErrorInfo> {
         if let Some(info) = ErrorInfo::from_native_error(object, cx) {
             return Some(info);
         }
@@ -268,7 +274,11 @@ impl ErrorInfo {
 ///
 /// The `dispatch_event` argument is temporary and non-standard; passing false
 /// prevents dispatching the `error` event.
-pub unsafe fn report_pending_exception<D: crate::DomTypes>(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
+pub unsafe fn report_pending_exception<D: crate::DomTypes>(
+    cx: *mut JSContext,
+    dispatch_event: bool,
+    realm: InRealm,
+) {
     if !JS_IsExceptionPending(cx) {
         return;
     }

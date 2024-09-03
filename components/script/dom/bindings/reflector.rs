@@ -8,6 +8,7 @@ use std::default::Default;
 
 use js::jsapi::{Heap, JSObject};
 use js::rust::HandleObject;
+pub use script_bindings::reflector::*;
 
 use crate::dom::bindings::conversions::DerivedFrom;
 use crate::dom::bindings::iterable::{Iterable, IterableIterator};
@@ -16,8 +17,6 @@ use crate::dom::bindings::trace::JSTraceable;
 use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
-
-pub use script_bindings::reflector::*;
 
 /*pub trait DomGlobal2 {
     fn global(&self) -> DomRoot<GlobalScope>;

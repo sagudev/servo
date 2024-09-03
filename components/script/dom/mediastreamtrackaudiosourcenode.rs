@@ -9,7 +9,7 @@ use servo_media::audio::node::AudioNodeInit;
 use crate::dom::audiocontext::AudioContext;
 use crate::dom::audionode::AudioNode;
 use crate::dom::bindings::codegen::Bindings::MediaStreamTrackAudioSourceNodeBinding::{
-    MediaStreamTrackAudioSourceOptions, MediaStreamTrackAudioSourceNodeMethods,
+    MediaStreamTrackAudioSourceNodeMethods, MediaStreamTrackAudioSourceOptions,
 };
 use crate::dom::bindings::error::Fallible;
 use crate::dom::bindings::inheritance::Castable;
@@ -63,7 +63,9 @@ impl MediaStreamTrackAudioSourceNode {
     }
 }
 
-impl MediaStreamTrackAudioSourceNodeMethods<crate::DomTypeHolder> for MediaStreamTrackAudioSourceNode {
+impl MediaStreamTrackAudioSourceNodeMethods<crate::DomTypeHolder>
+    for MediaStreamTrackAudioSourceNode
+{
     fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,

@@ -15,7 +15,7 @@ use serde_json::{self, Value};
 fn main() {
     println!("cargo::rerun-if-changed=../script_bindings/codegen/CodegenRust.py");
     println!("cargo::rerun-if-changed=../script_bindings/codegen/Configuration.py");
-    
+
     let start = Instant::now();
 
     let style_out_dir = PathBuf::from(env::var_os("DEP_SERVO_STYLE_CRATE_OUT_DIR").unwrap());

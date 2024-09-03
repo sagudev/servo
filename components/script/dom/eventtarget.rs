@@ -594,7 +594,11 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn set_error_event_handler<T: CallbackContainer<crate::DomTypeHolder>>(&self, ty: &str, listener: Option<Rc<T>>) {
+    pub fn set_error_event_handler<T: CallbackContainer<crate::DomTypeHolder>>(
+        &self,
+        ty: &str,
+        listener: Option<Rc<T>>,
+    ) {
         let cx = GlobalScope::get_cx();
 
         let event_listener = listener.map(|listener| {
@@ -622,7 +626,10 @@ impl EventTarget {
     }
 
     #[allow(unsafe_code)]
-    pub fn get_event_handler_common<T: CallbackContainer<crate::DomTypeHolder>>(&self, ty: &str) -> Option<Rc<T>> {
+    pub fn get_event_handler_common<T: CallbackContainer<crate::DomTypeHolder>>(
+        &self,
+        ty: &str,
+    ) -> Option<Rc<T>> {
         let cx = GlobalScope::get_cx();
         let listener = self.get_inline_event_listener(&Atom::from(ty));
         unsafe {

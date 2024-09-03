@@ -31,12 +31,11 @@ use js::rust::wrappers::{
 };
 use js::rust::{
     get_object_class, is_dom_class, GCMethods, Handle, HandleId, HandleObject, HandleValue,
-    MutableHandleValue, MutableHandleObject, ToString,
+    MutableHandleObject, MutableHandleValue, ToString,
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
 
-use crate::DomTypes;
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
@@ -48,6 +47,7 @@ use crate::dom::bindings::str::DOMString;
 use crate::dom::bindings::trace::trace_object;
 //use crate::dom::windowproxy::WindowProxyHandler;
 use crate::script_runtime::JSContext as SafeJSContext;
+use crate::DomTypes;
 
 /*#[derive(JSTraceable, MallocSizeOf)]
 /// Static data associated with a global object.
@@ -413,7 +413,9 @@ pub unsafe extern "C" fn enumerate_global<D: DomTypes>(
     if !JS_EnumerateStandardClasses(cx, obj) {
         return false;
     }
-    for init_fun in <D as DomHelpers<D>>::get_map().values()/*InterfaceObjectMap::MAP.values()*/ {
+    for init_fun in <D as DomHelpers<D>>::get_map().values()
+    /*InterfaceObjectMap::MAP.values()*/
+    {
         init_fun(SafeJSContext::from_ptr(cx), Handle::from_raw(obj));
     }
     true
@@ -448,7 +450,9 @@ pub unsafe extern "C" fn resolve_global<D: DomTypes>(
     assert!(!ptr.is_null());
     let bytes = slice::from_raw_parts(ptr, length);
 
-    if let Some(init_fun) = <D as DomHelpers<D>>::get_map()/*InterfaceObjectMap::MAP*/.get(bytes) {
+    if let Some(init_fun) = <D as DomHelpers<D>>::get_map() /*InterfaceObjectMap::MAP*/
+        .get(bytes)
+    {
         init_fun(SafeJSContext::from_ptr(cx), Handle::from_raw(obj));
         *rval = true;
     } else {
@@ -676,7 +680,11 @@ pub trait DomHelpers<D: DomTypes> {
 
     fn global_scope_origin(global: &D::GlobalScope) -> &servo_url::MutableOrigin;
 
-    fn report_cross_origin_denial(cx: crate::script_runtime::JSContext, id: RawHandleId, access: &str) -> bool;
+    fn report_cross_origin_denial(
+        cx: crate::script_runtime::JSContext,
+        id: RawHandleId,
+        access: &str,
+    ) -> bool;
 
     fn Window_create_named_properties_object(
         cx: SafeJSContext,
@@ -699,17 +707,33 @@ pub trait DomHelpers<D: DomTypes> {
 
     fn GlobalScope_get_cx() -> crate::script_runtime::JSContext;
 
-    fn GlobalScope_from_context(cx: *mut JSContext, in_realm: crate::realms::InRealm) -> crate::root::DomRoot<D::GlobalScope>;
+    fn GlobalScope_from_context(
+        cx: *mut JSContext,
+        in_realm: crate::realms::InRealm,
+    ) -> crate::root::DomRoot<D::GlobalScope>;
 
     fn GlobalScope_report_an_error(info: crate::error::ErrorInfo, value: HandleValue);
 
-    fn TestBinding_condition_satisfied(cx: crate::script_runtime::JSContext, obj: HandleObject) -> bool;
-    fn TestBinding_condition_unsatisfied(cx: crate::script_runtime::JSContext, obj: HandleObject) -> bool;
-    fn WebGL2RenderingContext_is_webgl2_enabled(cx: crate::script_runtime::JSContext, obj: HandleObject) -> bool;
+    fn TestBinding_condition_satisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: HandleObject,
+    ) -> bool;
+    fn TestBinding_condition_unsatisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: HandleObject,
+    ) -> bool;
+    fn WebGL2RenderingContext_is_webgl2_enabled(
+        cx: crate::script_runtime::JSContext,
+        obj: HandleObject,
+    ) -> bool;
 
     fn perform_a_microtask_checkpoint(global: &D::GlobalScope);
 
-    fn ReadableStream_from_js(cx: crate::script_runtime::JSContext, obj: *mut JSObject, in_realm: crate::realms::InRealm) -> Result<crate::root::DomRoot<D::ReadableStream>, ()>;
+    fn ReadableStream_from_js(
+        cx: crate::script_runtime::JSContext,
+        obj: *mut JSObject,
+        in_realm: crate::realms::InRealm,
+    ) -> Result<crate::root::DomRoot<D::ReadableStream>, ()>;
 
     fn DOMException_stringifier(exception: &D::DOMException) -> DOMString;
 

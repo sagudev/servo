@@ -52,6 +52,7 @@ use js::rust::{
     HandleValue, MutableHandleValue, ToString,
 };
 use num_traits::Float;
+pub use script_bindings::conversions::*;
 use servo_config::opts;
 
 use crate::dom::bindings::error::{Error, Fallible};
@@ -68,8 +69,6 @@ use crate::dom::htmlformcontrolscollection::HTMLFormControlsCollection;
 use crate::dom::htmloptionscollection::HTMLOptionsCollection;
 use crate::dom::nodelist::NodeList;
 use crate::dom::windowproxy::WindowProxy;
-
-pub use script_bindings::conversions::*;
 
 /*/// A trait to check whether a given `JSObject` implements an IDL interface.
 pub trait IDLInterface {
@@ -670,13 +669,13 @@ pub unsafe fn windowproxy_from_handlevalue(
 
 pub struct LocalFrom<T>(T);
 
-impl <T> From<T> for LocalFrom<T> {
+impl<T> From<T> for LocalFrom<T> {
     fn from(t: T) -> LocalFrom<T> {
         LocalFrom(t)
     }
 }
 
-impl <T> Into<T> for LocalFrom<T> {
+impl<T> Into<T> for LocalFrom<T> {
     fn into(t: LocalFrom<T>) -> T {
         t.0
     }

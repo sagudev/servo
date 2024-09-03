@@ -11,11 +11,10 @@ use std::hash::Hash;
 
 use indexmap::{IndexMap, IndexSet};
 use js::conversions::ToJSValConvertible;
+pub use script_bindings::like::*;
 
 use super::iterable::Iterable;
 use crate::dom::bindings::cell::DomRefCell;
-
-pub use script_bindings::like::*;
 
 /*/// Every Setlike dom_struct must implement this to provide access to underlying storage
 /// so codegen can automatically generate all setlike methods

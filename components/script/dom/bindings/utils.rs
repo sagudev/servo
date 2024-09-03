@@ -35,6 +35,7 @@ use js::rust::{
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
+pub use script_bindings::utils::*;
 
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
@@ -47,8 +48,6 @@ use crate::dom::bindings::str::DOMString;
 use crate::dom::bindings::trace::trace_object;
 use crate::dom::windowproxy::WindowProxyHandler;
 use crate::script_runtime::JSContext as SafeJSContext;
-
-pub use script_bindings::utils::*;
 
 #[derive(JSTraceable, MallocSizeOf)]
 /// Static data associated with a global object.

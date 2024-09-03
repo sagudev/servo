@@ -301,7 +301,11 @@ impl RequestMethods<crate::DomTypeHolder> for Request {
         }
 
         // Step 16
-        let mode = init.mode.as_ref().map(|m| LocalFrom::from(*m).into()).or(fallback_mode);
+        let mode = init
+            .mode
+            .as_ref()
+            .map(|m| LocalFrom::from(*m).into())
+            .or(fallback_mode);
 
         // Step 17
         if let Some(NetTraitsRequestMode::Navigate) = mode {
@@ -678,7 +682,8 @@ impl From<RequestCache> for LocalFrom<NetTraitsRequestCache> {
             RequestCache::No_cache => NetTraitsRequestCache::NoCache,
             RequestCache::Force_cache => NetTraitsRequestCache::ForceCache,
             RequestCache::Only_if_cached => NetTraitsRequestCache::OnlyIfCached,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -691,7 +696,8 @@ impl From<NetTraitsRequestCache> for LocalFrom<RequestCache> {
             NetTraitsRequestCache::NoCache => RequestCache::No_cache,
             NetTraitsRequestCache::ForceCache => RequestCache::Force_cache,
             NetTraitsRequestCache::OnlyIfCached => RequestCache::Only_if_cached,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -701,7 +707,8 @@ impl From<RequestCredentials> for LocalFrom<NetTraitsRequestCredentials> {
             RequestCredentials::Omit => NetTraitsRequestCredentials::Omit,
             RequestCredentials::Same_origin => NetTraitsRequestCredentials::CredentialsSameOrigin,
             RequestCredentials::Include => NetTraitsRequestCredentials::Include,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -711,7 +718,8 @@ impl From<NetTraitsRequestCredentials> for LocalFrom<RequestCredentials> {
             NetTraitsRequestCredentials::Omit => RequestCredentials::Omit,
             NetTraitsRequestCredentials::CredentialsSameOrigin => RequestCredentials::Same_origin,
             NetTraitsRequestCredentials::Include => RequestCredentials::Include,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -737,7 +745,8 @@ impl From<RequestDestination> for LocalFrom<NetTraitsRequestDestination> {
             RequestDestination::Video => NetTraitsRequestDestination::Video,
             RequestDestination::Worker => NetTraitsRequestDestination::Worker,
             RequestDestination::Xslt => NetTraitsRequestDestination::Xslt,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -769,7 +778,8 @@ impl From<NetTraitsRequestDestination> for LocalFrom<RequestDestination> {
             NetTraitsRequestDestination::Worker => RequestDestination::Worker,
             NetTraitsRequestDestination::Xslt => RequestDestination::Xslt,
             NetTraitsRequestDestination::WebIdentity => RequestDestination::_empty,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -780,7 +790,8 @@ impl From<RequestMode> for LocalFrom<NetTraitsRequestMode> {
             RequestMode::Same_origin => NetTraitsRequestMode::SameOrigin,
             RequestMode::No_cors => NetTraitsRequestMode::NoCors,
             RequestMode::Cors => NetTraitsRequestMode::CorsMode,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -794,7 +805,8 @@ impl From<NetTraitsRequestMode> for LocalFrom<RequestMode> {
             NetTraitsRequestMode::WebSocket { .. } => {
                 unreachable!("Websocket request mode should never be exposed to Dom")
             },
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -814,7 +826,8 @@ impl From<ReferrerPolicy> for LocalFrom<MsgReferrerPolicy> {
             ReferrerPolicy::Strict_origin_when_cross_origin => {
                 MsgReferrerPolicy::StrictOriginWhenCrossOrigin
             },
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -833,7 +846,8 @@ impl From<MsgReferrerPolicy> for LocalFrom<ReferrerPolicy> {
             MsgReferrerPolicy::StrictOriginWhenCrossOrigin => {
                 ReferrerPolicy::Strict_origin_when_cross_origin
             },
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -843,7 +857,8 @@ impl From<RequestRedirect> for LocalFrom<NetTraitsRequestRedirect> {
             RequestRedirect::Follow => NetTraitsRequestRedirect::Follow,
             RequestRedirect::Error => NetTraitsRequestRedirect::Error,
             RequestRedirect::Manual => NetTraitsRequestRedirect::Manual,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -853,7 +868,8 @@ impl From<NetTraitsRequestRedirect> for LocalFrom<RequestRedirect> {
             NetTraitsRequestRedirect::Follow => RequestRedirect::Follow,
             NetTraitsRequestRedirect::Error => RequestRedirect::Error,
             NetTraitsRequestRedirect::Manual => RequestRedirect::Manual,
-        }.into()
+        }
+        .into()
     }
 }
 

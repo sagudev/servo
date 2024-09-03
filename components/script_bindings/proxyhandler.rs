@@ -36,16 +36,16 @@ use js::rust::{
     get_context_realm, Handle, HandleObject, HandleValue, MutableHandle, MutableHandleObject,
 };
 
-use crate::DomTypes;
 use crate::dom::bindings::conversions::{is_dom_proxy, jsid_to_string, jsstring_to_str};
 use crate::dom::bindings::error::{/*throw_dom_exception,*/ Error};
 use crate::dom::bindings::principals::ServoJSPrincipalsRef;
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::bindings::str::DOMString;
-use crate::dom::bindings::utils::{DomHelpers, delete_property_by_id};
+use crate::dom::bindings::utils::{delete_property_by_id, DomHelpers};
 //use crate::dom::globalscope::GlobalScope;
 use crate::realms::{AlreadyInRealm, InRealm};
 use crate::script_runtime::JSContext as SafeJSContext;
+use crate::DomTypes;
 
 /// Determine if this id shadows any existing properties for this proxy.
 pub unsafe extern "C" fn shadow_check_callback(
@@ -237,7 +237,11 @@ pub unsafe fn is_platform_object_same_origin(cx: SafeJSContext, obj: RawHandleOb
 /// What this function does corresponds to the operations in
 /// <https://html.spec.whatwg.org/multipage/#the-location-interface> denoted as
 /// "Throw a `SecurityError` DOMException".
-pub unsafe fn report_cross_origin_denial<D: crate::DomTypes>(cx: SafeJSContext, id: RawHandleId, access: &str) -> bool {
+pub unsafe fn report_cross_origin_denial<D: crate::DomTypes>(
+    cx: SafeJSContext,
+    id: RawHandleId,
+    access: &str,
+) -> bool {
     debug!(
         "permission denied to {} property {} on cross-origin object",
         access,
@@ -245,7 +249,10 @@ pub unsafe fn report_cross_origin_denial<D: crate::DomTypes>(cx: SafeJSContext, 
     );
     let in_realm_proof = AlreadyInRealm::assert_for_cx(cx);
     if !JS_IsExceptionPending(*cx) {
-        let global = <D as crate::DomHelpers<D>>::GlobalScope_from_context(*cx, InRealm::Already(&in_realm_proof));
+        let global = <D as crate::DomHelpers<D>>::GlobalScope_from_context(
+            *cx,
+            InRealm::Already(&in_realm_proof),
+        );
         // TODO: include `id` and `access` in the exception message
         D::throw_dom_exception(cx, &global, Error::Security);
     }

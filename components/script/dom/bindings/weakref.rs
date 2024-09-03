@@ -20,13 +20,12 @@ use js::jsapi::{JSTracer, JS_SetReservedSlot};
 use js::jsval::{PrivateValue, UndefinedValue};
 use libc::c_void;
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
+pub use script_bindings::weakref::*;
 
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::trace::JSTraceable;
-
-pub use script_bindings::weakref::*;
 
 /*/// The index of the slot wherein a pointer to the weak holder cell is
 /// stored for weak-referenceable bindings. We use slot 1 for holding it,

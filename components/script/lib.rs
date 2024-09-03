@@ -97,12 +97,11 @@ mod webdriver_handlers;
 mod window_named_properties;
 
 pub use init::init;
-pub use script_runtime::JSEngineSetup;
-
 // export traits to be available for derive macros
 pub use script_bindings::inheritance::HasParent;
-pub use script_bindings::reflector::{DomObject/*, DomGlobal*/, MutDomObject, Reflector};
+pub use script_bindings::reflector::{DomObject /*, DomGlobal*/, MutDomObject, Reflector};
 pub use script_bindings::trace::{CustomTraceable, JSTraceable};
+pub use script_runtime::JSEngineSetup;
 
 pub use crate::dom::bindings::codegen::DomTypeHolder::DomTypeHolder;
 
@@ -115,15 +114,25 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         todo!()
     }
 
-    unsafe fn global_scope_from_object(obj: *mut js::jsapi::JSObject) -> crate::dom::bindings::root::DomRoot<<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope> {
+    unsafe fn global_scope_from_object(
+        obj: *mut js::jsapi::JSObject,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
         todo!()
     }
 
-    fn global_scope_origin(global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope) -> &servo_url::MutableOrigin {
+    fn global_scope_origin(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    ) -> &servo_url::MutableOrigin {
         todo!()
     }
 
-    fn report_cross_origin_denial(cx: crate::script_runtime::JSContext, id: js::jsapi::HandleId, access: &str) -> bool {
+    fn report_cross_origin_denial(
+        cx: crate::script_runtime::JSContext,
+        id: js::jsapi::HandleId,
+        access: &str,
+    ) -> bool {
         todo!()
     }
 
@@ -139,18 +148,26 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
         cx: crate::script_runtime::JSContext,
         value: js::rust::HandleValue,
-    ) -> crate::dom::bindings::error::Fallible<std::rc::Rc<<crate::DomTypeHolder as script_bindings::DomTypes>::Promise>> {
+    ) -> crate::dom::bindings::error::Fallible<
+        std::rc::Rc<<crate::DomTypeHolder as script_bindings::DomTypes>::Promise>,
+    > {
         todo!()
     }
 
     unsafe fn GlobalScope_from_object_maybe_wrapped(
         obj: *mut js::jsapi::JSObject,
         cx: *mut js::jsapi::JSContext,
-    ) -> crate::dom::bindings::root::DomRoot<<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope> {
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
         todo!()
     }
 
-    fn GlobalScope_incumbent() -> Option<crate::dom::bindings::root::DomRoot<<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope>> {
+    fn GlobalScope_incumbent() -> Option<
+        crate::dom::bindings::root::DomRoot<
+            <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+        >,
+    > {
         todo!()
     }
 
@@ -158,37 +175,70 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         todo!()
     }
 
-    fn GlobalScope_from_context(cx: *mut js::jsapi::JSContext, in_realm: crate::realms::InRealm) -> crate::dom::bindings::root::DomRoot<<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope> {
+    fn GlobalScope_from_context(
+        cx: *mut js::jsapi::JSContext,
+        in_realm: crate::realms::InRealm,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
         todo!()
     }
 
-    fn GlobalScope_report_an_error(info: crate::dom::bindings::error::ErrorInfo, value: js::rust::HandleValue) {
+    fn GlobalScope_report_an_error(
+        info: crate::dom::bindings::error::ErrorInfo,
+        value: js::rust::HandleValue,
+    ) {
         todo!()
     }
 
-    fn TestBinding_condition_satisfied(cx: crate::script_runtime::JSContext, obj: js::rust::HandleObject) -> bool {
+    fn TestBinding_condition_satisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
         todo!()
     }
-    fn TestBinding_condition_unsatisfied(cx: crate::script_runtime::JSContext, obj: js::rust::HandleObject) -> bool {
+    fn TestBinding_condition_unsatisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
         todo!()
     }
-    fn WebGL2RenderingContext_is_webgl2_enabled(cx: crate::script_runtime::JSContext, obj: js::rust::HandleObject) -> bool {
-        todo!()
-    }
-
-    fn perform_a_microtask_checkpoint(global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope) {
-        todo!()
-    }
-
-    fn ReadableStream_from_js(cx: crate::script_runtime::JSContext, obj: *mut js::jsapi::JSObject, in_realm: crate::realms::InRealm) -> Result<crate::dom::bindings::root::DomRoot<<crate::DomTypeHolder as script_bindings::DomTypes>::ReadableStream>, ()> {
-        todo!()
-    }
-
-    fn DOMException_stringifier(exception: &<crate::DomTypeHolder as script_bindings::DomTypes>::DOMException) -> crate::dom::bindings::str::DOMString {
+    fn WebGL2RenderingContext_is_webgl2_enabled(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
         todo!()
     }
 
-    fn get_map() -> &'static phf::Map<&'static [u8], fn(crate::script_runtime::JSContext, js::rust::HandleObject)> {
+    fn perform_a_microtask_checkpoint(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    ) {
+        todo!()
+    }
+
+    fn ReadableStream_from_js(
+        cx: crate::script_runtime::JSContext,
+        obj: *mut js::jsapi::JSObject,
+        in_realm: crate::realms::InRealm,
+    ) -> Result<
+        crate::dom::bindings::root::DomRoot<
+            <crate::DomTypeHolder as script_bindings::DomTypes>::ReadableStream,
+        >,
+        (),
+    > {
+        todo!()
+    }
+
+    fn DOMException_stringifier(
+        exception: &<crate::DomTypeHolder as script_bindings::DomTypes>::DOMException,
+    ) -> crate::dom::bindings::str::DOMString {
+        todo!()
+    }
+
+    fn get_map() -> &'static phf::Map<
+        &'static [u8],
+        fn(crate::script_runtime::JSContext, js::rust::HandleObject),
+    > {
         todo!()
     }
 }

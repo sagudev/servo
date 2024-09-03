@@ -9,6 +9,7 @@ use std::default::Default;
 use js::jsapi::{Heap, JSObject};
 use js::rust::HandleObject;
 
+use crate::codegen::DomTypes::DomTypes;
 use crate::dom::bindings::conversions::DerivedFrom;
 use crate::dom::bindings::iterable::{Iterable, IterableIterator};
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
@@ -17,7 +18,6 @@ use crate::dom::bindings::utils::DomHelpers;
 //use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
-use crate::codegen::DomTypes::DomTypes;
 
 /// Create the reflector for a new DOM object and yield ownership to the
 /// reflector.
@@ -28,7 +28,14 @@ where
     U: DerivedFrom<D::GlobalScope>,
 {
     let global_scope = global.upcast();
-    unsafe { T::WRAP(<D as DomHelpers<D>>::GlobalScope_get_cx(), global_scope, None, obj) }
+    unsafe {
+        T::WRAP(
+            <D as DomHelpers<D>>::GlobalScope_get_cx(),
+            global_scope,
+            None,
+            obj,
+        )
+    }
 }
 
 pub fn reflect_dom_object_with_proto<D, T, U>(
@@ -42,7 +49,14 @@ where
     U: DerivedFrom<D::GlobalScope>,
 {
     let global_scope = global.upcast();
-    unsafe { T::WRAP(<D as DomHelpers<D>>::GlobalScope_get_cx(), global_scope, proto, obj) }
+    unsafe {
+        T::WRAP(
+            <D as DomHelpers<D>>::GlobalScope_get_cx(),
+            global_scope,
+            proto,
+            obj,
+        )
+    }
 }
 
 /// A struct to store a reference to the reflector of a DOM object.
@@ -122,7 +136,7 @@ pub trait DomGlobal<D: DomTypes>: DomObject {
     }
 }
 
-impl <D: DomTypes, T: DomObject> DomGlobal<D> for T {}
+impl<D: DomTypes, T: DomObject> DomGlobal<D> for T {}
 
 impl DomObject for Reflector {
     fn reflector(&self) -> &Self {
@@ -155,7 +169,9 @@ pub trait DomObjectWrap<D: DomTypes>: Sized + DomObject + DomGlobal<D> {
 
 /// A trait to provide a function pointer to wrap function for
 /// DOM iterator interfaces.
-pub trait DomObjectIteratorWrap<D: DomTypes + 'static>: DomObjectWrap<D> + JSTraceable + Iterable {
+pub trait DomObjectIteratorWrap<D: DomTypes + 'static>:
+    DomObjectWrap<D> + JSTraceable + Iterable
+{
     /// Function pointer to the wrap function for `IterableIterator<T>`
     const ITER_WRAP: unsafe fn(
         JSContext,

@@ -303,7 +303,8 @@ impl From<AudioContextLatencyCategory> for LocalFrom<LatencyCategory> {
             AudioContextLatencyCategory::Balanced => LatencyCategory::Balanced,
             AudioContextLatencyCategory::Interactive => LatencyCategory::Interactive,
             AudioContextLatencyCategory::Playback => LatencyCategory::Playback,
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -317,6 +318,7 @@ impl<'a> From<&'a AudioContextOptions> for LocalFrom<RealTimeAudioContextOptions
                 },
                 AudioContextLatencyCategoryOrDouble::Double(_) => LatencyCategory::Interactive, // TODO
             },
-        }.into()
+        }
+        .into()
     }
 }

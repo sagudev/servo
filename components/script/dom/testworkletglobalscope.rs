@@ -51,7 +51,12 @@ impl TestWorkletGlobalScope {
             ),
             lookup_table: Default::default(),
         });
-        unsafe { TestWorkletGlobalScopeBinding::GenericBindings::Wrap::<crate::DomTypeHolder>(JSContext::from_ptr(runtime.cx()), global) }
+        unsafe {
+            TestWorkletGlobalScopeBinding::GenericBindings::Wrap::<crate::DomTypeHolder>(
+                JSContext::from_ptr(runtime.cx()),
+                global,
+            )
+        }
     }
 
     pub fn perform_a_worklet_task(&self, task: TestWorkletTask) {

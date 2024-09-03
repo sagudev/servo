@@ -74,7 +74,9 @@ impl MediaStreamAudioDestinationNode {
     }
 }
 
-impl MediaStreamAudioDestinationNodeMethods<crate::DomTypeHolder> for MediaStreamAudioDestinationNode {
+impl MediaStreamAudioDestinationNodeMethods<crate::DomTypeHolder>
+    for MediaStreamAudioDestinationNode
+{
     fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,

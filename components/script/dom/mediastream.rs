@@ -61,10 +61,7 @@ impl MediaStream {
 }
 
 impl MediaStreamMethods<crate::DomTypeHolder> for MediaStream {
-    fn Constructor(
-        global: &Window,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<MediaStream>> {
+    fn Constructor(global: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<MediaStream>> {
         Ok(MediaStream::new_with_proto(&global.global(), proto))
     }
 

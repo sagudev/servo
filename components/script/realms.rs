@@ -3,12 +3,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use js::jsapi::{GetCurrentRealmOrNull, JSAutoRealm};
+pub use script_bindings::realms::{AlreadyInRealm, InRealm};
 
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::globalscope::GlobalScope;
 use crate::script_runtime::JSContext;
-
-pub use script_bindings::realms::{AlreadyInRealm, InRealm};
 
 /*pub struct AlreadyInRealm(());
 
@@ -47,8 +46,8 @@ impl<'a> InRealm<'a> {
 
 pub fn enter_realm(object: &impl DomObject) -> JSAutoRealm {
     /*JSAutoRealm::new(
-        *GlobalScope::get_cx(),
-        object.reflector().get_jsobject().get(),
-)*/
+            *GlobalScope::get_cx(),
+            object.reflector().get_jsobject().get(),
+    )*/
     script_bindings::realms::enter_realm::<crate::DomTypeHolder>()
 }

@@ -33,6 +33,7 @@ use std::{mem, ptr};
 
 use js::jsapi::{JSObject, JSTracer};
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
+pub use script_bindings::root::*;
 use script_layout_interface::TrustedNodeAddress;
 use style::thread_state;
 
@@ -41,8 +42,6 @@ use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::{DomObject, MutDomObject, Reflector};
 use crate::dom::bindings::trace::{trace_reflector, JSTraceable};
 use crate::dom::node::Node;
-
-pub use script_bindings::root::*;
 
 /*/// A rooted value.
 #[allow(crown::unrooted_must_root)]

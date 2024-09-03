@@ -4114,10 +4114,7 @@ impl ProfilerMetadataFactory for Document {
 
 impl DocumentMethods<crate::DomTypeHolder> for Document {
     // https://dom.spec.whatwg.org/#dom-document-document
-    fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<Document>> {
+    fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<Document>> {
         let doc = window.Document();
         let docloader = DocumentLoader::new(&doc.loader());
         Ok(Document::new_with_proto(

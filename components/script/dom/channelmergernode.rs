@@ -13,7 +13,7 @@ use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{
     ChannelCountMode, ChannelInterpretation,
 };
 use crate::dom::bindings::codegen::Bindings::ChannelMergerNodeBinding::{
-    ChannelMergerOptions, ChannelMergerNodeMethods,
+    ChannelMergerNodeMethods, ChannelMergerOptions,
 };
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::reflector::reflect_dom_object_with_proto;

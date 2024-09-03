@@ -42,10 +42,7 @@ impl DOMParser {
 }
 
 impl DOMParserMethods<crate::DomTypeHolder> for DOMParser {
-    fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<DOMParser>> {
+    fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<DOMParser>> {
         Ok(DOMParser::new(window, proto))
     }
 

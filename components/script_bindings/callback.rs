@@ -18,7 +18,6 @@ use js::rust::wrappers::{JS_GetProperty, JS_WrapObject};
 use js::rust::{MutableHandleObject, Runtime};
 
 use crate::codegen::DomTypes::DomTypes;
-use crate::utils::DomHelpers;
 use crate::dom::bindings::codegen::Bindings::WindowBinding::Window_Binding::WindowMethods;
 use crate::dom::bindings::error::{report_pending_exception, Error, Fallible};
 use crate::dom::bindings::inheritance::Castable;
@@ -30,6 +29,7 @@ use crate::dom::bindings::utils::AsCCharPtrPtr;
 //use crate::dom::window::Window;
 use crate::realms::{enter_realm, InRealm};
 use crate::script_runtime::JSContext;
+use crate::utils::DomHelpers;
 
 /// The exception handling used for a call.
 #[derive(Clone, Copy, PartialEq)]
@@ -63,7 +63,7 @@ pub struct CallbackObject<D: DomTypes> {
     incumbent: Option<Dom<D::GlobalScope>>,
 }
 
-impl <D: DomTypes> CallbackObject<D> {
+impl<D: DomTypes> CallbackObject<D> {
     #[allow(crown::unrooted_must_root)]
     // These are used by the bindings and do not need `default()` functions.
     #[allow(clippy::new_without_default)]
@@ -91,7 +91,7 @@ impl <D: DomTypes> CallbackObject<D> {
     }
 }
 
-impl <D: DomTypes> Drop for CallbackObject<D> {
+impl<D: DomTypes> Drop for CallbackObject<D> {
     #[allow(unsafe_code)]
     fn drop(&mut self) {
         unsafe {
@@ -101,7 +101,7 @@ impl <D: DomTypes> Drop for CallbackObject<D> {
     }
 }
 
-impl <D: DomTypes> PartialEq for CallbackObject<D> {
+impl<D: DomTypes> PartialEq for CallbackObject<D> {
     fn eq(&self, other: &CallbackObject<D>) -> bool {
         self.callback.get() == other.callback.get()
     }
@@ -134,7 +134,7 @@ pub struct CallbackFunction<D: DomTypes> {
     object: CallbackObject<D>,
 }
 
-impl <D: DomTypes> CallbackFunction<D> {
+impl<D: DomTypes> CallbackFunction<D> {
     /// Create a new `CallbackFunction` for this object.
     #[allow(crown::unrooted_must_root)]
     // These are used by the bindings and do not need `default()` functions.
@@ -164,7 +164,7 @@ pub struct CallbackInterface<D: DomTypes> {
     object: CallbackObject<D>,
 }
 
-impl <D: DomTypes> CallbackInterface<D> {
+impl<D: DomTypes> CallbackInterface<D> {
     /// Create a new CallbackInterface object for the given `JSObject`.
     // These are used by the bindings and do not need `default()` functions.
     #[allow(clippy::new_without_default)]
@@ -239,7 +239,7 @@ pub struct CallSetup<D: DomTypes> {
     incumbent_script: Option<AutoIncumbentScript<D>>,
 }
 
-impl <D: DomTypes> CallSetup<D> {
+impl<D: DomTypes> CallSetup<D> {
     /// Performs the setup needed to make a call.
     #[allow(crown::unrooted_must_root)]
     pub fn new<T: CallbackContainer<D>>(callback: &T, handling: ExceptionHandling) -> CallSetup<D> {
@@ -268,7 +268,7 @@ impl <D: DomTypes> CallSetup<D> {
     }
 }
 
-impl <D: DomTypes> Drop for CallSetup<D> {
+impl<D: DomTypes> Drop for CallSetup<D> {
     fn drop(&mut self) {
         unsafe {
             LeaveRealm(*self.cx, self.old_realm);

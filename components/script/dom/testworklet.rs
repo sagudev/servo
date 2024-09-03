@@ -47,10 +47,7 @@ impl TestWorklet {
 }
 
 impl TestWorkletMethods<crate::DomTypeHolder> for TestWorklet {
-    fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<TestWorklet>> {
+    fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<TestWorklet>> {
         Ok(TestWorklet::new(window, proto))
     }
 

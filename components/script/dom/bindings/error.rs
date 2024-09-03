@@ -18,22 +18,8 @@ use js::jsval::UndefinedValue;
 use js::rust::wrappers::{JS_ErrorFromException, JS_GetPendingException, JS_SetPendingException};
 use js::rust::{HandleObject, HandleValue, MutableHandleValue};
 use libc::c_uint;
-
-#[cfg(feature = "js_backtrace")]
-use crate::dom::bindings::cell::DomRefCell;
-use crate::dom::bindings::codegen::PrototypeList::proto_id_to_name;
-use crate::dom::bindings::conversions::{
-    root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
-};
-use crate::dom::bindings::str::USVString;
-use crate::dom::domexception::{DOMErrorName, DOMException};
-use crate::dom::globalscope::GlobalScope;
-use crate::realms::InRealm;
-use crate::script_runtime::JSContext as SafeJSContext;
-
 #[cfg(feature = "js_backtrace")]
 use script_bindings::error::LAST_EXCEPTION_BACKTRACE;
-
 /*#[cfg(feature = "js_backtrace")]
 thread_local! {
     /// An optional stringified JS backtrace and stringified native backtrace from the
@@ -106,8 +92,19 @@ pub type Fallible<T> = Result<T, Error>;
 /// The return type for IDL operations that can throw DOM exceptions and
 /// return `()`.
 pub type ErrorResult = Fallible<()>;*/
-
 pub use script_bindings::error::*;
+
+#[cfg(feature = "js_backtrace")]
+use crate::dom::bindings::cell::DomRefCell;
+use crate::dom::bindings::codegen::PrototypeList::proto_id_to_name;
+use crate::dom::bindings::conversions::{
+    root_from_object, ConversionResult, FromJSValConvertible, ToJSValConvertible,
+};
+use crate::dom::bindings::str::USVString;
+use crate::dom::domexception::{DOMErrorName, DOMException};
+use crate::dom::globalscope::GlobalScope;
+use crate::realms::InRealm;
+use crate::script_runtime::JSContext as SafeJSContext;
 
 /// Set a pending exception for the given `result` on `cx`.
 pub fn throw_dom_exception(cx: SafeJSContext, global: &GlobalScope, result: Error) {

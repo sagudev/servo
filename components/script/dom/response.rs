@@ -224,11 +224,7 @@ impl ResponseMethods<crate::DomTypeHolder> for Response {
     }
 
     // https://fetch.spec.whatwg.org/#dom-response-redirect
-    fn Redirect(
-        global: &GlobalScope,
-        url: USVString,
-        status: u16,
-    ) -> Fallible<DomRoot<Response>> {
+    fn Redirect(global: &GlobalScope, url: USVString, status: u16) -> Fallible<DomRoot<Response>> {
         // Step 1
         let base_url = global.api_base_url();
         let parsed_url = base_url.join(&url.0);

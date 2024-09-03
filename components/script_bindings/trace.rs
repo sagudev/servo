@@ -45,6 +45,7 @@ use js::jsapi::{GCTraceKindToAscii, Heap, JSObject, JSScript, JSString, JSTracer
 use js::jsval::JSVal;
 use js::rust::{GCMethods, Handle};
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
+
 /*use parking_lot::RwLock;
 use servo_arc::Arc as ServoArc;
 use smallvec::SmallVec;
@@ -238,7 +239,7 @@ unsafe impl<K, V: JSTraceable, S> JSTraceable for HashMapTracedValues<K, V, S> {
 }*/
 
 #[allow(unsafe_code)]
-unsafe impl <T> JSTraceable for crate::iterable::NoTrace<T> {
+unsafe impl<T> JSTraceable for crate::iterable::NoTrace<T> {
     #[inline]
     unsafe fn trace(&self, trc: *mut ::js::jsapi::JSTracer) {}
 }
