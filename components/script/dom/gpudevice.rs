@@ -215,7 +215,7 @@ impl GPUDevice {
 
     fn get_pipeline_layout_data(
         &self,
-        layout: &GPUPipelineLayoutOrGPUAutoLayoutMode<crate::DomTypeHolder>,
+        layout: &GPUPipelineLayoutOrGPUAutoLayoutMode,
     ) -> (
         Option<PipelineLayoutId>,
         Option<(PipelineLayoutId, Vec<BindGroupLayoutId>)>,

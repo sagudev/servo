@@ -1893,7 +1893,7 @@ impl Document {
     // https://dom.spec.whatwg.org/#converting-nodes-into-a-node
     pub fn node_from_nodes_and_strings(
         &self,
-        mut nodes: Vec<NodeOrString<crate::DomTypeHolder>>,
+        mut nodes: Vec<NodeOrString>,
     ) -> Fallible<DomRoot<Node>> {
         if nodes.len() == 1 {
             Ok(match nodes.pop().unwrap() {
@@ -4878,17 +4878,17 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-    fn Prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn Prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().prepend(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-append
-    fn Append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn Append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().append(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
-    fn ReplaceChildren(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn ReplaceChildren(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().replace_children(nodes)
     }
 

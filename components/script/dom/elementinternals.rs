@@ -34,8 +34,8 @@ enum SubmissionValue {
     None,
 }
 
-impl From<Option<&FileOrUSVStringOrFormData<crate::DomTypeHolder>>> for SubmissionValue {
-    fn from(value: Option<&FileOrUSVStringOrFormData<crate::DomTypeHolder>>) -> Self {
+impl From<Option<&FileOrUSVStringOrFormData>> for SubmissionValue {
+    fn from(value: Option<&FileOrUSVStringOrFormData>) -> Self {
         match value {
             None => SubmissionValue::None,
             Some(FileOrUSVStringOrFormData::File(file)) => {
@@ -186,8 +186,8 @@ impl ElementInternalsMethods<crate::DomTypeHolder> for ElementInternals {
     /// <https://html.spec.whatwg.org/multipage#dom-elementinternals-setformvalue>
     fn SetFormValue(
         &self,
-        value: Option<FileOrUSVStringOrFormData<crate::DomTypeHolder>>,
-        maybe_state: Option<Option<FileOrUSVStringOrFormData<crate::DomTypeHolder>>>,
+        value: Option<FileOrUSVStringOrFormData>,
+        maybe_state: Option<Option<FileOrUSVStringOrFormData>>,
     ) -> ErrorResult {
         // Steps 1-2: If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException
         if !self.is_target_form_associated() {

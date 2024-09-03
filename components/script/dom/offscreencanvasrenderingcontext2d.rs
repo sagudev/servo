@@ -145,23 +145,23 @@ impl OffscreenCanvasRenderingContext2DMethods<crate::DomTypeHolder> for Offscree
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn StrokeStyle(&self) -> StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder> {
+    fn StrokeStyle(&self) -> StringOrCanvasGradientOrCanvasPattern {
         self.canvas_state.stroke_style()
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn SetStrokeStyle(&self, value: StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder>) {
+    fn SetStrokeStyle(&self, value: StringOrCanvasGradientOrCanvasPattern) {
         self.canvas_state
             .set_stroke_style(self.htmlcanvas.as_deref(), value)
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn FillStyle(&self) -> StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder> {
+    fn FillStyle(&self) -> StringOrCanvasGradientOrCanvasPattern {
         self.canvas_state.fill_style()
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-strokestyle
-    fn SetFillStyle(&self, value: StringOrCanvasGradientOrCanvasPattern<crate::DomTypeHolder>) {
+    fn SetFillStyle(&self, value: StringOrCanvasGradientOrCanvasPattern) {
         self.canvas_state
             .set_fill_style(self.htmlcanvas.as_deref(), value)
     }

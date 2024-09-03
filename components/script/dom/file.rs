@@ -101,7 +101,7 @@ impl FileMethods<crate::DomTypeHolder> for File {
     fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        fileBits: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString<crate::DomTypeHolder>>,
+        fileBits: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString>,
         filename: DOMString,
         filePropertyBag: &FileBinding::FilePropertyBag,
     ) -> Fallible<DomRoot<File>> {

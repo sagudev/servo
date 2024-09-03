@@ -170,7 +170,7 @@ impl Serializable for Blob {
 /// <https://w3c.github.io/FileAPI/#constructorBlob>
 #[allow(unsafe_code)]
 pub fn blob_parts_to_bytes(
-    mut blobparts: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString<crate::DomTypeHolder>>,
+    mut blobparts: Vec<ArrayBufferOrArrayBufferViewOrBlobOrString>,
 ) -> Result<Vec<u8>, ()> {
     let mut ret = vec![];
     for blobpart in &mut blobparts {
@@ -201,7 +201,7 @@ impl BlobMethods<crate::DomTypeHolder> for Blob {
     fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        blobParts: Option<Vec<ArrayBufferOrArrayBufferViewOrBlobOrString<crate::DomTypeHolder>>>,
+        blobParts: Option<Vec<ArrayBufferOrArrayBufferViewOrBlobOrString>>,
         blobPropertyBag: &BlobBinding::BlobPropertyBag,
     ) -> Fallible<DomRoot<Blob>> {
         let bytes: Vec<u8> = match blobParts {

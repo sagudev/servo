@@ -51,7 +51,7 @@ impl Clone for GPUCanvasConfiguration {
     }
 }
 
-impl Clone for HTMLCanvasElementOrOffscreenCanvas<crate::DomTypeHolder> {
+impl Clone for HTMLCanvasElementOrOffscreenCanvas {
     fn clone(&self) -> Self {
         match self {
             Self::HTMLCanvasElement(arg0) => Self::HTMLCanvasElement(arg0.clone()),
@@ -83,7 +83,7 @@ impl malloc_size_of::MallocSizeOf for GPUTextureDescriptor {
     }
 }
 
-impl malloc_size_of::MallocSizeOf for HTMLCanvasElementOrOffscreenCanvas<crate::DomTypeHolder> {
+impl malloc_size_of::MallocSizeOf for HTMLCanvasElementOrOffscreenCanvas {
     fn size_of(&self, ops: &mut malloc_size_of::MallocSizeOfOps) -> usize {
         match self {
             HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(canvas) => canvas.size_of(ops),
@@ -99,7 +99,7 @@ pub struct GPUCanvasContext {
     #[no_trace]
     channel: WebGPU,
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-canvas>
-    canvas: HTMLCanvasElementOrOffscreenCanvas<crate::DomTypeHolder>,
+    canvas: HTMLCanvasElementOrOffscreenCanvas,
     // TODO: can we have wgpu surface that is hw accelerated inside wr ...
     #[ignore_malloc_size_of = "Defined in webrender"]
     #[no_trace]
@@ -110,7 +110,7 @@ pub struct GPUCanvasContext {
 }
 
 impl GPUCanvasContext {
-    fn new_inherited(canvas: HTMLCanvasElementOrOffscreenCanvas<crate::DomTypeHolder>, channel: WebGPU) -> Self {
+    fn new_inherited(canvas: HTMLCanvasElementOrOffscreenCanvas, channel: WebGPU) -> Self {
         let (sender, receiver) = ipc::channel().unwrap();
         if let Err(e) = channel.0.send(WebGPURequest::CreateContext(sender)) {
             warn!("Failed to send CreateContext ({:?})", e);
@@ -200,7 +200,7 @@ impl LayoutCanvasRenderingContextHelpers for LayoutDom<'_, GPUCanvasContext> {
 
 impl GPUCanvasContextMethods<crate::DomTypeHolder> for GPUCanvasContext {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucanvascontext-canvas>
-    fn Canvas(&self) -> HTMLCanvasElementOrOffscreenCanvas<crate::DomTypeHolder> {
+    fn Canvas(&self) -> HTMLCanvasElementOrOffscreenCanvas {
         self.canvas.clone()
     }
 

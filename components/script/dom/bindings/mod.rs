@@ -183,7 +183,6 @@ pub mod codegen {
     }
 
     pub use script_bindings::codegen::PrototypeList;
-    pub use script_bindings::codegen::UnionTypes;
     pub use script_bindings::codegen::RegisterBindings;
 
     #[allow(dead_code, crown::unrooted_must_root)]
@@ -208,7 +207,7 @@ pub mod codegen {
     }
     pub mod RegisterBindings {
         include!(concat!(env!("OUT_DIR"), "/RegisterBindings.rs"));
-    }
+    }*/
     #[allow(
         non_camel_case_types,
         unused_imports,
@@ -218,6 +217,6 @@ pub mod codegen {
         clippy::enum_variant_names
     )]
     pub mod UnionTypes {
-        include!(concat!(env!("OUT_DIR"), "/UnionTypes.rs"));
-    }*/
+        include!(concat!(env!("OUT_DIR"), "/ConcreteUnionTypes.rs"));
+    }
 }

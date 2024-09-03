@@ -295,9 +295,9 @@ enum SrcObject {
     Blob(Dom<Blob>),
 }
 
-impl From<MediaStreamOrBlob<crate::DomTypeHolder>> for SrcObject {
+impl From<MediaStreamOrBlob> for SrcObject {
     #[allow(crown::unrooted_must_root)]
-    fn from(src_object: MediaStreamOrBlob<crate::DomTypeHolder>) -> SrcObject {
+    fn from(src_object: MediaStreamOrBlob) -> SrcObject {
         match src_object {
             MediaStreamOrBlob::Blob(blob) => SrcObject::Blob(Dom::from_ref(&*blob)),
             MediaStreamOrBlob::MediaStream(stream) => {
@@ -2129,7 +2129,7 @@ impl HTMLMediaElementMethods<crate::DomTypeHolder> for HTMLMediaElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-media-srcobject
-    fn GetSrcObject(&self) -> Option<MediaStreamOrBlob<crate::DomTypeHolder>> {
+    fn GetSrcObject(&self) -> Option<MediaStreamOrBlob> {
         (*self.src_object.borrow())
             .as_ref()
             .map(|src_object| match src_object {
@@ -2141,7 +2141,7 @@ impl HTMLMediaElementMethods<crate::DomTypeHolder> for HTMLMediaElement {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-media-srcobject
-    fn SetSrcObject(&self, value: Option<MediaStreamOrBlob<crate::DomTypeHolder>>) {
+    fn SetSrcObject(&self, value: Option<MediaStreamOrBlob>) {
         *self.src_object.borrow_mut() = value.map(|value| value.into());
         self.media_element_load_algorithm();
     }

@@ -49,7 +49,7 @@ def main():
         ("ConcreteInheritTypes", "ConcreteInheritTypes.rs"),
         ("ConcreteBindingRoot", "ConcreteBindingRoot.rs"),
         ("Bindings", "Bindings/mod.rs"),
-        #("UnionTypes", "UnionTypes.rs"),
+        ("ConcreteUnionTypes", "ConcreteUnionTypes.rs"),
     ]:
         generate(config, name, os.path.join(out_dir, filename))
     make_dir(doc_servo)

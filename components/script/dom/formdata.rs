@@ -114,7 +114,7 @@ impl FormDataMethods<crate::DomTypeHolder> for FormData {
     }
 
     // https://xhr.spec.whatwg.org/#dom-formdata-get
-    fn Get(&self, name: USVString) -> Option<FileOrUSVString<crate::DomTypeHolder>> {
+    fn Get(&self, name: USVString) -> Option<FileOrUSVString> {
         self.data
             .borrow()
             .iter()
@@ -128,7 +128,7 @@ impl FormDataMethods<crate::DomTypeHolder> for FormData {
     }
 
     // https://xhr.spec.whatwg.org/#dom-formdata-getall
-    fn GetAll(&self, name: USVString) -> Vec<FileOrUSVString<crate::DomTypeHolder>> {
+    fn GetAll(&self, name: USVString) -> Vec<FileOrUSVString> {
         self.data
             .borrow()
             .iter()
@@ -231,13 +231,13 @@ impl FormData {
 
 impl Iterable for FormData {
     type Key = USVString;
-    type Value = FileOrUSVString<crate::DomTypeHolder>;
+    type Value = FileOrUSVString;
 
     fn get_iterable_length(&self) -> u32 {
         self.data.borrow().len() as u32
     }
 
-    fn get_value_at_index(&self, n: u32) -> FileOrUSVString<crate::DomTypeHolder> {
+    fn get_value_at_index(&self, n: u32) -> FileOrUSVString {
         let data = self.data.borrow();
         let datum = &data.get(n as usize).unwrap().1;
         match &datum.value {

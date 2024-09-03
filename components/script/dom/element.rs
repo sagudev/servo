@@ -2756,17 +2756,17 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-    fn Prepend(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn Prepend(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().prepend(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-append
-    fn Append(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn Append(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().append(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
-    fn ReplaceChildren(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn ReplaceChildren(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().replace_children(nodes)
     }
 
@@ -2783,17 +2783,17 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-before
-    fn Before(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn Before(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().before(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-after
-    fn After(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn After(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().after(nodes)
     }
 
     // https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    fn ReplaceWith(&self, nodes: Vec<NodeOrString<crate::DomTypeHolder>>) -> ErrorResult {
+    fn ReplaceWith(&self, nodes: Vec<NodeOrString>) -> ErrorResult {
         self.upcast::<Node>().replace_with(nodes)
     }
 

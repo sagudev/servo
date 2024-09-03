@@ -220,8 +220,8 @@ impl HTMLSelectElementMethods<crate::DomTypeHolder> for HTMLSelectElement {
     // https://html.spec.whatwg.org/multipage/#dom-select-add
     fn Add(
         &self,
-        element: HTMLOptionElementOrHTMLOptGroupElement<crate::DomTypeHolder>,
-        before: Option<HTMLElementOrLong<crate::DomTypeHolder>>,
+        element: HTMLOptionElementOrHTMLOptGroupElement,
+        before: Option<HTMLElementOrLong>,
     ) -> ErrorResult {
         self.Options().Add(element, before)
     }
