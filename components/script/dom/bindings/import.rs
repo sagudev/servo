@@ -108,10 +108,10 @@ pub mod module {
         IDLInterface, StringificationBehavior, ToJSValConvertible, DOM_OBJECT_SLOT,
     };
     pub use crate::dom::bindings::error::{throw_constructor_without_new, Error, ErrorResult};
-    pub use crate::dom::bindings::finalize::{
+    /*pub use crate::dom::bindings::finalize::{
         finalize_common, finalize_global, finalize_weak_referenceable,
-    };
-    pub use crate::dom::bindings::guard::{Condition, Guard};
+    };*/
+    //pub use crate::dom::bindings::guard::{Condition, Guard};
     pub use crate::dom::bindings::htmlconstructor::{
         pop_current_element_queue, push_new_element_queue,
     };
