@@ -2776,7 +2776,7 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                 "crate::reflector::MutDomObject",
                 "malloc_size_of::MallocSizeOf",
                 "crate::reflector::DomObject",
-                "crate::reflector::DomGlobal<Self>",
+                #"crate::reflector::DomGlobal<Self>",
             ]
 
         if descriptor.register:
@@ -2786,7 +2786,7 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
                     "PartialEq",
                 ]
 
-            if descriptor.concrete:
+            if descriptor.concrete and not descriptor.isGlobal():
                 traits += ["crate::reflector::DomObjectWrap<Self>"]
 
         if not descriptor.interface.isCallback() and not descriptor.interface.isIteratorInterface():
@@ -3282,8 +3282,9 @@ class CGDomObjectIteratorWrap(CGThing):
 
     def define(self):
         assert self.descriptor.interface.isIteratorInterface()
+        iteratorName = self.descriptor.interface.identifier.name
         name = self.descriptor.interface.iterableInterface.identifier.name
-        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(name)}"
+        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(iteratorName)}"
         return f"""
 impl DomObjectIteratorWrap<crate::DomTypeHolder> for {name} {{
     const ITER_WRAP: unsafe fn(
@@ -3925,7 +3926,7 @@ class CGCallGenerator(CGThing):
             if static:
                 glob = "global.upcast::<D::GlobalScope>()"
             else:
-                glob = "&this.global()"
+                glob = "&this.global::<D>()"
 
             self.cgRoot.append(CGGeneric(
                 "let result = match result {\n"
@@ -8302,7 +8303,7 @@ class GlobalGenRoots():
 
         cgThings = []
         for descriptor in descriptors:
-            if descriptor.concrete:
+            if descriptor.concrete and not descriptor.isGlobal():
                 if descriptor.interface.isIteratorInterface():
                     cgThings.append(CGDomObjectIteratorWrap(descriptor))
                 else:

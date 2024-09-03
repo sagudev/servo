@@ -23,7 +23,7 @@ use crate::dom::bindings::codegen::Bindings::IterableIteratorBinding::{
 };
 use crate::dom::bindings::error::Fallible;
 use crate::dom::bindings::reflector::{
-    reflect_dom_object, DomObjectIteratorWrap, DomObjectWrap, Reflector, DomGlobal,
+    reflect_dom_object, DomObjectIteratorWrap, DomObjectWrap, Reflector/*, DomGlobal*/,
 };
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
 use crate::dom::bindings::trace::{JSTraceable, RootedTraceableBox};
@@ -58,7 +58,7 @@ pub trait Iterable {
 
 /// An iterator over the iterable entries of a given DOM interface.
 #[dom_struct]
-pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> {
+pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable /*+ DomGlobal<D>*/> {
     reflector: Reflector,
     iterable: Dom<T>,
     type_: IteratorType,
@@ -67,23 +67,23 @@ pub struct IterableIterator<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> +
     _marker: NoTrace<std::marker::PhantomData<D>>,
 }
 
-impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
+/*impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable /*+ DomGlobal<D>*/> IterableIterator<D, T> {
     pub fn global(&self) -> DomRoot<D::GlobalScope> {
         <Self as DomGlobal<D>>::global(self)
     }
-}
+}*/
 
 pub(crate) struct NoTrace<T>(T);
 
-//impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterableIterator<D, T> {}
+//impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomGlobal<D> for IterablefqIterator<D, T> {}
 
-impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface> IDLInterface for IterableIterator<D, T> {
+impl <D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable /*+ DomGlobal<D>*/ + IDLInterface> IDLInterface for IterableIterator<D, T> {
     fn derives(class: &'static DOMClass) -> bool {
         <T as IDLInterface>::derives(class)
     }
 }
 
-impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable /*+ DomGlobal<D>*/> IterableIterator<D, T> {
     /// Create a new iterator instance for the provided iterable DOM interface.
     pub fn new(iterable: &T, type_: IteratorType) -> DomRoot<Self> {
         let iterator = Box::new(IterableIterator {
@@ -93,7 +93,7 @@ impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable
             index: Cell::new(0),
             _marker: NoTrace(std::marker::PhantomData),
         });
-        reflect_dom_object(iterator, &*iterable.global())
+        reflect_dom_object(iterator, &*iterable.global::<D>())
     }
 
     /// Return the next value from the iterable object.
@@ -141,7 +141,7 @@ impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable
     }
 }
 
-impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>> DomObjectWrap<D> for IterableIterator<D, T> {
+impl<D: DomTypes + 'static, T: DomObjectIteratorWrap<D> + JSTraceable + Iterable /*+ DomGlobal<D>*/> DomObjectWrap<D> for IterableIterator<D, T> {
     const WRAP: unsafe fn(
         JSContext,
         &D::GlobalScope,

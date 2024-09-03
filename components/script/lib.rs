@@ -101,7 +101,7 @@ pub use script_runtime::JSEngineSetup;
 
 // export traits to be available for derive macros
 pub use script_bindings::inheritance::HasParent;
-pub use script_bindings::reflector::{DomObject, DomGlobal, MutDomObject, Reflector};
+pub use script_bindings::reflector::{DomObject/*, DomGlobal*/, MutDomObject, Reflector};
 pub use script_bindings::trace::{CustomTraceable, JSTraceable};
 
 pub use crate::dom::bindings::codegen::DomTypeHolder::DomTypeHolder;

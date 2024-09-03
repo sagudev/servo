@@ -6,7 +6,7 @@ use dom_struct::dom_struct;
 use html5ever::LocalName;
 use js::rust::HandleObject;
 use script_traits::serializable::BlobImpl;
-use script_bindings::reflector::DomGlobal;
+//use script_bindings::reflector::DomGlobal;
 
 use super::bindings::trace::NoTrace;
 use crate::dom::bindings::cell::DomRefCell;

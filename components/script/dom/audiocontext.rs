@@ -17,6 +17,7 @@ use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::AudioNodeOptions;
 use crate::dom::bindings::codegen::Bindings::BaseAudioContextBinding::AudioContextState;
 use crate::dom::bindings::codegen::Bindings::BaseAudioContextBinding::BaseAudioContext_Binding::BaseAudioContextMethods;
 use crate::dom::bindings::codegen::UnionTypes::AudioContextLatencyCategoryOrDouble;
+use crate::dom::bindings::conversions::LocalFrom;
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::num::Finite;
@@ -54,7 +55,7 @@ impl AudioContext {
     ) -> Fallible<AudioContext> {
         // Steps 1-3.
         let context = BaseAudioContext::new_inherited(
-            BaseAudioContextOptions::AudioContext(options.into()),
+            BaseAudioContextOptions::AudioContext(LocalFrom::from(options).into()),
             pipeline_id,
         )?;
 
@@ -296,26 +297,26 @@ impl AudioContextMethods<crate::DomTypeHolder> for AudioContext {
     }
 }
 
-impl From<AudioContextLatencyCategory> for LatencyCategory {
+impl From<AudioContextLatencyCategory> for LocalFrom<LatencyCategory> {
     fn from(category: AudioContextLatencyCategory) -> Self {
         match category {
             AudioContextLatencyCategory::Balanced => LatencyCategory::Balanced,
             AudioContextLatencyCategory::Interactive => LatencyCategory::Interactive,
             AudioContextLatencyCategory::Playback => LatencyCategory::Playback,
-        }
+        }.into()
     }
 }
 
-impl<'a> From<&'a AudioContextOptions> for RealTimeAudioContextOptions {
+impl<'a> From<&'a AudioContextOptions> for LocalFrom<RealTimeAudioContextOptions> {
     fn from(options: &AudioContextOptions) -> Self {
-        Self {
+        RealTimeAudioContextOptions {
             sample_rate: *options.sampleRate.unwrap_or(Finite::wrap(44100.)),
             latency_hint: match options.latencyHint {
                 AudioContextLatencyCategoryOrDouble::AudioContextLatencyCategory(category) => {
-                    category.into()
+                    LocalFrom::from(category).into()
                 },
                 AudioContextLatencyCategoryOrDouble::Double(_) => LatencyCategory::Interactive, // TODO
             },
-        }
+        }.into()
     }
 }

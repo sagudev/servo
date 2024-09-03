@@ -667,3 +667,17 @@ pub unsafe fn windowproxy_from_handlevalue(
     let ptr = value.to_private() as *const WindowProxy;
     Ok(DomRoot::from_ref(&*ptr))
 }
+
+pub struct LocalFrom<T>(T);
+
+impl <T> From<T> for LocalFrom<T> {
+    fn from(t: T) -> LocalFrom<T> {
+        LocalFrom(t)
+    }
+}
+
+impl <T> Into<T> for LocalFrom<T> {
+    fn into(t: LocalFrom<T>) -> T {
+        t.0
+    }
+}
