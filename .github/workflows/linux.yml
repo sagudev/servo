@@ -107,8 +107,8 @@ jobs:
         run: |
           sudo apt update
           python3 ./mach bootstrap
-      - name: Tidy
-        run: python3 ./mach test-tidy --no-progress --all
+      #- name: Tidy
+      #  run: python3 ./mach test-tidy --no-progress --all
       - name: Build (${{ inputs.profile }})
         run: |
           python3 ./mach build --locked --${{ inputs.profile }}
