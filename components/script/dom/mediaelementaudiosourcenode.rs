@@ -77,7 +77,7 @@ impl MediaElementAudioSourceNodeMethods<crate::DomTypeHolder> for MediaElementAu
         window: &Window,
         proto: Option<HandleObject>,
         context: &AudioContext,
-        options: &MediaElementAudioSourceOptions<crate::DomTypeHolder>,
+        options: &MediaElementAudioSourceOptions,
     ) -> Fallible<DomRoot<MediaElementAudioSourceNode>> {
         MediaElementAudioSourceNode::new_with_proto(window, proto, context, &options.mediaElement)
     }

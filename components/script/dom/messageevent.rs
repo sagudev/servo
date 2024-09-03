@@ -226,7 +226,7 @@ impl MessageEventMethods<crate::DomTypeHolder> for MessageEvent {
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: RootedTraceableBox<MessageEventBinding::MessageEventInit<crate::DomTypeHolder>>,
+        init: RootedTraceableBox<MessageEventBinding::MessageEventInit>,
     ) -> Fallible<DomRoot<MessageEvent>> {
         let ev = MessageEvent::new_with_proto(
             global,

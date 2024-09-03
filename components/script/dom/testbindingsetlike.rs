@@ -37,17 +37,16 @@ impl TestBindingSetlike {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TestBindingSetlikeMethods<crate::DomTypeHolder> for TestBindingSetlike {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestBindingSetlike>> {
         Ok(TestBindingSetlike::new(global, proto))
     }
-}
 
-impl TestBindingSetlikeMethods<crate::DomTypeHolder> for TestBindingSetlike {
     fn Size(&self) -> u32 {
         self.internal.size()
     }

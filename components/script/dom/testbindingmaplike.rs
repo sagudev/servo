@@ -38,17 +38,16 @@ impl TestBindingMaplike {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TestBindingMaplikeMethods<crate::DomTypeHolder> for TestBindingMaplike {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestBindingMaplike>> {
         Ok(TestBindingMaplike::new(global, proto))
     }
-}
 
-impl TestBindingMaplikeMethods<crate::DomTypeHolder> for TestBindingMaplike {
     fn SetInternal(&self, key: DOMString, value: i32) {
         self.internal.set(key, value)
     }

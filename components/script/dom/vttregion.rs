@@ -48,14 +48,13 @@ impl VTTRegion {
     fn new(global: &GlobalScope, proto: Option<HandleObject>) -> DomRoot<Self> {
         reflect_dom_object_with_proto(Box::new(Self::new_inherited()), global, proto)
     }
-
-    #[allow(non_snake_case)]
-    pub fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<Self>> {
-        Ok(VTTRegion::new(&window.global(), proto))
-    }
 }
 
 impl VTTRegionMethods<crate::DomTypeHolder> for VTTRegion {
+    fn Constructor(window: &Window, proto: Option<HandleObject>) -> Fallible<DomRoot<Self>> {
+        Ok(VTTRegion::new(&window.global(), proto))
+    }
+
     // https://w3c.github.io/webvtt/#dom-vttregion-id
     fn Id(&self) -> DOMString {
         self.id.borrow().clone()

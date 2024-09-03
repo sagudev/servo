@@ -34,6 +34,31 @@ impl WebGLContextEventMethods<crate::DomTypeHolder> for WebGLContextEvent {
     fn IsTrusted(&self) -> bool {
         self.event.IsTrusted()
     }
+
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+        type_: DOMString,
+        init: &WebGLContextEventInit,
+    ) -> Fallible<DomRoot<WebGLContextEvent>> {
+        let status_message = match init.statusMessage.as_ref() {
+            Some(message) => message.clone(),
+            None => DOMString::new(),
+        };
+
+        let bubbles = EventBubbles::from(init.parent.bubbles);
+
+        let cancelable = EventCancelable::from(init.parent.cancelable);
+
+        Ok(WebGLContextEvent::new_with_proto(
+            window,
+            proto,
+            Atom::from(type_),
+            bubbles,
+            cancelable,
+            status_message,
+        ))
+    }
 }
 
 impl WebGLContextEvent {
@@ -74,31 +99,5 @@ impl WebGLContextEvent {
         }
 
         event
-    }
-
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-        type_: DOMString,
-        init: &WebGLContextEventInit,
-    ) -> Fallible<DomRoot<WebGLContextEvent>> {
-        let status_message = match init.statusMessage.as_ref() {
-            Some(message) => message.clone(),
-            None => DOMString::new(),
-        };
-
-        let bubbles = EventBubbles::from(init.parent.bubbles);
-
-        let cancelable = EventCancelable::from(init.parent.cancelable);
-
-        Ok(WebGLContextEvent::new_with_proto(
-            window,
-            proto,
-            Atom::from(type_),
-            bubbles,
-            cancelable,
-            status_message,
-        ))
     }
 }

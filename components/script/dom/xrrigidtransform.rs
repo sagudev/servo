@@ -64,10 +64,11 @@ impl XRRigidTransform {
         let transform = RigidTransform3D::identity();
         XRRigidTransform::new(window, transform)
     }
+}
 
+impl XRRigidTransformMethods<crate::DomTypeHolder> for XRRigidTransform {
     // https://immersive-web.github.io/webxr/#dom-xrrigidtransform-xrrigidtransform
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         position: &DOMPointInit,
@@ -100,9 +101,7 @@ impl XRRigidTransform {
             transform,
         ))
     }
-}
 
-impl XRRigidTransformMethods<crate::DomTypeHolder> for XRRigidTransform {
     // https://immersive-web.github.io/webxr/#dom-xrrigidtransform-position
     fn Position(&self) -> DomRoot<DOMPointReadOnly> {
         self.position.or_init(|| {

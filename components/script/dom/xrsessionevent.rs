@@ -62,9 +62,10 @@ impl XRSessionEvent {
         }
         trackevent
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XRSessionEventMethods<crate::DomTypeHolder> for XRSessionEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -79,9 +80,7 @@ impl XRSessionEvent {
             &init.session,
         ))
     }
-}
 
-impl XRSessionEventMethods<crate::DomTypeHolder> for XRSessionEvent {
     // https://immersive-web.github.io/webxr/#dom-xrsessioneventinit-session
     fn Session(&self) -> DomRoot<XRSession> {
         DomRoot::from_ref(&*self.session)

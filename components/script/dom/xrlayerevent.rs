@@ -35,9 +35,10 @@ impl XRLayerEvent {
     fn new(window: &Window, proto: Option<HandleObject>, layer: &XRLayer) -> DomRoot<XRLayerEvent> {
         reflect_dom_object_with_proto(Box::new(XRLayerEvent::new_inherited(layer)), window, proto)
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XRLayerEventMethods<crate::DomTypeHolder> for XRLayerEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -50,9 +51,7 @@ impl XRLayerEvent {
         event.event.init_event(type_, bubbles, cancelable);
         event
     }
-}
 
-impl XRLayerEventMethods<crate::DomTypeHolder> for XRLayerEvent {
     // https://immersive-web.github.io/layers/#dom-xrlayerevent-layer
     fn Layer(&self) -> DomRoot<XRLayer> {
         DomRoot::from_ref(&self.layer)

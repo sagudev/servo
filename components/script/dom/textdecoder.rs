@@ -35,7 +35,6 @@ pub struct TextDecoder {
     do_not_flush: Cell<bool>,
 }
 
-#[allow(non_snake_case)]
 impl TextDecoder {
     fn new_inherited(encoding: &'static Encoding, fatal: bool, ignoreBOM: bool) -> TextDecoder {
         TextDecoder {
@@ -72,9 +71,11 @@ impl TextDecoder {
             proto,
         )
     }
+}
 
+impl TextDecoderMethods<crate::DomTypeHolder> for TextDecoder {
     /// <https://encoding.spec.whatwg.org/#dom-textdecoder>
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         label: DOMString,
@@ -92,9 +93,7 @@ impl TextDecoder {
             options.ignoreBOM,
         ))
     }
-}
 
-impl TextDecoderMethods<crate::DomTypeHolder> for TextDecoder {
     // https://encoding.spec.whatwg.org/#dom-textdecoder-encoding
     fn Encoding(&self) -> DOMString {
         DOMString::from(self.encoding.name().to_ascii_lowercase())

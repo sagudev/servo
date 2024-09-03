@@ -63,9 +63,10 @@ impl TransitionEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TransitionEventMethods<crate::DomTypeHolder> for TransitionEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -78,9 +79,7 @@ impl TransitionEvent {
             init,
         ))
     }
-}
 
-impl TransitionEventMethods<crate::DomTypeHolder> for TransitionEvent {
     // https://drafts.csswg.org/css-transitions/#Events-TransitionEvent-propertyName
     fn PropertyName(&self) -> DOMString {
         DOMString::from(&*self.property_name)

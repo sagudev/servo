@@ -155,8 +155,8 @@ impl RequestMethods<crate::DomTypeHolder> for Request {
     fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        mut input: RequestInfo<crate::DomTypeHolder>,
-        init: RootedTraceableBox<RequestInit<crate::DomTypeHolder>>,
+        mut input: RequestInfo,
+        init: RootedTraceableBox<RequestInit>,
     ) -> Fallible<DomRoot<Request>> {
         // Step 1
         let temporary_request: NetTraitsRequest;

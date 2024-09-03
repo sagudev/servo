@@ -27,7 +27,7 @@ pub struct RTCError {
 }
 
 impl RTCError {
-    fn new_inherited(global: &GlobalScope, init: &RTCErrorInit<crate::DomTypeHolder>, message: DOMString) -> RTCError {
+    fn new_inherited(global: &GlobalScope, init: &RTCErrorInit, message: DOMString) -> RTCError {
         RTCError {
             exception: Dom::from_ref(&*DOMException::new(
                 global,
@@ -42,14 +42,14 @@ impl RTCError {
         }
     }
 
-    pub fn new(global: &GlobalScope, init: &RTCErrorInit<crate::DomTypeHolder>, message: DOMString) -> DomRoot<RTCError> {
+    pub fn new(global: &GlobalScope, init: &RTCErrorInit, message: DOMString) -> DomRoot<RTCError> {
         Self::new_with_proto(global, None, init, message)
     }
 
     fn new_with_proto(
         global: &GlobalScope,
         proto: Option<HandleObject>,
-        init: &RTCErrorInit<crate::DomTypeHolder>,
+        init: &RTCErrorInit,
         message: DOMString,
     ) -> DomRoot<RTCError> {
         reflect_dom_object_with_proto(
@@ -64,7 +64,7 @@ impl RTCErrorMethods<crate::DomTypeHolder> for RTCError {
     fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
-        init: &RTCErrorInit<crate::DomTypeHolder>,
+        init: &RTCErrorInit,
         message: DOMString,
     ) -> DomRoot<RTCError> {
         RTCError::new_with_proto(&window.global(), proto, init, message)

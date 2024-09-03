@@ -187,7 +187,7 @@ impl MouseEventMethods<crate::DomTypeHolder> for MouseEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &MouseEventBinding::MouseEventInit<crate::DomTypeHolder>,
+        init: &MouseEventBinding::MouseEventInit,
     ) -> Fallible<DomRoot<MouseEvent>> {
         let bubbles = EventBubbles::from(init.parent.parent.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.parent.parent.cancelable);

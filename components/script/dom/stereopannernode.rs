@@ -91,9 +91,10 @@ impl StereoPannerNode {
         let node = StereoPannerNode::new_inherited(window, context, options)?;
         Ok(reflect_dom_object_with_proto(Box::new(node), window, proto))
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl StereoPannerNodeMethods<crate::DomTypeHolder> for StereoPannerNode {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         context: &BaseAudioContext,
@@ -101,9 +102,7 @@ impl StereoPannerNode {
     ) -> Fallible<DomRoot<StereoPannerNode>> {
         StereoPannerNode::new_with_proto(window, proto, context, options)
     }
-}
 
-impl StereoPannerNodeMethods<crate::DomTypeHolder> for StereoPannerNode {
     // https://webaudio.github.io/web-audio-api/#dom-stereopannernode-pan
     fn Pan(&self) -> DomRoot<AudioParam> {
         DomRoot::from_ref(&self.pan)

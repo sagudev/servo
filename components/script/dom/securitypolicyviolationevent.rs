@@ -92,9 +92,11 @@ impl SecurityPolicyViolationEvent {
     ) -> DomRoot<Self> {
         Self::new_with_proto(global, None, type_, bubbles, cancelable, init)
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+#[allow(non_snake_case)]
+impl SecurityPolicyViolationEventMethods<crate::DomTypeHolder> for SecurityPolicyViolationEvent {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -109,10 +111,7 @@ impl SecurityPolicyViolationEvent {
             init,
         )
     }
-}
 
-#[allow(non_snake_case)]
-impl SecurityPolicyViolationEventMethods<crate::DomTypeHolder> for SecurityPolicyViolationEvent {
     /// <https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi>
     fn DocumentURI(&self) -> USVString {
         self.document_uri.clone()

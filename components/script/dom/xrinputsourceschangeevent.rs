@@ -94,9 +94,10 @@ impl XRInputSourcesChangeEvent {
 
         changeevent
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XRInputSourcesChangeEventMethods<crate::DomTypeHolder> for XRInputSourcesChangeEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -113,9 +114,7 @@ impl XRInputSourcesChangeEvent {
             &init.removed,
         )
     }
-}
 
-impl XRInputSourcesChangeEventMethods<crate::DomTypeHolder> for XRInputSourcesChangeEvent {
     // https://immersive-web.github.io/webxr/#dom-xrinputsourceschangeevent-session
     fn Session(&self) -> DomRoot<XRSession> {
         DomRoot::from_ref(&*self.session)

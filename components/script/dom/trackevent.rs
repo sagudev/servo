@@ -36,7 +36,6 @@ pub struct TrackEvent {
     track: Option<MediaTrack>,
 }
 
-#[allow(non_snake_case)]
 impl TrackEvent {
     #[allow(crown::unrooted_must_root)]
     fn new_inherited(track: &Option<VideoTrackOrAudioTrackOrTextTrack>) -> TrackEvent {
@@ -88,8 +87,11 @@ impl TrackEvent {
         }
         te
     }
+}
 
-    pub fn Constructor(
+#[allow(non_snake_case)]
+impl TrackEventMethods<crate::DomTypeHolder> for TrackEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -104,10 +106,7 @@ impl TrackEvent {
             &init.track,
         ))
     }
-}
 
-#[allow(non_snake_case)]
-impl TrackEventMethods<crate::DomTypeHolder> for TrackEvent {
     // https://html.spec.whatwg.org/multipage/#dom-trackevent-track
     fn GetTrack(&self) -> Option<VideoTrackOrAudioTrackOrTextTrack> {
         match &self.track {

@@ -3404,33 +3404,6 @@ impl Document {
         );
     }
 
-    // https://dom.spec.whatwg.org/#dom-document-document
-    #[allow(non_snake_case)]
-    pub fn Constructor(
-        window: &Window,
-        proto: Option<HandleObject>,
-    ) -> Fallible<DomRoot<Document>> {
-        let doc = window.Document();
-        let docloader = DocumentLoader::new(&doc.loader());
-        Ok(Document::new_with_proto(
-            window,
-            proto,
-            HasBrowsingContext::No,
-            None,
-            doc.origin().clone(),
-            IsHTMLDocument::NonHTMLDocument,
-            None,
-            None,
-            DocumentActivity::Inactive,
-            DocumentSource::NotFromParser,
-            docloader,
-            None,
-            None,
-            None,
-            Default::default(),
-        ))
-    }
-
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         window: &Window,
@@ -4140,6 +4113,32 @@ impl ProfilerMetadataFactory for Document {
 }
 
 impl DocumentMethods<crate::DomTypeHolder> for Document {
+    // https://dom.spec.whatwg.org/#dom-document-document
+    fn Constructor(
+        window: &Window,
+        proto: Option<HandleObject>,
+    ) -> Fallible<DomRoot<Document>> {
+        let doc = window.Document();
+        let docloader = DocumentLoader::new(&doc.loader());
+        Ok(Document::new_with_proto(
+            window,
+            proto,
+            HasBrowsingContext::No,
+            None,
+            doc.origin().clone(),
+            IsHTMLDocument::NonHTMLDocument,
+            None,
+            None,
+            DocumentActivity::Inactive,
+            DocumentSource::NotFromParser,
+            docloader,
+            None,
+            None,
+            None,
+            Default::default(),
+        ))
+    }
+
     // https://w3c.github.io/editing/ActiveDocuments/execCommand.html#querycommandsupported()
     fn QueryCommandSupported(&self, _command: DOMString) -> bool {
         false
@@ -4601,7 +4600,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
         &self,
         root: &Node,
         what_to_show: u32,
-        filter: Option<Rc<NodeFilter<crate::DomTypeHolder>>>,
+        filter: Option<Rc<NodeFilter>>,
     ) -> DomRoot<NodeIterator> {
         NodeIterator::new(self, root, what_to_show, filter)
     }
@@ -4611,7 +4610,7 @@ impl DocumentMethods<crate::DomTypeHolder> for Document {
         &self,
         root: &Node,
         what_to_show: u32,
-        filter: Option<Rc<NodeFilter<crate::DomTypeHolder>>>,
+        filter: Option<Rc<NodeFilter>>,
     ) -> DomRoot<TreeWalker> {
         TreeWalker::new(self, root, what_to_show, filter)
     }

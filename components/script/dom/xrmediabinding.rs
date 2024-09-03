@@ -42,9 +42,10 @@ impl XRMediaBinding {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XRMediaBindingMethods<crate::DomTypeHolder> for XRMediaBinding {
+    fn Constructor(
         global: &Window,
         proto: Option<HandleObject>,
         session: &XRSession,
@@ -62,9 +63,7 @@ impl XRMediaBinding {
         // Steps 3-5.
         Ok(XRMediaBinding::new(global, proto, session))
     }
-}
 
-impl XRMediaBindingMethods<crate::DomTypeHolder> for XRMediaBinding {
     /// <https://immersive-web.github.io/layers/#dom-xrmediabinding-createquadlayer>
     fn CreateQuadLayer(
         &self,

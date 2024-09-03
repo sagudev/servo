@@ -32,17 +32,16 @@ impl TestBindingIterable {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TestBindingIterableMethods<crate::DomTypeHolder> for TestBindingIterable {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestBindingIterable>> {
         Ok(TestBindingIterable::new(global, proto))
     }
-}
 
-impl TestBindingIterableMethods<crate::DomTypeHolder> for TestBindingIterable {
     fn Add(&self, v: DOMString) {
         self.vals.borrow_mut().push(v);
     }

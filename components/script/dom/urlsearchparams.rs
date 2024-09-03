@@ -49,9 +49,14 @@ impl URLSearchParams {
         reflect_dom_object_with_proto(Box::new(URLSearchParams::new_inherited(url)), global, proto)
     }
 
+    pub fn set_list(&self, list: Vec<(String, String)>) {
+        *self.list.borrow_mut() = list;
+    }
+}
+
+impl URLSearchParamsMethods<crate::DomTypeHolder> for URLSearchParams {
     /// <https://url.spec.whatwg.org/#dom-urlsearchparams-urlsearchparams>
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         init: USVStringSequenceSequenceOrUSVStringUSVStringRecordOrUSVString,
@@ -96,12 +101,6 @@ impl URLSearchParams {
         Ok(query)
     }
 
-    pub fn set_list(&self, list: Vec<(String, String)>) {
-        *self.list.borrow_mut() = list;
-    }
-}
-
-impl URLSearchParamsMethods<crate::DomTypeHolder> for URLSearchParams {
     /// <https://url.spec.whatwg.org/#dom-urlsearchparams-size>
     fn Size(&self) -> u32 {
         self.list.borrow().len() as u32

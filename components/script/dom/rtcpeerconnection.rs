@@ -770,7 +770,7 @@ impl RTCPeerConnectionMethods<crate::DomTypeHolder> for RTCPeerConnection {
     fn AddTransceiver(
         &self,
         _track_or_kind: MediaStreamTrackOrString<crate::DomTypeHolder>,
-        init: &RTCRtpTransceiverInit<crate::DomTypeHolder>,
+        init: &RTCRtpTransceiverInit,
     ) -> DomRoot<RTCRtpTransceiver> {
         RTCRtpTransceiver::new(&self.global(), init.direction)
     }

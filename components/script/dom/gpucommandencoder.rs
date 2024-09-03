@@ -131,7 +131,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-beginrenderpass>
     fn BeginRenderPass(
         &self,
-        descriptor: &GPURenderPassDescriptor<crate::DomTypeHolder>,
+        descriptor: &GPURenderPassDescriptor,
     ) -> DomRoot<GPURenderPassEncoder> {
         let depth_stencil_attachment = descriptor.depthStencilAttachment.as_ref().map(|depth| {
             wgpu_com::RenderPassDepthStencilAttachment {
@@ -246,7 +246,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copybuffertotexture>
     fn CopyBufferToTexture(
         &self,
-        source: &GPUImageCopyBuffer<crate::DomTypeHolder>,
+        source: &GPUImageCopyBuffer,
         destination: &GPUImageCopyTexture,
         copy_size: GPUExtent3D,
     ) {
@@ -269,7 +269,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
     fn CopyTextureToBuffer(
         &self,
         source: &GPUImageCopyTexture,
-        destination: &GPUImageCopyBuffer<crate::DomTypeHolder>,
+        destination: &GPUImageCopyBuffer,
         copy_size: GPUExtent3D,
     ) {
         self.buffers

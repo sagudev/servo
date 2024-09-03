@@ -155,7 +155,7 @@ impl KeyboardEventMethods<crate::DomTypeHolder> for KeyboardEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &KeyboardEventBinding::KeyboardEventInit<crate::DomTypeHolder>,
+        init: &KeyboardEventBinding::KeyboardEventInit,
     ) -> Fallible<DomRoot<KeyboardEvent>> {
         let mut modifiers = Modifiers::empty();
         modifiers.set(Modifiers::CONTROL, init.parent.ctrlKey);

@@ -154,7 +154,7 @@ impl ExtendableMessageEventMethods<crate::DomTypeHolder> for ExtendableMessageEv
         worker: &ServiceWorkerGlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: RootedTraceableBox<ExtendableMessageEventBinding::ExtendableMessageEventInit<crate::DomTypeHolder>>,
+        init: RootedTraceableBox<ExtendableMessageEventBinding::ExtendableMessageEventInit>,
     ) -> Fallible<DomRoot<ExtendableMessageEvent>> {
         let global = worker.upcast::<GlobalScope>();
         let ev = ExtendableMessageEvent::new_with_proto(

@@ -33,18 +33,17 @@ impl TextEncoder {
     fn new(global: &GlobalScope, proto: Option<HandleObject>) -> DomRoot<TextEncoder> {
         reflect_dom_object_with_proto(Box::new(TextEncoder::new_inherited()), global, proto)
     }
+}
 
+impl TextEncoderMethods<crate::DomTypeHolder> for TextEncoder {
     // https://encoding.spec.whatwg.org/#dom-textencoder
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TextEncoder>> {
         Ok(TextEncoder::new(global, proto))
     }
-}
 
-impl TextEncoderMethods<crate::DomTypeHolder> for TextEncoder {
     // https://encoding.spec.whatwg.org/#dom-textencoder-encoding
     fn Encoding(&self) -> DOMString {
         DOMString::from("utf-8")

@@ -153,7 +153,7 @@ impl OffscreenCanvasMethods<crate::DomTypeHolder> for OffscreenCanvas {
         _cx: JSContext,
         id: DOMString,
         _options: HandleValue,
-    ) -> Option<OffscreenRenderingContext<crate::DomTypeHolder>> {
+    ) -> Option<OffscreenRenderingContext> {
         match &*id {
             "2d" => self
                 .get_or_init_2d_context()

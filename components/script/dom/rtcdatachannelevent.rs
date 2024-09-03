@@ -69,7 +69,7 @@ impl RTCDataChannelEventMethods<crate::DomTypeHolder> for RTCDataChannelEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &RTCDataChannelEventInit<crate::DomTypeHolder>,
+        init: &RTCDataChannelEventInit,
     ) -> DomRoot<RTCDataChannelEvent> {
         RTCDataChannelEvent::new_with_proto(
             &window.global(),

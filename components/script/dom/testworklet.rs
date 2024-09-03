@@ -44,17 +44,16 @@ impl TestWorklet {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TestWorkletMethods<crate::DomTypeHolder> for TestWorklet {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestWorklet>> {
         Ok(TestWorklet::new(window, proto))
     }
-}
 
-impl TestWorkletMethods<crate::DomTypeHolder> for TestWorklet {
     #[allow(non_snake_case)]
     fn AddModule(
         &self,

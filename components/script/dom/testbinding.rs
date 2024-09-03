@@ -70,8 +70,10 @@ impl TestBinding {
     fn new(global: &GlobalScope, proto: Option<HandleObject>) -> DomRoot<TestBinding> {
         reflect_dom_object_with_proto(Box::new(TestBinding::new_inherited()), global, proto)
     }
+}
 
-    pub fn Constructor(
+impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestBinding>> {
@@ -79,7 +81,7 @@ impl TestBinding {
     }
 
     #[allow(unused_variables)]
-    pub fn Constructor_(
+    fn Constructor_(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         nums: Vec<f64>,
@@ -88,16 +90,14 @@ impl TestBinding {
     }
 
     #[allow(unused_variables)]
-    pub fn Constructor__(
+    fn Constructor__(
         global: &GlobalScope,
         proto: Option<HandleObject>,
         num: f64,
     ) -> Fallible<DomRoot<TestBinding>> {
         Ok(TestBinding::new(global, proto))
     }
-}
 
-impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn BooleanAttribute(&self) -> bool {
         false
     }
@@ -663,7 +663,7 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassAny(&self, _: SafeJSContext, _: HandleValue) {}
     fn PassObject(&self, _: SafeJSContext, _: *mut JSObject) {}
     fn PassCallbackFunction(&self, _: Rc<Function>) {}
-    fn PassCallbackInterface(&self, _: Rc<EventListener<crate::DomTypeHolder>>) {}
+    fn PassCallbackInterface(&self, _: Rc<EventListener>) {}
     fn PassSequence(&self, _: Vec<i32>) {}
     fn PassAnySequence(&self, _: SafeJSContext, _: CustomAutoRooterGuard<Vec<JSVal>>) {}
     fn AnySequencePassthrough(
@@ -715,7 +715,7 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassNullableUnion5(&self, _: Option<UnsignedLongOrBoolean>) {}
     fn PassNullableUnion6(&self, _: Option<ByteStringOrLong>) {}
     fn PassNullableCallbackFunction(&self, _: Option<Rc<Function>>) {}
-    fn PassNullableCallbackInterface(&self, _: Option<Rc<EventListener<crate::DomTypeHolder>>>) {}
+    fn PassNullableCallbackInterface(&self, _: Option<Rc<EventListener>>) {}
     fn PassNullableSequence(&self, _: Option<Vec<i32>>) {}
 
     fn PassOptionalBoolean(&self, _: Option<bool>) {}
@@ -745,7 +745,7 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassOptionalAny(&self, _: SafeJSContext, _: HandleValue) {}
     fn PassOptionalObject(&self, _: SafeJSContext, _: Option<*mut JSObject>) {}
     fn PassOptionalCallbackFunction(&self, _: Option<Rc<Function>>) {}
-    fn PassOptionalCallbackInterface(&self, _: Option<Rc<EventListener<crate::DomTypeHolder>>>) {}
+    fn PassOptionalCallbackInterface(&self, _: Option<Rc<EventListener>>) {}
     fn PassOptionalSequence(&self, _: Option<Vec<i32>>) {}
 
     fn PassOptionalNullableBoolean(&self, _: Option<Option<bool>>) {}
@@ -774,7 +774,7 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassOptionalNullableUnion5(&self, _: Option<Option<UnsignedLongOrBoolean>>) {}
     fn PassOptionalNullableUnion6(&self, _: Option<Option<ByteStringOrLong>>) {}
     fn PassOptionalNullableCallbackFunction(&self, _: Option<Option<Rc<Function>>>) {}
-    fn PassOptionalNullableCallbackInterface(&self, _: Option<Option<Rc<EventListener<crate::DomTypeHolder>>>>) {}
+    fn PassOptionalNullableCallbackInterface(&self, _: Option<Option<Rc<EventListener>>>) {}
     fn PassOptionalNullableSequence(&self, _: Option<Option<Vec<i32>>>) {}
 
     fn PassOptionalBooleanWithDefault(&self, _: bool) {}
@@ -814,7 +814,7 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassOptionalNullableUnionWithDefault(&self, _: Option<HTMLElementOrLong>) {}
     fn PassOptionalNullableUnion2WithDefault(&self, _: Option<EventOrString>) {}
     // fn PassOptionalNullableCallbackFunctionWithDefault(self, _: Option<Function>) {}
-    fn PassOptionalNullableCallbackInterfaceWithDefault(&self, _: Option<Rc<EventListener<crate::DomTypeHolder>>>) {}
+    fn PassOptionalNullableCallbackInterfaceWithDefault(&self, _: Option<Rc<EventListener>>) {}
     fn PassOptionalAnyWithDefault(&self, _: SafeJSContext, _: HandleValue) {}
 
     fn PassOptionalNullableBooleanWithNonNullDefault(&self, _: Option<bool>) {}
@@ -1096,42 +1096,36 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn MethodInternalThrowToRejectPromise(&self, _arg: u64) -> Rc<Promise> {
         unreachable!("Method should already throw")
     }
-}
 
-#[allow(non_snake_case)]
-impl TestBinding {
-    pub fn StaticThrowToRejectPromise(_: &GlobalScope) -> Fallible<Rc<Promise>> {
+    fn StaticThrowToRejectPromise(_: &GlobalScope) -> Fallible<Rc<Promise>> {
         Err(Error::Type("test".to_string()))
     }
 
-    pub fn StaticInternalThrowToRejectPromise(_: &GlobalScope, _arg: u64) -> Rc<Promise> {
+    fn StaticInternalThrowToRejectPromise(_: &GlobalScope, _arg: u64) -> Rc<Promise> {
         unreachable!("Method should already throw")
     }
-}
 
-#[allow(non_snake_case)]
-impl TestBinding {
-    pub fn BooleanAttributeStatic(_: &GlobalScope) -> bool {
+    fn BooleanAttributeStatic(_: &GlobalScope) -> bool {
         false
     }
-    pub fn SetBooleanAttributeStatic(_: &GlobalScope, _: bool) {}
-    pub fn ReceiveVoidStatic(_: &GlobalScope) {}
-    pub fn PrefControlledStaticAttributeDisabled(_: &GlobalScope) -> bool {
+    fn SetBooleanAttributeStatic(_: &GlobalScope, _: bool) {}
+    fn ReceiveVoidStatic(_: &GlobalScope) {}
+    fn PrefControlledStaticAttributeDisabled(_: &GlobalScope) -> bool {
         false
     }
-    pub fn PrefControlledStaticAttributeEnabled(_: &GlobalScope) -> bool {
+    fn PrefControlledStaticAttributeEnabled(_: &GlobalScope) -> bool {
         false
     }
-    pub fn PrefControlledStaticMethodDisabled(_: &GlobalScope) {}
-    pub fn PrefControlledStaticMethodEnabled(_: &GlobalScope) {}
-    pub fn FuncControlledStaticAttributeDisabled(_: &GlobalScope) -> bool {
+    fn PrefControlledStaticMethodDisabled(_: &GlobalScope) {}
+    fn PrefControlledStaticMethodEnabled(_: &GlobalScope) {}
+    fn FuncControlledStaticAttributeDisabled(_: &GlobalScope) -> bool {
         false
     }
-    pub fn FuncControlledStaticAttributeEnabled(_: &GlobalScope) -> bool {
+    fn FuncControlledStaticAttributeEnabled(_: &GlobalScope) -> bool {
         false
     }
-    pub fn FuncControlledStaticMethodDisabled(_: &GlobalScope) {}
-    pub fn FuncControlledStaticMethodEnabled(_: &GlobalScope) {}
+    fn FuncControlledStaticMethodDisabled(_: &GlobalScope) {}
+    fn FuncControlledStaticMethodEnabled(_: &GlobalScope) {}
 }
 
 impl TestBinding {

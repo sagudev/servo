@@ -92,9 +92,10 @@ impl WheelEvent {
 
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl WheelEventMethods<crate::DomTypeHolder> for WheelEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -116,9 +117,7 @@ impl WheelEvent {
 
         Ok(event)
     }
-}
 
-impl WheelEventMethods<crate::DomTypeHolder> for WheelEvent {
     // https://w3c.github.io/uievents/#widl-WheelEvent-deltaX
     fn DeltaX(&self) -> Finite<f64> {
         self.delta_x.get()

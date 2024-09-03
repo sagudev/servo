@@ -62,9 +62,10 @@ impl SubmitEvent {
         }
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl SubmitEventMethods<crate::DomTypeHolder> for SubmitEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -79,9 +80,7 @@ impl SubmitEvent {
             init.submitter.as_ref().map(|s| DomRoot::from_ref(&**s)),
         )
     }
-}
 
-impl SubmitEventMethods<crate::DomTypeHolder> for SubmitEvent {
     /// <https://dom.spec.whatwg.org/#dom-event-istrusted>
     fn IsTrusted(&self) -> bool {
         self.event.IsTrusted()

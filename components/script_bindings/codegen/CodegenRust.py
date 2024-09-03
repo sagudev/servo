@@ -3261,10 +3261,10 @@ class CGDomObjectWrap(CGThing):
         name = f"dom::{ifaceName.lower()}::{ifaceName}"
         bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(ifaceName)}"
         return f"""
-impl <D: DomTypes> DomObjectWrap<D> for {firstCap(ifaceName)} {{
+impl DomObjectWrap<crate::DomTypeHolder> for {firstCap(ifaceName)} {{
     const WRAP: unsafe fn(
         SafeJSContext,
-        &D::GlobalScope,
+        &crate::dom::types::GlobalScope,
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>> = {bindingModule}::Wrap::<crate::DomTypeHolder>;
@@ -3285,13 +3285,13 @@ class CGDomObjectIteratorWrap(CGThing):
         name = self.descriptor.interface.iterableInterface.identifier.name
         bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(name)}"
         return f"""
-impl <D: DomTypes> DomObjectIteratorWrap<D> for {name} {{
+impl DomObjectIteratorWrap<crate::DomTypeHolder> for {name} {{
     const ITER_WRAP: unsafe fn(
         SafeJSContext,
-        &D::GlobalScope,
+        &crate::dom::types::GlobalScope,
         Option<HandleObject>,
-        Box<IterableIterator<D, Self>>,
-    ) -> Root<Dom<IterableIterator<D, Self>>> = {bindingModule}::Wrap::<crate::DomTypeHolder>;
+        Box<IterableIterator<crate::DomTypeHolder, Self>>,
+    ) -> Root<Dom<IterableIterator<crate::DomTypeHolder, Self>>> = {bindingModule}::Wrap::<crate::DomTypeHolder>;
 }}
 """
 
@@ -8356,6 +8356,7 @@ class GlobalGenRoots():
                    CGGeneric("use crate::dom::bindings::root::{Dom, DomRoot/*, LayoutDom*/};\n"),
                    CGGeneric("use crate::dom::bindings::trace::JSTraceable;\n"),
                    CGGeneric("use crate::dom::bindings::reflector::DomObject;\n"),
+                   CGGeneric("pub use script_bindings::codegen::InheritTypes::*;\n"),
                    CGGeneric("use js::jsapi::JSTracer;\n\n"),
                    CGGeneric("use std::mem;\n\n")]
         allprotos = []
@@ -8399,9 +8400,9 @@ class GlobalGenRoots():
                 variants.append(CGGeneric(base))
             variants += [CGGeneric(type_id_variant(derivedName)) for derivedName in derived]
             derives = "Clone, Copy, Debug, PartialEq"
-            typeIdCode.append(CGWrapper(CGIndenter(CGList(variants, ",\n"), 4),
-                                        pre=f"#[derive({derives})]\npub enum {base}TypeId {{\n",
-                                        post="\n}\n\n"))
+            #typeIdCode.append(CGWrapper(CGIndenter(CGList(variants, ",\n"), 4),
+            #                            pre=f"#[derive({derives})]\npub enum {base}TypeId {{\n",
+            #                            post="\n}\n\n"))
             if base in topTypes:
                 typeIdCode.append(CGGeneric(f"""
 impl {base} {{

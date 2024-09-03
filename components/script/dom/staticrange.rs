@@ -40,7 +40,7 @@ impl StaticRange {
     pub fn new_with_doc(
         document: &Document,
         proto: Option<HandleObject>,
-        init: &StaticRangeInit<crate::DomTypeHolder>,
+        init: &StaticRangeInit,
     ) -> DomRoot<StaticRange> {
         StaticRange::new_with_proto(document, proto, init)
     }
@@ -48,7 +48,7 @@ impl StaticRange {
     pub fn new_with_proto(
         document: &Document,
         proto: Option<HandleObject>,
-        init: &StaticRangeInit<crate::DomTypeHolder>,
+        init: &StaticRangeInit,
     ) -> DomRoot<StaticRange> {
         let staticrange = reflect_dom_object_with_proto(
             Box::new(StaticRange::new_inherited(
@@ -69,7 +69,7 @@ impl StaticRangeMethods<crate::DomTypeHolder> for StaticRange {
     fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
-        init: &StaticRangeInit<crate::DomTypeHolder>,
+        init: &StaticRangeInit,
     ) -> Fallible<DomRoot<StaticRange>> {
         match init.startContainer.type_id() {
             NodeTypeId::DocumentType | NodeTypeId::Attr => {

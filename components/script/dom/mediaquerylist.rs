@@ -93,7 +93,7 @@ impl MediaQueryListMethods<crate::DomTypeHolder> for MediaQueryList {
     }
 
     // https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-addlistener
-    fn AddListener(&self, listener: Option<Rc<EventListener<crate::DomTypeHolder>>>) {
+    fn AddListener(&self, listener: Option<Rc<EventListener>>) {
         self.upcast::<EventTarget>().add_event_listener(
             DOMString::from_string("change".to_owned()),
             listener,
@@ -105,7 +105,7 @@ impl MediaQueryListMethods<crate::DomTypeHolder> for MediaQueryList {
     }
 
     // https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-removelistener
-    fn RemoveListener(&self, listener: Option<Rc<EventListener<crate::DomTypeHolder>>>) {
+    fn RemoveListener(&self, listener: Option<Rc<EventListener>>) {
         self.upcast::<EventTarget>().remove_event_listener(
             DOMString::from_string("change".to_owned()),
             listener,

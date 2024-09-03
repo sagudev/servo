@@ -66,7 +66,7 @@ impl FormDataEventMethods<crate::DomTypeHolder> for FormDataEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &FormDataEventBinding::FormDataEventInit<crate::DomTypeHolder>,
+        init: &FormDataEventBinding::FormDataEventInit,
     ) -> Fallible<DomRoot<FormDataEvent>> {
         let bubbles = EventBubbles::from(init.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.cancelable);

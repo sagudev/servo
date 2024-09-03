@@ -62,9 +62,10 @@ impl RTCErrorEvent {
         }
         event
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCErrorEventMethods<crate::DomTypeHolder> for RTCErrorEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -79,9 +80,7 @@ impl RTCErrorEvent {
             &init.error,
         )
     }
-}
 
-impl RTCErrorEventMethods<crate::DomTypeHolder> for RTCErrorEvent {
     // https://www.w3.org/TR/webrtc/#dom-rtcerrorevent-error
     fn Error(&self) -> DomRoot<RTCError> {
         DomRoot::from_ref(&*self.error)

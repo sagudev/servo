@@ -62,9 +62,10 @@ impl RTCTrackEvent {
         }
         trackevent
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl RTCTrackEventMethods<crate::DomTypeHolder> for RTCTrackEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -79,9 +80,7 @@ impl RTCTrackEvent {
             &init.track,
         ))
     }
-}
 
-impl RTCTrackEventMethods<crate::DomTypeHolder> for RTCTrackEvent {
     // https://w3c.github.io/webrtc-pc/#dom-rtctrackevent-track
     fn Track(&self) -> DomRoot<MediaStreamTrack> {
         DomRoot::from_ref(&*self.track)

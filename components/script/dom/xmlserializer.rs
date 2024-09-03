@@ -35,17 +35,16 @@ impl XMLSerializer {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XMLSerializerMethods<crate::DomTypeHolder> for XMLSerializer {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<XMLSerializer>> {
         Ok(XMLSerializer::new(window, proto))
     }
-}
 
-impl XMLSerializerMethods<crate::DomTypeHolder> for XMLSerializer {
     // https://w3c.github.io/DOM-Parsing/#the-xmlserializer-interface
     fn SerializeToString(&self, root: &Node) -> Fallible<DOMString> {
         let mut writer = vec![];

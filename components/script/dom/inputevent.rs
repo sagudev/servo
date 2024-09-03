@@ -54,7 +54,7 @@ impl InputEventMethods<crate::DomTypeHolder> for InputEvent {
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &InputEventBinding::InputEventInit<crate::DomTypeHolder>,
+        init: &InputEventBinding::InputEventInit,
     ) -> Fallible<DomRoot<InputEvent>> {
         let event = InputEvent::new(
             window,

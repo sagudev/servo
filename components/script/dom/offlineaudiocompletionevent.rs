@@ -66,7 +66,7 @@ impl OfflineAudioCompletionEventMethods<crate::DomTypeHolder> for OfflineAudioCo
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &OfflineAudioCompletionEventInit<crate::DomTypeHolder>,
+        init: &OfflineAudioCompletionEventInit,
     ) -> Fallible<DomRoot<OfflineAudioCompletionEvent>> {
         let bubbles = EventBubbles::from(init.parent.bubbles);
         let cancelable = EventCancelable::from(init.parent.cancelable);

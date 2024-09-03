@@ -74,7 +74,7 @@ impl RTCPeerConnectionIceEventMethods<crate::DomTypeHolder> for RTCPeerConnectio
         window: &Window,
         proto: Option<HandleObject>,
         ty: DOMString,
-        init: &RTCPeerConnectionIceEventInit<crate::DomTypeHolder>,
+        init: &RTCPeerConnectionIceEventInit,
     ) -> Fallible<DomRoot<RTCPeerConnectionIceEvent>> {
         Ok(RTCPeerConnectionIceEvent::new_with_proto(
             &window.global(),

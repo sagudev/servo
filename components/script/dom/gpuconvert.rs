@@ -419,7 +419,7 @@ pub fn convert_stencil_op(operation: GPUStencilOperation) -> wgt::StencilOperati
     }
 }
 
-pub fn convert_ic_buffer(ic_buffer: &GPUImageCopyBuffer<crate::DomTypeHolder>) -> wgpu_com::ImageCopyBuffer {
+pub fn convert_ic_buffer(ic_buffer: &GPUImageCopyBuffer) -> wgpu_com::ImageCopyBuffer {
     wgpu_com::ImageCopyBuffer {
         buffer: ic_buffer.buffer.id().0,
         layout: convert_image_data_layout(&ic_buffer.parent),

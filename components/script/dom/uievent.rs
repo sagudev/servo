@@ -78,9 +78,10 @@ impl UIEvent {
         );
         ev
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl UIEventMethods<crate::DomTypeHolder> for UIEvent {
+    fn Constructor(
         window: &Window,
         proto: Option<HandleObject>,
         type_: DOMString,
@@ -99,9 +100,7 @@ impl UIEvent {
         );
         Ok(event)
     }
-}
 
-impl UIEventMethods<crate::DomTypeHolder> for UIEvent {
     // https://w3c.github.io/uievents/#widl-UIEvent-view
     fn GetView(&self) -> Option<DomRoot<Window>> {
         self.view.get()

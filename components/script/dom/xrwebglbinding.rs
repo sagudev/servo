@@ -56,9 +56,10 @@ impl XRWebGLBinding {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl XRWebGLBindingMethods<crate::DomTypeHolder> for XRWebGLBinding {
+    fn Constructor(
         global: &Window,
         proto: Option<HandleObject>,
         session: &XRSession,
@@ -72,9 +73,7 @@ impl XRWebGLBinding {
         };
         XRWebGLBinding::new(global, proto, session, &context)
     }
-}
 
-impl XRWebGLBindingMethods<crate::DomTypeHolder> for XRWebGLBinding {
     /// <https://immersive-web.github.io/layers/#dom-xrwebglbinding-createprojectionlayer>
     fn CreateProjectionLayer(
         &self,

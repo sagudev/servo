@@ -25,7 +25,7 @@ pub struct GPUUncapturedErrorEvent {
 }
 
 impl GPUUncapturedErrorEvent {
-    fn new_inherited(init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>) -> Self {
+    fn new_inherited(init: &GPUUncapturedErrorEventInit) -> Self {
         Self {
             gpu_error: Dom::from_ref(&init.error),
             event: Event::new_inherited(),
@@ -35,7 +35,7 @@ impl GPUUncapturedErrorEvent {
     pub fn new(
         global: &GlobalScope,
         type_: DOMString,
-        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
+        init: &GPUUncapturedErrorEventInit,
     ) -> DomRoot<Self> {
         Self::new_with_proto(global, None, type_, init)
     }
@@ -44,7 +44,7 @@ impl GPUUncapturedErrorEvent {
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
+        init: &GPUUncapturedErrorEventInit,
     ) -> DomRoot<Self> {
         let ev = reflect_dom_object_with_proto(
             Box::new(GPUUncapturedErrorEvent::new_inherited(init)),
@@ -72,7 +72,7 @@ impl GPUUncapturedErrorEventMethods<crate::DomTypeHolder> for GPUUncapturedError
         global: &GlobalScope,
         proto: Option<HandleObject>,
         type_: DOMString,
-        init: &GPUUncapturedErrorEventInit<crate::DomTypeHolder>,
+        init: &GPUUncapturedErrorEventInit,
     ) -> DomRoot<Self> {
         GPUUncapturedErrorEvent::new_with_proto(global, proto, type_, init)
     }

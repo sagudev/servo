@@ -52,17 +52,16 @@ impl TestBindingPairIterable {
             proto,
         )
     }
+}
 
-    #[allow(non_snake_case)]
-    pub fn Constructor(
+impl TestBindingPairIterableMethods<crate::DomTypeHolder> for TestBindingPairIterable {
+    fn Constructor(
         global: &GlobalScope,
         proto: Option<HandleObject>,
     ) -> Fallible<DomRoot<TestBindingPairIterable>> {
         Ok(TestBindingPairIterable::new(global, proto))
     }
-}
 
-impl TestBindingPairIterableMethods<crate::DomTypeHolder> for TestBindingPairIterable {
     fn Add(&self, key: DOMString, value: u32) {
         self.map.borrow_mut().push((key, value));
     }
