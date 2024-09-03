@@ -45,7 +45,7 @@ def main():
         #("RegisterBindings", "RegisterBindings.rs"),
         ("InterfaceObjectMap", "InterfaceObjectMapPhf.rs"),
         ("InterfaceObjectMapData", "InterfaceObjectMapData.json"),
-        #("InterfaceTypes", "InterfaceTypes.rs"),
+        ("InterfaceTypes", "InterfaceTypes.rs"),
         ("ConcreteInheritTypes", "ConcreteInheritTypes.rs"),
         ("ConcreteBindingRoot", "ConcreteBindingRoot.rs"),
         ("Bindings", "Bindings/mod.rs"),
