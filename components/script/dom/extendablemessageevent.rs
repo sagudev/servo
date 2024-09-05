@@ -9,6 +9,7 @@ use js::rust::{HandleObject, HandleValue};
 use servo_atoms::Atom;
 
 use crate::dom::bindings::cell::DomRefCell;
+use crate::dom::bindings::codegen::Bindings::ExtendableEventBinding::ExtendableEventMethods;
 use crate::dom::bindings::codegen::Bindings::ExtendableMessageEventBinding;
 use crate::dom::bindings::codegen::Bindings::ExtendableMessageEventBinding::ExtendableMessageEventMethods;
 use crate::dom::bindings::error::Fallible;

@@ -26,17 +26,6 @@ use crate::stylesheet_loader::StylesheetLoader;
 
 unsafe_no_jsmanaged_fields!(RulesSource);
 
-impl From<RulesMutateError> for Error {
-    fn from(other: RulesMutateError) -> Self {
-        match other {
-            RulesMutateError::Syntax => Error::Syntax,
-            RulesMutateError::IndexSize => Error::IndexSize,
-            RulesMutateError::HierarchyRequest => Error::HierarchyRequest,
-            RulesMutateError::InvalidState => Error::InvalidState,
-        }
-    }
-}
-
 #[dom_struct]
 pub struct CSSRuleList {
     reflector_: Reflector,

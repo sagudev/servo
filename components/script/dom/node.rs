@@ -68,7 +68,7 @@ use crate::dom::bindings::inheritance::{
     SVGElementTypeId, SVGGraphicsElementTypeId, TextTypeId,
 };
 use crate::dom::bindings::reflector::{reflect_dom_object_with_proto, DomObject, DomObjectWrap};
-use crate::dom::bindings::root::{Dom, DomRoot, DomSlice, LayoutDom, MutNullableDom};
+use crate::dom::bindings::root::{Dom, DomRoot, DomSlice, LayoutDom, MutNullableDom, ToLayout};
 use crate::dom::bindings::str::{DOMString, USVString};
 use crate::dom::bindings::xmlname::namespace_from_domstring;
 use crate::dom::characterdata::{CharacterData, LayoutCharacterDataHelpers};
@@ -3446,77 +3446,6 @@ impl UniqueId {
                 *ptr = Some(Box::new(Uuid::new_v4()));
             }
             (*ptr).as_ref().unwrap()
-        }
-    }
-}
-
-impl From<NodeTypeId> for LayoutNodeType {
-    #[inline(always)]
-    fn from(node_type: NodeTypeId) -> LayoutNodeType {
-        match node_type {
-            NodeTypeId::Element(e) => LayoutNodeType::Element(e.into()),
-            NodeTypeId::CharacterData(CharacterDataTypeId::Text(_)) => LayoutNodeType::Text,
-            x => unreachable!("Layout should not traverse nodes of type {:?}", x),
-        }
-    }
-}
-
-impl From<ElementTypeId> for LayoutElementType {
-    #[inline(always)]
-    fn from(element_type: ElementTypeId) -> LayoutElementType {
-        match element_type {
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLBodyElement) => {
-                LayoutElementType::HTMLBodyElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLBRElement) => {
-                LayoutElementType::HTMLBRElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLCanvasElement) => {
-                LayoutElementType::HTMLCanvasElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLHtmlElement) => {
-                LayoutElementType::HTMLHtmlElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLIFrameElement) => {
-                LayoutElementType::HTMLIFrameElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLImageElement) => {
-                LayoutElementType::HTMLImageElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLMediaElement(_)) => {
-                LayoutElementType::HTMLMediaElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLInputElement) => {
-                LayoutElementType::HTMLInputElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLObjectElement) => {
-                LayoutElementType::HTMLObjectElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLParagraphElement) => {
-                LayoutElementType::HTMLParagraphElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTableCellElement) => {
-                LayoutElementType::HTMLTableCellElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTableColElement) => {
-                LayoutElementType::HTMLTableColElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTableElement) => {
-                LayoutElementType::HTMLTableElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTableRowElement) => {
-                LayoutElementType::HTMLTableRowElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTableSectionElement) => {
-                LayoutElementType::HTMLTableSectionElement
-            },
-            ElementTypeId::HTMLElement(HTMLElementTypeId::HTMLTextAreaElement) => {
-                LayoutElementType::HTMLTextAreaElement
-            },
-            ElementTypeId::SVGElement(SVGElementTypeId::SVGGraphicsElement(
-                SVGGraphicsElementTypeId::SVGSVGElement,
-            )) => LayoutElementType::SVGSVGElement,
-            _ => LayoutElementType::Element,
         }
     }
 }

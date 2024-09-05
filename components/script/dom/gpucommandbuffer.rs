@@ -16,13 +16,6 @@ use crate::dom::bindings::str::USVString;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::gpubuffer::GPUBuffer;
 
-impl Eq for DomRoot<GPUBuffer> {}
-impl Hash for DomRoot<GPUBuffer> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id().hash(state);
-    }
-}
-
 #[dom_struct]
 pub struct GPUCommandBuffer {
     reflector_: Reflector,

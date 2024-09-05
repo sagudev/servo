@@ -4,6 +4,7 @@
 
 //! Various utilities to glue JavaScript and the DOM implementation together.
 
+use std::cell::Ref;
 use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::NonNull;
@@ -35,6 +36,7 @@ use js::rust::{
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
+use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
@@ -738,4 +740,6 @@ pub trait DomHelpers<D: DomTypes> {
     fn DOMException_stringifier(exception: &D::DOMException) -> DOMString;
 
     fn get_map() -> &'static phf::Map<&'static [u8], fn(SafeJSContext, HandleObject)>;
+
+    fn AudioBuffer_get_channels(buffer: &D::AudioBuffer) -> Ref<Option<ServoMediaAudioBuffer>>;
 }

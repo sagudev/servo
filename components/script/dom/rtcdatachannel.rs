@@ -355,30 +355,3 @@ impl RTCDataChannelMethods<crate::DomTypeHolder> for RTCDataChannel {
         self.send(&SendSource::ArrayBufferView(data))
     }
 }
-
-impl From<&RTCDataChannelInit> for DataChannelInit {
-    fn from(init: &RTCDataChannelInit) -> DataChannelInit {
-        DataChannelInit {
-            label: String::new(),
-            id: init.id,
-            max_packet_life_time: init.maxPacketLifeTime,
-            max_retransmits: init.maxRetransmits,
-            negotiated: init.negotiated,
-            ordered: init.ordered,
-            protocol: init.protocol.to_string(),
-        }
-    }
-}
-
-impl From<DataChannelState> for RTCDataChannelState {
-    fn from(state: DataChannelState) -> RTCDataChannelState {
-        match state {
-            DataChannelState::Connecting | DataChannelState::__Unknown(_) => {
-                RTCDataChannelState::Connecting
-            },
-            DataChannelState::Open => RTCDataChannelState::Open,
-            DataChannelState::Closing => RTCDataChannelState::Closing,
-            DataChannelState::Closed => RTCDataChannelState::Closed,
-        }
-    }
-}

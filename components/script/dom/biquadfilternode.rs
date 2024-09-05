@@ -13,7 +13,7 @@ use servo_media::audio::biquad_filter_node::{
 use servo_media::audio::node::{AudioNodeInit, AudioNodeMessage, AudioNodeType};
 use servo_media::audio::param::ParamType;
 
-use crate::dom::audionode::AudioNode;
+use crate::dom::audionode::{AudioNode, AudioNodeOptionsUnwrap};
 use crate::dom::audioparam::AudioParam;
 use crate::dom::baseaudiocontext::BaseAudioContext;
 use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{
@@ -173,32 +173,5 @@ impl BiquadFilterNodeMethods<crate::DomTypeHolder> for BiquadFilterNode {
         self.node.message(AudioNodeMessage::BiquadFilterNode(
             BiquadFilterNodeMessage::SetFilterType(filter.into()),
         ));
-    }
-}
-
-impl<'a> From<&'a BiquadFilterOptions> for BiquadFilterNodeOptions {
-    fn from(options: &'a BiquadFilterOptions) -> Self {
-        Self {
-            gain: *options.gain,
-            q: *options.Q,
-            frequency: *options.frequency,
-            detune: *options.detune,
-            filter: options.type_.into(),
-        }
-    }
-}
-
-impl From<BiquadFilterType> for FilterType {
-    fn from(filter: BiquadFilterType) -> FilterType {
-        match filter {
-            BiquadFilterType::Lowpass => FilterType::LowPass,
-            BiquadFilterType::Highpass => FilterType::HighPass,
-            BiquadFilterType::Bandpass => FilterType::BandPass,
-            BiquadFilterType::Lowshelf => FilterType::LowShelf,
-            BiquadFilterType::Highshelf => FilterType::HighShelf,
-            BiquadFilterType::Peaking => FilterType::Peaking,
-            BiquadFilterType::Allpass => FilterType::AllPass,
-            BiquadFilterType::Notch => FilterType::Notch,
-        }
     }
 }

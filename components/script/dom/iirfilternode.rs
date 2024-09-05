@@ -12,7 +12,7 @@ use js::typedarray::Float32Array;
 use servo_media::audio::iir_filter_node::{IIRFilterNode as IIRFilter, IIRFilterNodeOptions};
 use servo_media::audio::node::AudioNodeInit;
 
-use crate::dom::audionode::AudioNode;
+use crate::dom::audionode::{AudioNode, AudioNodeOptionsUnwrap};
 use crate::dom::baseaudiocontext::BaseAudioContext;
 use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{
     ChannelCountMode, ChannelInterpretation,
@@ -126,17 +126,5 @@ impl IIRFilterNodeMethods<crate::DomTypeHolder> for IIRFilterNode {
         phase_response.update(&phase_response_vec);
 
         Ok(())
-    }
-}
-
-impl<'a> From<&'a IIRFilterOptions> for IIRFilterNodeOptions {
-    fn from(options: &'a IIRFilterOptions) -> Self {
-        let feedforward: Vec<f64> =
-            (*options.feedforward.iter().map(|v| **v).collect_vec()).to_vec();
-        let feedback: Vec<f64> = (*options.feedback.iter().map(|v| **v).collect_vec()).to_vec();
-        Self {
-            feedforward: Arc::new(feedforward),
-            feedback: Arc::new(feedback),
-        }
     }
 }

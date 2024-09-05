@@ -26,10 +26,9 @@ use crate::dom::bindings::codegen::Bindings::RTCPeerConnectionBinding::{
     RTCSignalingState,
 };
 use crate::dom::bindings::codegen::Bindings::RTCSessionDescriptionBinding::{
-    RTCSdpType, RTCSessionDescriptionInit,
+    RTCSdpType, RTCSessionDescriptionInit, RTCSessionDescriptionMethods
 };
 use crate::dom::bindings::codegen::UnionTypes::{MediaStreamTrackOrString, StringOrStringSequence};
-use crate::dom::bindings::conversions::LocalFrom;
 use crate::dom::bindings::error::{Error, Fallible};
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};
@@ -425,7 +424,6 @@ impl RTCPeerConnection {
             return;
         }
 
-        let state: LocalFrom<RTCSignalingState> = state.into();
         let state: RTCSignalingState = state.into();
 
         if state == self.signaling_state.get() {
@@ -775,77 +773,5 @@ impl RTCPeerConnectionMethods<crate::DomTypeHolder> for RTCPeerConnection {
         init: &RTCRtpTransceiverInit,
     ) -> DomRoot<RTCRtpTransceiver> {
         RTCRtpTransceiver::new(&self.global(), init.direction)
-    }
-}
-
-impl From<SessionDescription> for LocalFrom<RTCSessionDescriptionInit> {
-    fn from(desc: SessionDescription) -> Self {
-        let type_ = match desc.type_ {
-            SdpType::Answer => RTCSdpType::Answer,
-            SdpType::Offer => RTCSdpType::Offer,
-            SdpType::Pranswer => RTCSdpType::Pranswer,
-            SdpType::Rollback => RTCSdpType::Rollback,
-        };
-        RTCSessionDescriptionInit {
-            type_,
-            sdp: desc.sdp.into(),
-        }
-        .into()
-    }
-}
-
-impl<'a> From<&'a RTCSessionDescriptionInit> for LocalFrom<SessionDescription> {
-    fn from(desc: &'a RTCSessionDescriptionInit) -> Self {
-        let type_ = match desc.type_ {
-            RTCSdpType::Answer => SdpType::Answer,
-            RTCSdpType::Offer => SdpType::Offer,
-            RTCSdpType::Pranswer => SdpType::Pranswer,
-            RTCSdpType::Rollback => SdpType::Rollback,
-        };
-        SessionDescription {
-            type_,
-            sdp: desc.sdp.to_string(),
-        }
-        .into()
-    }
-}
-
-impl From<GatheringState> for LocalFrom<RTCIceGatheringState> {
-    fn from(state: GatheringState) -> Self {
-        match state {
-            GatheringState::New => RTCIceGatheringState::New,
-            GatheringState::Gathering => RTCIceGatheringState::Gathering,
-            GatheringState::Complete => RTCIceGatheringState::Complete,
-        }
-        .into()
-    }
-}
-
-impl From<IceConnectionState> for LocalFrom<RTCIceConnectionState> {
-    fn from(state: IceConnectionState) -> Self {
-        match state {
-            IceConnectionState::New => RTCIceConnectionState::New,
-            IceConnectionState::Checking => RTCIceConnectionState::Checking,
-            IceConnectionState::Connected => RTCIceConnectionState::Connected,
-            IceConnectionState::Completed => RTCIceConnectionState::Completed,
-            IceConnectionState::Disconnected => RTCIceConnectionState::Disconnected,
-            IceConnectionState::Failed => RTCIceConnectionState::Failed,
-            IceConnectionState::Closed => RTCIceConnectionState::Closed,
-        }
-        .into()
-    }
-}
-
-impl From<SignalingState> for LocalFrom<RTCSignalingState> {
-    fn from(state: SignalingState) -> Self {
-        match state {
-            SignalingState::Stable => RTCSignalingState::Stable,
-            SignalingState::HaveLocalOffer => RTCSignalingState::Have_local_offer,
-            SignalingState::HaveRemoteOffer => RTCSignalingState::Have_remote_offer,
-            SignalingState::HaveLocalPranswer => RTCSignalingState::Have_local_pranswer,
-            SignalingState::HaveRemotePranswer => RTCSignalingState::Have_remote_pranswer,
-            SignalingState::Closed => RTCSignalingState::Closed,
-        }
-        .into()
     }
 }

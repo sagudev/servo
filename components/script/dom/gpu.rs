@@ -18,7 +18,7 @@ use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
 };
 use crate::dom::bindings::error::Error;
 use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};
-use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
+use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, DomGlobal, Reflector};
 use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;
 use crate::dom::globalscope::GlobalScope;
@@ -61,7 +61,7 @@ impl<T: AsyncWGPUListener + DomObject> WGPUResponse<T> {
     }
 }
 
-pub fn response_async<T: AsyncWGPUListener + DomObject + 'static>(
+pub fn response_async<T: AsyncWGPUListener + DomObject + DomGlobal + 'static>(
     promise: &Rc<Promise>,
     receiver: &T,
 ) -> IpcSender<WebGPUResponse> {

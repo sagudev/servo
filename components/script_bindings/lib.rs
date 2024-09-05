@@ -81,6 +81,7 @@ pub mod guard;
 pub mod inheritance;
 pub mod interface;
 pub mod iterable;
+pub mod impls;
 pub mod like;
 pub mod mem;
 pub mod namespace;

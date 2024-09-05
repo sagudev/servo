@@ -96,6 +96,10 @@ mod webdriver_handlers;
 #[warn(deprecated)]
 mod window_named_properties;
 
+use std::cell::Ref;
+
+use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
+
 pub use init::init;
 // export traits to be available for derive macros
 pub use script_bindings::inheritance::HasParent;
@@ -239,6 +243,10 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         &'static [u8],
         fn(crate::script_runtime::JSContext, js::rust::HandleObject),
     > {
+        todo!()
+    }
+
+    fn AudioBuffer_get_channels(buffer: &<crate::DomTypeHolder as script_bindings::DomTypes>::AudioBuffer) -> Ref<Option<ServoMediaAudioBuffer>> {
         todo!()
     }
 }

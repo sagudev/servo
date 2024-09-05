@@ -23,16 +23,6 @@ use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::DOMString;
 use crate::dom::globalscope::GlobalScope;
 
-// manual hash derived
-// TODO: allow derivables in bindings.conf
-impl std::hash::Hash for GPUFeatureName {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        core::mem::discriminant(self).hash(state);
-    }
-}
-
-impl Eq for GPUFeatureName {}
-
 #[dom_struct]
 pub struct GPUSupportedFeatures {
     reflector: Reflector,
@@ -145,19 +135,6 @@ pub fn gpu_to_wgt_feature(feature: GPUFeatureName) -> Option<Features> {
         GPUFeatureName::Dual_source_blending => Some(Features::DUAL_SOURCE_BLENDING),
         GPUFeatureName::Texture_compression_bc_sliced_3d => None,
         GPUFeatureName::Clip_distances => None,
-    }
-}
-
-// this should be autogenerate by bindings
-impl FromStr for GPUFeatureName {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        pairs
-            .iter()
-            .find(|&&(key, _)| s == key)
-            .map(|&(_, ev)| ev)
-            .ok_or(())
     }
 }
 

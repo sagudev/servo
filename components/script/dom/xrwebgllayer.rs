@@ -31,19 +31,6 @@ use crate::dom::xrsession::XRSession;
 use crate::dom::xrview::XRView;
 use crate::dom::xrviewport::XRViewport;
 
-impl<'a> From<&'a XRWebGLLayerInit> for LayerInit {
-    fn from(init: &'a XRWebGLLayerInit) -> LayerInit {
-        LayerInit::WebGLLayer {
-            alpha: init.alpha,
-            antialias: init.antialias,
-            depth: init.depth,
-            stencil: init.stencil,
-            framebuffer_scale_factor: *init.framebufferScaleFactor as f32,
-            ignore_depth_values: init.ignoreDepthValues,
-        }
-    }
-}
-
 #[dom_struct]
 pub struct XRWebGLLayer {
     xr_layer: XRLayer,

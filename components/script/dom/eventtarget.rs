@@ -790,24 +790,3 @@ impl VirtualMethods for EventTarget {
         None
     }
 }
-
-impl From<AddEventListenerOptionsOrBoolean> for AddEventListenerOptions {
-    fn from(options: AddEventListenerOptionsOrBoolean) -> Self {
-        match options {
-            AddEventListenerOptionsOrBoolean::AddEventListenerOptions(options) => options,
-            AddEventListenerOptionsOrBoolean::Boolean(capture) => Self {
-                parent: EventListenerOptions { capture },
-                once: false,
-            },
-        }
-    }
-}
-
-impl From<EventListenerOptionsOrBoolean> for EventListenerOptions {
-    fn from(options: EventListenerOptionsOrBoolean) -> Self {
-        match options {
-            EventListenerOptionsOrBoolean::EventListenerOptions(options) => options,
-            EventListenerOptionsOrBoolean::Boolean(capture) => Self { capture },
-        }
-    }
-}

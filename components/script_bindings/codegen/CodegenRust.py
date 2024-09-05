@@ -8319,8 +8319,8 @@ class GlobalGenRoots():
             if descriptor.concrete and not descriptor.proxy and not descriptor.interface.isIteratorInterface():
                 cgThings.append(CGAssertInheritance(descriptor))
 
-            if descriptor.concrete and not descriptor.interface.isIteratorInterface() and not descriptor.interface.isNamespace():
-                cgThings.append(CGGeneric(f"impl {descriptor.interface.identifier.name} {{\npub fn global(&self) -> DomRoot<crate::dom::globalscope::GlobalScope> {{\n crate::dom::bindings::reflector::global(self)\n }}\n }}\n"))
+            if not descriptor.interface.isIteratorInterface() and not descriptor.interface.isNamespace() and not descriptor.interface.isCallback():
+                cgThings.append(CGGeneric(f"impl {descriptor.interface.identifier.name} {{\npub fn global(&self) -> DomRoot<crate::dom::globalscope::GlobalScope> {{\n <Self as script_bindings::DomGlobal<crate::DomTypeHolder>>::global(self) }}\n }}\n"))
 
 
         # And make sure we have the right number of newlines at the end

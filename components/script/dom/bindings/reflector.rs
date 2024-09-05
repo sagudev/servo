@@ -18,19 +18,31 @@ use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
 
-/*pub trait DomGlobal2 {
+pub trait DomGlobal {
     fn global(&self) -> DomRoot<GlobalScope>;
 }
 
-impl <T: DomGlobal<crate::DomTypeHolder>> DomGlobal2 for T {
+impl <T: script_bindings::DomGlobal<crate::DomTypeHolder>> DomGlobal for T {
     fn global(&self) -> DomRoot<GlobalScope> {
-        <Self as DomGlobal<crate::DomTypeHolder>>::global(self)
+        <Self as script_bindings::DomGlobal<crate::DomTypeHolder>>::global(self)
     }
+}
+
+/*pub fn global(g: &impl script_bidings::DomGlobal<crate::DomTypeHolder>) -> DomRoot<GlobalScope> {
+    g.global()
 }*/
 
-pub fn global(g: &impl DomGlobal<crate::DomTypeHolder>) -> DomRoot<GlobalScope> {
-    g.global()
+/*impl crate::dom::promise::Promise {
+    fn global(&self) -> DomRoot<GlobalScope> {
+        global(self)
+    }
 }
+
+impl crate::dom::windowproxy::WindowProxy {
+    fn global(&self) -> DomRoot<GlobalScope> {
+        global(self)
+    }
+}*/
 
 /*/// Create the reflector for a new DOM object and yield ownership to the
 /// reflector.

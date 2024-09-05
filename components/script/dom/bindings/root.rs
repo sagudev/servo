@@ -336,23 +336,27 @@ impl<T> MallocSizeOf for Dom<T> {
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
         0
     }
-}
+}*/
 
-impl<T> Dom<T> {
+pub trait ToLayout<T> {
     /// Returns `LayoutDom<T>` containing the same pointer.
     ///
     /// # Safety
     ///
     /// The `self` parameter to this method must meet all the requirements of [`ptr::NonNull::as_ref`].
-    pub unsafe fn to_layout(&self) -> LayoutDom<T> {
+    unsafe fn to_layout(&self) -> LayoutDom<T>;
+}
+
+impl<T> ToLayout<T> for Dom<T> {
+    unsafe fn to_layout(&self) -> LayoutDom<T> {
         assert_in_layout();
         LayoutDom {
-            value: self.ptr.as_ref(),
+            value: self.as_ptr().as_ref().unwrap(),
         }
     }
 }
 
-impl<T: DomObject> Dom<T> {
+/*impl<T: DomObject> Dom<T> {
     /// Create a `Dom<T>` from a `&T`
     #[allow(crown::unrooted_must_root)]
     pub fn from_ref(obj: &T) -> Dom<T> {

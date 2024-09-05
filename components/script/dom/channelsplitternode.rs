@@ -7,7 +7,7 @@ use js::rust::HandleObject;
 use servo_media::audio::node::AudioNodeInit;
 
 use crate::dom::audiobuffersourcenode::AudioBufferSourceNode;
-use crate::dom::audionode::{AudioNode, MAX_CHANNEL_COUNT};
+use crate::dom::audionode::{AudioNode, AudioNodeOptionsUnwrap, MAX_CHANNEL_COUNT};
 use crate::dom::baseaudiocontext::BaseAudioContext;
 use crate::dom::bindings::codegen::Bindings::AudioBufferSourceNodeBinding::AudioBufferSourceOptions;
 use crate::dom::bindings::codegen::Bindings::AudioNodeBinding::{

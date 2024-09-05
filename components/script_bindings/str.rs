@@ -502,7 +502,7 @@ impl DOMString {
     }
 
     /// <https://html.spec.whatwg.org/multipage/#parse-a-local-date-and-time-string>
-    pub(crate) fn parse_local_date_and_time_string(&self) -> Option<ParsedDate> {
+    pub fn parse_local_date_and_time_string(&self) -> Option<ParsedDate> {
         let value = &self;
         // Step 1, 2, 4
         let mut iterator = if value.contains('T') {
@@ -812,7 +812,7 @@ fn is_leap_year(year: i32) -> bool {
 }
 
 #[derive(Clone, Debug, Default, MallocSizeOf, PartialEq)]
-pub(crate) struct ParsedDate {
+pub struct ParsedDate {
     pub year: i32,
     pub month: u32,
     pub day: u32,

@@ -75,13 +75,3 @@ impl MediaDeviceInfoMethods<crate::DomTypeHolder> for MediaDeviceInfo {
         self.group_id.clone()
     }
 }
-
-impl From<ServoMediaDeviceKind> for MediaDeviceKind {
-    fn from(kind: ServoMediaDeviceKind) -> MediaDeviceKind {
-        match kind {
-            ServoMediaDeviceKind::AudioInput => MediaDeviceKind::Audioinput,
-            ServoMediaDeviceKind::AudioOutput => MediaDeviceKind::Audiooutput,
-            ServoMediaDeviceKind::VideoInput => MediaDeviceKind::Videoinput,
-        }
-    }
-}

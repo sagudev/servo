@@ -174,7 +174,7 @@ impl ReadableStream {
 
         unsafe {
             rooted!(in(*cx) let mut js_error = UndefinedValue());
-            error.to_jsval(*cx, &global, js_error.handle_mut());
+            error.to_jsval::<crate::DomTypeHolder>(*cx, &global, js_error.handle_mut());
             ReadableStreamError(
                 *cx,
                 self.js_stream.handle(),

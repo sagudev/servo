@@ -97,11 +97,3 @@ impl ConstantSourceNodeMethods<crate::DomTypeHolder> for ConstantSourceNode {
         DomRoot::from_ref(&self.offset)
     }
 }
-
-impl<'a> From<&'a ConstantSourceOptions> for ServoMediaConstantSourceOptions {
-    fn from(options: &'a ConstantSourceOptions) -> Self {
-        Self {
-            offset: *options.offset,
-        }
-    }
-}

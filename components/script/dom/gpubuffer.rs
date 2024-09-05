@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use std::cell::Cell;
+use std::hash::{Hash, Hasher};
 use std::ops::Range;
 use std::rc::Rc;
 use std::string::String;
@@ -55,6 +56,13 @@ pub struct GPUBufferMapInfo {
     #[ignore_malloc_size_of = "defined in mozjs"]
     pub js_buffers: Vec<HeapBufferSource<ArrayBufferU8>>,
     pub map_mode: Option<u32>,
+}
+
+impl Eq for GPUBuffer {}
+impl Hash for GPUBuffer {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id().hash(state);
+    }
 }
 
 #[dom_struct]

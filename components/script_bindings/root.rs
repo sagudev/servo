@@ -192,6 +192,13 @@ impl<T: DomObject> DomRoot<T> {
     }
 }
 
+impl<T: Eq + DomObject> Eq for DomRoot<T> {}
+impl<T: Hash + DomObject> Hash for DomRoot<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        T::hash(&*self, state)
+    }
+}
+
 impl<T> MallocSizeOf for DomRoot<T>
 where
     T: DomObject + MallocSizeOf,
@@ -359,6 +366,10 @@ impl<T: DomObject> Dom<T> {
         Dom {
             ptr: ptr::NonNull::from(obj),
         }
+    }
+
+    pub fn as_ptr(&self) -> *const T {
+        self.ptr.as_ptr()
     }
 }
 

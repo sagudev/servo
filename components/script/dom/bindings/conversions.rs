@@ -667,7 +667,7 @@ pub unsafe fn windowproxy_from_handlevalue(
     Ok(DomRoot::from_ref(&*ptr))
 }
 
-pub struct LocalFrom<T>(T);
+/*pub struct LocalFrom<T>(T);
 
 impl<T> From<T> for LocalFrom<T> {
     fn from(t: T) -> LocalFrom<T> {
@@ -679,4 +679,4 @@ impl<T> Into<T> for LocalFrom<T> {
     fn into(t: LocalFrom<T>) -> T {
         t.0
     }
-}
+}*/

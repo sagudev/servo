@@ -85,7 +85,7 @@ use crate::dom::bindings::error::{Error, ErrorResult, Fallible};
 use crate::dom::bindings::inheritance::{Castable, ElementTypeId, HTMLElementTypeId, NodeTypeId};
 use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};
 use crate::dom::bindings::reflector::DomObject;
-use crate::dom::bindings::root::{Dom, DomRoot, LayoutDom, MutNullableDom};
+use crate::dom::bindings::root::{Dom, DomRoot, LayoutDom, MutNullableDom, ToLayout};
 use crate::dom::bindings::str::{DOMString, USVString};
 use crate::dom::bindings::xmlname::XMLName::Invalid;
 use crate::dom::bindings::xmlname::{
@@ -198,12 +198,6 @@ impl fmt::Debug for Element {
         write!(f, ">")
     }
 }
-
-/*impl fmt::Debug for DomRoot<Element> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        (**self).fmt(f)
-    }
-}*/
 
 #[derive(MallocSizeOf, PartialEq)]
 pub enum ElementCreator {
@@ -3571,7 +3565,7 @@ impl VirtualMethods for Element {
     }
 }
 
-impl SelectorsElement for DomRoot<Element> {
+impl SelectorsElement for Element {
     type Impl = SelectorImpl;
 
     #[allow(unsafe_code)]

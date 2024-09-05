@@ -56,7 +56,7 @@ impl Console {
     }
 
     // Directly logs a DOMString, without processing the message
-    fn internal_warn(global: &GlobalScope, message: DOMString) {
+    pub(crate) fn internal_warn(global: &GlobalScope, message: DOMString) {
         console_message(global, message, LogLevel::Warn)
     }
 }

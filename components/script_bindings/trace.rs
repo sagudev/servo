@@ -46,7 +46,7 @@ use js::jsval::JSVal;
 use js::rust::{GCMethods, Handle};
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
 
-/*use parking_lot::RwLock;
+use parking_lot::RwLock;
 use servo_arc::Arc as ServoArc;
 use smallvec::SmallVec;
 use style::author_styles::AuthorStyles;
@@ -54,7 +54,7 @@ use style::stylesheet_set::{AuthorStylesheetSet, DocumentStylesheetSet};
 use tendril::fmt::UTF8;
 use tendril::stream::LossyDecoder;
 use tendril::TendrilSink;
-use webxr_api::{Finger, Hand};*/
+use webxr_api::{Finger, Hand};
 
 /*use crate::dom::bindings::cell::DomRefCell;*/
 use crate::dom::bindings::error::Error;
@@ -312,7 +312,7 @@ pub fn trace_string(tracer: *mut JSTracer, description: &str, s: &Heap<*mut JSSt
     }
 }
 
-/*unsafe impl<T: JSTraceable> CustomTraceable for ServoArc<T> {
+unsafe impl<T: JSTraceable> CustomTraceable for ServoArc<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         (**self).trace(trc)
     }
@@ -322,7 +322,7 @@ unsafe impl<T: JSTraceable> CustomTraceable for RwLock<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         self.read().trace(trc)
     }
-}*/
+}
 
 /*unsafe impl<T: JSTraceable> JSTraceable for DomRefCell<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
@@ -330,25 +330,25 @@ unsafe impl<T: JSTraceable> CustomTraceable for RwLock<T> {
     }
 }*/
 
-/*unsafe impl<T: JSTraceable + Eq + Hash> CustomTraceable for indexmap::IndexSet<T> {
+unsafe impl<T: JSTraceable + Eq + Hash> CustomTraceable for indexmap::IndexSet<T> {
     #[inline]
     unsafe fn trace(&self, trc: *mut JSTracer) {
         for e in self.iter() {
             e.trace(trc);
         }
     }
-}*/
+}
 
 // XXXManishearth Check if the following three are optimized to no-ops
 // if e.trace() is a no-op (e.g it is an unsafe_no_jsmanaged_fields type)
-/*unsafe impl<T: JSTraceable + 'static> CustomTraceable for SmallVec<[T; 1]> {
+unsafe impl<T: JSTraceable + 'static> CustomTraceable for SmallVec<[T; 1]> {
     #[inline]
     unsafe fn trace(&self, trc: *mut JSTracer) {
         for e in self.iter() {
             e.trace(trc);
         }
     }
-}*/
+}
 
 unsafe impl<K, V, S> CustomTraceable for IndexMap<K, V, S>
 where
@@ -383,7 +383,7 @@ unsafe_no_jsmanaged_fields!(USVString);
     unsafe fn trace(&self, _: *mut JSTracer) {
         // Do nothing
     }
-}
+}*/
 
 unsafe impl<S> CustomTraceable for DocumentStylesheetSet<S>
 where
@@ -475,7 +475,7 @@ where
         phalanx_distal.trace(trc);
         phalanx_tip.trace(trc);
     }
-}*/
+}
 
 /// Holds a set of JSTraceables that need to be rooted
 pub use js::gc::RootedTraceableSet;

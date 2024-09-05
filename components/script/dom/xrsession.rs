@@ -1023,13 +1023,3 @@ pub fn cast_transform<T, U, V, W>(
 ) -> RigidTransform3D<f32, V, W> {
     unsafe { mem::transmute(transform) }
 }
-
-impl From<EnvironmentBlendMode> for XREnvironmentBlendMode {
-    fn from(x: EnvironmentBlendMode) -> Self {
-        match x {
-            EnvironmentBlendMode::Opaque => XREnvironmentBlendMode::Opaque,
-            EnvironmentBlendMode::AlphaBlend => XREnvironmentBlendMode::Alpha_blend,
-            EnvironmentBlendMode::Additive => XREnvironmentBlendMode::Additive,
-        }
-    }
-}

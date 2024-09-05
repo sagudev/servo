@@ -211,7 +211,7 @@ impl Promise {
         let _ac = enter_realm(self);
         rooted!(in(*cx) let mut v = UndefinedValue());
         unsafe {
-            error.to_jsval(*cx, &self.global(), v.handle_mut());
+            error.to_jsval::<crate::DomTypeHolder>(*cx, &self.global(), v.handle_mut());
         }
         self.reject(cx, v.handle());
     }
