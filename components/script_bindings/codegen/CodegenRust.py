@@ -1685,7 +1685,7 @@ class PropertyDefiner:
         joinedSpecs = ',\n'.join(specs)
         specsArray = f"static mut {name}_specs: &[&[{specType}]] = &[];\n"
 
-        initSpecs = (f"fn init_{name}_specs<D: DomTypes>() {{\n"
+        initSpecs = (f"pub(crate) fn init_{name}_specs<D: DomTypes>() {{\n"
                      f"    unsafe {{ {name}_specs = Box::leak(vec![\n"
                      f"{joinedSpecs}\n"
                      "    ].into_boxed_slice()); }\n"
@@ -1694,7 +1694,7 @@ class PropertyDefiner:
         joinedPrefableSpecs = ',\n'.join(prefableSpecs)
         prefArray = f"static mut {name}: &[Guard<&[{specType}]>] = &[];\n"
 
-        initPrefs = (f"fn init_{name}_prefs<D: DomTypes>() {{\n"
+        initPrefs = (f"pub(crate) fn init_{name}_prefs<D: DomTypes>() {{\n"
                      f"    unsafe {{ {name} = \n"
                      f"Box::leak(Box::new([{joinedPrefableSpecs}]))\n"
                      "    ; }\n"
@@ -2440,7 +2440,7 @@ static mut CLASS_OPS: JSClassOps = JSClassOps {{
     trace: None,
 }};
 
-fn init_class_ops<D: DomTypes>() {{
+pub(crate) fn init_class_ops<D: DomTypes>() {{
     unsafe {{
     CLASS_OPS = JSClassOps {{
         addProperty: None,
@@ -2471,7 +2471,7 @@ pub static mut Class: DOMJSClass = DOMJSClass {{
     dom_class: {args['domClass']},
 }};
 
-fn init_domjs_class<D: DomTypes>() {{
+pub(crate) fn init_domjs_class<D: DomTypes>() {{
     init_class_ops::<D>();
     unsafe {{
         Class.dom_class.malloc_size_of = malloc_size_of_including_raw_self::<{self.descriptor.concreteType}>;
@@ -2597,7 +2597,7 @@ static mut INTERFACE_OBJECT_CLASS: NonCallbackInterfaceObjectClass =
         PrototypeList::ID::{name},
         {self.descriptor.prototypeDepth});
 
-fn init_interface_object<D: DomTypes>() {{
+pub(crate) fn init_interface_object<D: DomTypes>() {{
     unsafe {{
         INTERFACE_OBJECT_CLASS = NonCallbackInterfaceObjectClass::new(
         {{
@@ -4565,7 +4565,7 @@ class CGMemberJITInfo(CGThing):
                     argTypes: &${argTypes} as *const _ as *const JSJitInfo_ArgType,
                 };
 
-                fn init_${infoName}<D: DomTypes>() {
+                pub(crate) fn init_${infoName}<D: DomTypes>() {
                     unsafe { ${infoName}.base = ${jitInfoInit}; }
                 }
                 """,
@@ -4575,7 +4575,7 @@ class CGMemberJITInfo(CGThing):
                 jitInfoInit=indent(jitInfoInitializer(True, True)),
                 argTypes=argTypes)
 
-        return f"static mut {infoName}: JSJitInfo = {jitInfoInitializer(False, False)};\n\nfn init_{infoName}<D: DomTypes>() {{ unsafe {{ {infoName} = {jitInfoInitializer(False, True)}; }} }}\n\n"
+        return f"static mut {infoName}: JSJitInfo = {jitInfoInitializer(False, False)};\n\npub(crate) fn init_{infoName}<D: DomTypes>() {{ unsafe {{ {infoName} = {jitInfoInitializer(False, True)}; }} }}\n\n"
 
     def define(self):
         if self.member.isAttr():
@@ -4874,7 +4874,7 @@ class CGStaticMethodJitinfo(CGGeneric):
                 ),
             }};
 
-            fn init_{method.identifier.name}_methodinfo<D: DomTypes>() {{
+            pub(crate) fn init_{method.identifier.name}_methodinfo<D: DomTypes>() {{
                 unsafe {{
                     {method.identifier.name}_methodinfo.__bindgen_anon_1 = JSJitInfo__bindgen_ty_1 {{
                         staticMethod: Some({method.identifier.name}::<D>)
@@ -6654,6 +6654,44 @@ class CGWeakReferenceableTrait(CGThing):
         return self.code
 
 
+class CGInitStatics(CGThing):
+    def __init__(self, descriptor):
+        CGThing.__init__(self)
+        properties = PropertyArrays(descriptor)
+        all_names = PropertyArrays.arrayNames()
+        arrays = [getattr(properties, name) for name in all_names]
+        nonempty = map(lambda x: x.variableName(), filter(lambda x: x.length() != 0, arrays))
+        specs = [[
+            f'init_{name}_specs::<D>();',
+            f'init_{name}_prefs::<D>();',
+        ] for name in nonempty]
+        flat_specs = [x for xs in specs for x in xs]
+        specs = '\n'.join(flat_specs)
+        methods = [f'init_{descriptor.internalNameFor(m.identifier.name)}_methodinfo::<D>();' for m in descriptor.interface.members if m.isMethod() and not m.isStatic() and descriptor.internalNameFor(m.identifier.name) not in map(lambda x: f"__{x.lower()}", descriptor.operations)] if not descriptor.interface.isCallback() else []
+        getters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_getterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.isStatic()]
+        setters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_setterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.readonly and not m.isStatic()]
+        methods = '\n'.join(methods)
+        getters = '\n'.join(getters)
+        setters = '\n'.join(setters)
+        jitinfo = '' #XXXjdm
+        interface = "init_interface_object::<D>();" if descriptor.interface.hasInterfaceObject() and not descriptor.interface.isNamespace() and not descriptor.interface.isCallback() and not descriptor.interface.getExtendedAttribute("Inline") else ""
+        nonproxy = "init_domjs_class::<D>();\ninit_class_ops::<D>();" if not descriptor.proxy and descriptor.concrete else ""
+
+        self.code = f"""
+        pub(crate) fn init_statics<D: DomTypes>() {{
+            {interface}
+            {nonproxy}
+            {specs}
+            {methods}
+            {getters}
+            {setters}
+            {jitinfo}
+        }}
+        """
+
+    def define(self):
+        return self.code
+
 class CGDescriptor(CGThing):
     def __init__(self, descriptor, config, soleDescriptor):
         CGThing.__init__(self)
@@ -6847,6 +6885,8 @@ class CGDescriptor(CGThing):
                     cgThings.append(CGConstructorEnabled(descriptor))
             cgThings.append(CGCreateInterfaceObjectsMethod(descriptor, properties, haveUnscopables,
                                                            haveLegacyWindowAliases))
+
+        cgThings.append(CGInitStatics(descriptor))
 
         cgThings = CGList(cgThings, '\n')
 
@@ -7229,6 +7269,22 @@ class CGDictionary(CGThing):
                 deps.add(member.type.unroll().inner)
         return deps
 
+
+class CGInitAllStatics(CGAbstractMethod):
+    def __init__(self, config):
+        docs = "Initialize the static data used by the SpiderMonkey DOM bindings to implement JS interfaces."
+        descriptors = config.getDescriptors()
+        CGAbstractMethod.__init__(self, None, 'InitAllStatics', 'void', [],
+                                  pub=True, docs=docs, templateArgs=["D: DomTypes"])
+        self.descriptors = descriptors
+
+    def definition_body(self):
+        return CGList([
+            CGGeneric(f"    Bindings::{toBindingModuleFileFromDescriptor(desc)}::{toBindingNamespace(desc.name)}"
+                      "::init_statics::<D>();\n")
+            for desc in self.descriptors if desc.register and desc.interface.identifier.name != "EventListener"
+        ], "\n")
+    
 
 class CGRegisterProxyHandlersMethod(CGAbstractMethod):
     def __init__(self, descriptors):
@@ -8259,6 +8315,7 @@ class GlobalGenRoots():
         # TODO - Generate the methods we want
         code = CGList([
             CGRegisterProxyHandlers(config),
+            CGInitAllStatics(config),
         ], "\n")
 
         return CGImports(code, descriptors=[], callbacks=[], dictionaries=[], enums=[], typedefs=[], imports=[
