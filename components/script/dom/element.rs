@@ -4,7 +4,7 @@
 
 //! Element nodes.
 
-use std::borrow::Cow;
+use std::borrow::{Cow, ToOwned};
 use std::cell::Cell;
 use std::default::Default;
 use std::ops::Deref;
@@ -2811,7 +2811,7 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
         let quirks_mode = doc.quirks_mode();
         let element = DomRoot::from_ref(self);
 
-        Ok(dom_apis::element_matches(&element, &selectors, quirks_mode))
+        Ok(dom_apis::element_matches(&SelectorWrapper::Borrowed(&element), &selectors, quirks_mode))
     }
 
     // https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
@@ -2833,10 +2833,10 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
 
         let quirks_mode = doc.quirks_mode();
         Ok(dom_apis::element_closest(
-            DomRoot::from_ref(self),
+            SelectorWrapper::Owned(DomRoot::from_ref(self)),
             &selectors,
             quirks_mode,
-        ))
+        ).map(SelectorWrapper::into_owned))
     }
 
     // https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
@@ -3565,7 +3565,39 @@ impl VirtualMethods for Element {
     }
 }
 
-impl SelectorsElement for Element {
+#[derive(PartialEq, Clone)]
+pub enum SelectorWrapper<'a> {
+    Borrowed(&'a DomRoot<Element>),
+    Owned(DomRoot<Element>),
+}
+
+impl<'a> fmt::Debug for SelectorWrapper<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.deref().fmt(f)
+    }
+}
+
+impl<'a> Deref for SelectorWrapper<'a> {
+    type Target = DomRoot<Element>;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            SelectorWrapper::Owned(r) => &r,
+            SelectorWrapper::Borrowed(r) => r,
+        }
+    }
+}
+
+impl<'a> SelectorWrapper<'a> {    
+    fn into_owned(self) -> DomRoot<Element> {
+        match self {
+            SelectorWrapper::Owned(r) => r,
+            SelectorWrapper::Borrowed(r) => r.clone(),
+        }
+    }
+}
+
+impl<'a> SelectorsElement for SelectorWrapper<'a> {
     type Impl = SelectorImpl;
 
     #[allow(unsafe_code)]
@@ -3573,8 +3605,8 @@ impl SelectorsElement for Element {
         ::selectors::OpaqueElement::new(unsafe { &*self.reflector().get_jsobject().get() })
     }
 
-    fn parent_element(&self) -> Option<DomRoot<Element>> {
-        self.upcast::<Node>().GetParentElement()
+    fn parent_element(&self) -> Option<Self> {
+        self.upcast::<Node>().GetParentElement().map(SelectorWrapper::Owned)
     }
 
     fn parent_node_is_shadow_root(&self) -> bool {
@@ -3588,6 +3620,7 @@ impl SelectorsElement for Element {
         self.upcast::<Node>()
             .containing_shadow_root()
             .map(|shadow_root| shadow_root.Host())
+            .map(SelectorWrapper::Owned)
     }
 
     fn is_pseudo_element(&self) -> bool {
@@ -3602,22 +3635,24 @@ impl SelectorsElement for Element {
         false
     }
 
-    fn prev_sibling_element(&self) -> Option<DomRoot<Element>> {
+    fn prev_sibling_element(&self) -> Option<Self> {
         self.node
             .preceding_siblings()
             .filter_map(DomRoot::downcast)
             .next()
+            .map(SelectorWrapper::Owned)
     }
 
-    fn next_sibling_element(&self) -> Option<DomRoot<Element>> {
+    fn next_sibling_element(&self) -> Option<Self> {
         self.node
             .following_siblings()
             .filter_map(DomRoot::downcast)
             .next()
+            .map(SelectorWrapper::Owned)
     }
 
-    fn first_element_child(&self) -> Option<DomRoot<Element>> {
-        self.GetFirstElementChild()
+    fn first_element_child(&self) -> Option<Self> {
+        self.GetFirstElementChild().map(SelectorWrapper::Owned)
     }
 
     fn attr_matches(
@@ -3637,7 +3672,7 @@ impl SelectorsElement for Element {
     }
 
     fn is_root(&self) -> bool {
-        Element::is_root(self)
+        Element::is_root(&self)
     }
 
     fn is_empty(&self) -> bool {
@@ -3651,16 +3686,16 @@ impl SelectorsElement for Element {
     }
 
     fn has_local_name(&self, local_name: &LocalName) -> bool {
-        Element::local_name(self) == local_name
+        Element::local_name(&self) == local_name
     }
 
     fn has_namespace(&self, ns: &Namespace) -> bool {
-        Element::namespace(self) == ns
+        Element::namespace(&self) == ns
     }
 
     fn is_same_type(&self, other: &Self) -> bool {
-        Element::local_name(self) == Element::local_name(other) &&
-            Element::namespace(self) == Element::namespace(other)
+        Element::local_name(&self) == Element::local_name(other) &&
+            Element::namespace(&self) == Element::namespace(other)
     }
 
     fn match_non_ts_pseudo_class(
@@ -3689,7 +3724,7 @@ impl SelectorsElement for Element {
             // storing separate <ident> or <string>s for each language tag.
             NonTSPseudoClass::Lang(ref lang) => extended_filtering(&self.get_lang(), lang),
 
-            NonTSPseudoClass::ReadOnly => !Element::state(self).contains(pseudo_class.state_flag()),
+            NonTSPseudoClass::ReadOnly => !Element::state(&self).contains(pseudo_class.state_flag()),
 
             NonTSPseudoClass::Active |
             NonTSPseudoClass::Focus |
@@ -3704,7 +3739,7 @@ impl SelectorsElement for Element {
             NonTSPseudoClass::Indeterminate |
             NonTSPseudoClass::ReadWrite |
             NonTSPseudoClass::PlaceholderShown |
-            NonTSPseudoClass::Target => Element::state(self).contains(pseudo_class.state_flag()),
+            NonTSPseudoClass::Target => Element::state(&self).contains(pseudo_class.state_flag()),
         }
     }
 
@@ -3740,7 +3775,7 @@ impl SelectorsElement for Element {
     }
 
     fn has_class(&self, name: &AtomIdent, case_sensitivity: CaseSensitivity) -> bool {
-        Element::has_class(self, name, case_sensitivity)
+        Element::has_class(&self, name, case_sensitivity)
     }
 
     fn is_html_element_in_html_document(&self) -> bool {
@@ -3757,7 +3792,7 @@ impl SelectorsElement for Element {
         if !self_flags.is_empty() {
             #[allow(unsafe_code)]
             unsafe {
-                Dom::from_ref(self.deref())
+                Dom::from_ref(&***self)
                     .to_layout()
                     .insert_selector_flags(self_flags);
             }
@@ -3769,7 +3804,7 @@ impl SelectorsElement for Element {
             if let Some(p) = self.parent_element() {
                 #[allow(unsafe_code)]
                 unsafe {
-                    Dom::from_ref(p.deref())
+                    Dom::from_ref(&**p)
                         .to_layout()
                         .insert_selector_flags(parent_flags);
                 }

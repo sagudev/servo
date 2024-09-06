@@ -235,7 +235,11 @@ pub fn get_constructor_object_from_local_name(
         ($binding:ident) => ({
             $binding::GenericBindings::GetConstructorObject(cx, global, rval);
             true
-        })
+        });
+        ($binding:ident::<crate::DomTypeHolder>) => ({
+            $binding::GenericBindings::GetConstructorObject::<crate::DomTypeHolder>(cx, global, rval);
+            true
+        });
     );
 
     match name {
@@ -246,7 +250,7 @@ pub fn get_constructor_object_from_local_name(
         local_name!("area") => get_constructor!(HTMLAreaElementBinding),
         local_name!("article") => get_constructor!(HTMLElementBinding),
         local_name!("aside") => get_constructor!(HTMLElementBinding),
-        local_name!("audio") => get_constructor!(HTMLAudioElementBinding),
+        local_name!("audio") => get_constructor!(HTMLAudioElementBinding::<crate::DomTypeHolder>),
         local_name!("b") => get_constructor!(HTMLElementBinding),
         local_name!("base") => get_constructor!(HTMLBaseElementBinding),
         local_name!("bdi") => get_constructor!(HTMLElementBinding),
@@ -297,7 +301,7 @@ pub fn get_constructor_object_from_local_name(
         local_name!("html") => get_constructor!(HTMLHtmlElementBinding),
         local_name!("i") => get_constructor!(HTMLElementBinding),
         local_name!("iframe") => get_constructor!(HTMLIFrameElementBinding),
-        local_name!("img") => get_constructor!(HTMLImageElementBinding),
+        local_name!("img") => get_constructor!(HTMLImageElementBinding::<crate::DomTypeHolder>),
         local_name!("input") => get_constructor!(HTMLInputElementBinding),
         local_name!("ins") => get_constructor!(HTMLModElementBinding),
         local_name!("kbd") => get_constructor!(HTMLElementBinding),
@@ -320,7 +324,7 @@ pub fn get_constructor_object_from_local_name(
         local_name!("object") => get_constructor!(HTMLObjectElementBinding),
         local_name!("ol") => get_constructor!(HTMLOListElementBinding),
         local_name!("optgroup") => get_constructor!(HTMLOptGroupElementBinding),
-        local_name!("option") => get_constructor!(HTMLOptionElementBinding),
+        local_name!("option") => get_constructor!(HTMLOptionElementBinding::<crate::DomTypeHolder>),
         local_name!("output") => get_constructor!(HTMLOutputElementBinding),
         local_name!("p") => get_constructor!(HTMLParagraphElementBinding),
         local_name!("param") => get_constructor!(HTMLParamElementBinding),

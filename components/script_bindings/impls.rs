@@ -1025,7 +1025,7 @@ impl From<XRSessionMode> for SessionMode {
     }
 }
 
-impl<T: SelectorsElement + crate::DomObject + Into<DomRoot<T>>> SelectorsElement for DomRoot<T> {
+/*impl<T: SelectorsElement + crate::DomObject + Into<DomRoot<T>>> SelectorsElement for DomRoot<T> {
     type Impl = T::Impl;
 
     fn opaque(&self) -> ::selectors::OpaqueElement {
@@ -1144,7 +1144,7 @@ impl<T: SelectorsElement + crate::DomObject + Into<DomRoot<T>>> SelectorsElement
     fn has_custom_state(&self, name: &<<T as selectors::Element>::Impl as selectors::SelectorImpl>::Identifier) -> bool {
         T::has_custom_state(&*self, name)
     }
-}
+}*/
 
 impl<T: fmt::Debug + crate::DomObject> fmt::Debug for DomRoot<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

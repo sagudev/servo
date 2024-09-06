@@ -574,3 +574,16 @@ impl BaseAudioContextMethods<crate::DomTypeHolder> for BaseAudioContext {
         IIRFilterNode::new(self.global().as_window(), self, &opts)
     }
 }
+
+impl From<BaseAudioContextOptions> for AudioContextOptions {
+    fn from(options: BaseAudioContextOptions) -> Self {
+        match options {
+            BaseAudioContextOptions::AudioContext(options) => {
+                AudioContextOptions::RealTimeAudioContext(options)
+            },
+            BaseAudioContextOptions::OfflineAudioContext(options) => {
+                AudioContextOptions::OfflineAudioContext(options)
+            },
+        }
+    }
+}

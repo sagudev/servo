@@ -347,7 +347,7 @@ pub trait ToLayout<T> {
     unsafe fn to_layout(&self) -> LayoutDom<T>;
 }
 
-impl<T> ToLayout<T> for Dom<T> {
+impl<T: DomObject> ToLayout<T> for Dom<T> {
     unsafe fn to_layout(&self) -> LayoutDom<T> {
         assert_in_layout();
         LayoutDom {

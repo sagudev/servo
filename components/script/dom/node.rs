@@ -77,7 +77,7 @@ use crate::dom::customelementregistry::{try_upgrade_element, CallbackReaction};
 use crate::dom::document::{Document, DocumentSource, HasBrowsingContext, IsHTMLDocument};
 use crate::dom::documentfragment::DocumentFragment;
 use crate::dom::documenttype::DocumentType;
-use crate::dom::element::{CustomElementCreationMode, Element, ElementCreator};
+use crate::dom::element::{CustomElementCreationMode, Element, ElementCreator, SelectorWrapper};
 use crate::dom::event::{Event, EventBubbles, EventCancelable};
 use crate::dom::eventtarget::EventTarget;
 use crate::dom::htmlbodyelement::HTMLBodyElement;
@@ -484,7 +484,7 @@ impl Iterator for QuerySelectorIterator {
                     MatchingForInvalidation::No,
                 );
                 if let Some(element) = DomRoot::downcast(node) {
-                    if matches_selector_list(selectors, &element, &mut ctx) {
+                    if matches_selector_list(selectors, &SelectorWrapper::Borrowed(&element), &mut ctx) {
                         return Some(DomRoot::upcast(element));
                     }
                 }
@@ -984,7 +984,7 @@ impl Node {
                 Ok(self
                     .traverse_preorder(ShadowIncluding::No)
                     .filter_map(DomRoot::downcast)
-                    .find(|element| matches_selector_list(&selectors, element, &mut ctx)))
+                    .find(|element| matches_selector_list(&selectors, &SelectorWrapper::Borrowed(element), &mut ctx)))
             },
         }
     }
