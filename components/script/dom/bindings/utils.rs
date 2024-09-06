@@ -36,15 +36,15 @@ use js::rust::{
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
-use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 pub use script_bindings::utils::*;
+use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
     jsstring_to_str, private_from_proto_check, PrototypeCheck,
 };
-use crate::dom::bindings::error::{throw_invalid_this, throw_dom_exception};
+use crate::dom::bindings::error::{throw_dom_exception, throw_invalid_this};
 use crate::dom::bindings::inheritance::TopTypeId;
 use crate::dom::bindings::proxyhandler::report_cross_origin_denial;
 use crate::dom::bindings::str::DOMString;
@@ -813,7 +813,9 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         &InterfaceObjectMap::MAP
     }
 
-    fn AudioBuffer_get_channels(buffer: &<crate::DomTypeHolder as script_bindings::DomTypes>::AudioBuffer) -> Ref<Option<ServoMediaAudioBuffer>> {
+    fn AudioBuffer_get_channels(
+        buffer: &<crate::DomTypeHolder as script_bindings::DomTypes>::AudioBuffer,
+    ) -> Ref<Option<ServoMediaAudioBuffer>> {
         buffer.get_channels()
     }
 }

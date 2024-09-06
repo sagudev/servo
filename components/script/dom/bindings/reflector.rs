@@ -22,7 +22,7 @@ pub trait DomGlobal {
     fn global(&self) -> DomRoot<GlobalScope>;
 }
 
-impl <T: script_bindings::DomGlobal<crate::DomTypeHolder>> DomGlobal for T {
+impl<T: script_bindings::DomGlobal<crate::DomTypeHolder>> DomGlobal for T {
     fn global(&self) -> DomRoot<GlobalScope> {
         <Self as script_bindings::DomGlobal<crate::DomTypeHolder>>::global(self)
     }

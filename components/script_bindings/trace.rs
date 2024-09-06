@@ -45,7 +45,6 @@ use js::jsapi::{GCTraceKindToAscii, Heap, JSObject, JSScript, JSString, JSTracer
 use js::jsval::JSVal;
 use js::rust::{GCMethods, Handle};
 use malloc_size_of::{MallocSizeOf, MallocSizeOfOps};
-
 use parking_lot::RwLock;
 use servo_arc::Arc as ServoArc;
 use smallvec::SmallVec;

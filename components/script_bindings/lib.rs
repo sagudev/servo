@@ -78,10 +78,10 @@ pub mod conversions;
 pub mod error;
 pub mod finalize;
 pub mod guard;
+pub mod impls;
 pub mod inheritance;
 pub mod interface;
 pub mod iterable;
-pub mod impls;
 pub mod like;
 pub mod mem;
 pub mod namespace;
@@ -321,7 +321,8 @@ pub mod dom {
                 };
                 pub use crate::dom::bindings::proxyhandler;
                 pub use crate::dom::bindings::proxyhandler::{
-                    ensure_expando_object, get_expando_object, set_property_descriptor, report_cross_origin_denial
+                    ensure_expando_object, get_expando_object, report_cross_origin_denial,
+                    set_property_descriptor,
                 };
                 pub use crate::dom::bindings::record::Record;
                 pub use crate::dom::bindings::reflector::{

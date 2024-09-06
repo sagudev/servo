@@ -95,7 +95,11 @@ pub type ErrorResult = Fallible<()>;*/
 pub use script_bindings::error::*;
 
 pub unsafe fn report_pending_exception(cx: *mut JSContext, dispatch_event: bool, realm: InRealm) {
-    script_bindings::error::report_pending_exception::<crate::DomTypeHolder>(cx, dispatch_event, realm)
+    script_bindings::error::report_pending_exception::<crate::DomTypeHolder>(
+        cx,
+        dispatch_event,
+        realm,
+    )
 }
 
 #[cfg(feature = "js_backtrace")]

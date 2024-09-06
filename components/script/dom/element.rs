@@ -2811,7 +2811,11 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
         let quirks_mode = doc.quirks_mode();
         let element = DomRoot::from_ref(self);
 
-        Ok(dom_apis::element_matches(&SelectorWrapper::Borrowed(&element), &selectors, quirks_mode))
+        Ok(dom_apis::element_matches(
+            &SelectorWrapper::Borrowed(&element),
+            &selectors,
+            quirks_mode,
+        ))
     }
 
     // https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
@@ -2836,7 +2840,8 @@ impl ElementMethods<crate::DomTypeHolder> for Element {
             SelectorWrapper::Owned(DomRoot::from_ref(self)),
             &selectors,
             quirks_mode,
-        ).map(SelectorWrapper::into_owned))
+        )
+        .map(SelectorWrapper::into_owned))
     }
 
     // https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
@@ -3588,7 +3593,7 @@ impl<'a> Deref for SelectorWrapper<'a> {
     }
 }
 
-impl<'a> SelectorWrapper<'a> {    
+impl<'a> SelectorWrapper<'a> {
     fn into_owned(self) -> DomRoot<Element> {
         match self {
             SelectorWrapper::Owned(r) => r,
@@ -3606,7 +3611,9 @@ impl<'a> SelectorsElement for SelectorWrapper<'a> {
     }
 
     fn parent_element(&self) -> Option<Self> {
-        self.upcast::<Node>().GetParentElement().map(SelectorWrapper::Owned)
+        self.upcast::<Node>()
+            .GetParentElement()
+            .map(SelectorWrapper::Owned)
     }
 
     fn parent_node_is_shadow_root(&self) -> bool {
@@ -3724,7 +3731,9 @@ impl<'a> SelectorsElement for SelectorWrapper<'a> {
             // storing separate <ident> or <string>s for each language tag.
             NonTSPseudoClass::Lang(ref lang) => extended_filtering(&self.get_lang(), lang),
 
-            NonTSPseudoClass::ReadOnly => !Element::state(&self).contains(pseudo_class.state_flag()),
+            NonTSPseudoClass::ReadOnly => {
+                !Element::state(&self).contains(pseudo_class.state_flag())
+            },
 
             NonTSPseudoClass::Active |
             NonTSPseudoClass::Focus |

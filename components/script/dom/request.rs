@@ -299,11 +299,7 @@ impl RequestMethods<crate::DomTypeHolder> for Request {
         }
 
         // Step 16
-        let mode = init
-            .mode
-            .as_ref()
-            .map(|m| (*m).into())
-            .or(fallback_mode);
+        let mode = init.mode.as_ref().map(|m| (*m).into()).or(fallback_mode);
 
         // Step 17
         if let Some(NetTraitsRequestMode::Navigate) = mode {
@@ -662,4 +658,3 @@ impl BodyMixin for Request {
         headers.extract_mime_type()
     }
 }
-

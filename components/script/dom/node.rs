@@ -484,7 +484,11 @@ impl Iterator for QuerySelectorIterator {
                     MatchingForInvalidation::No,
                 );
                 if let Some(element) = DomRoot::downcast(node) {
-                    if matches_selector_list(selectors, &SelectorWrapper::Borrowed(&element), &mut ctx) {
+                    if matches_selector_list(
+                        selectors,
+                        &SelectorWrapper::Borrowed(&element),
+                        &mut ctx,
+                    ) {
                         return Some(DomRoot::upcast(element));
                     }
                 }
@@ -984,7 +988,13 @@ impl Node {
                 Ok(self
                     .traverse_preorder(ShadowIncluding::No)
                     .filter_map(DomRoot::downcast)
-                    .find(|element| matches_selector_list(&selectors, &SelectorWrapper::Borrowed(element), &mut ctx)))
+                    .find(|element| {
+                        matches_selector_list(
+                            &selectors,
+                            &SelectorWrapper::Borrowed(element),
+                            &mut ctx,
+                        )
+                    }))
             },
         }
     }

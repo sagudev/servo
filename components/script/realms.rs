@@ -3,8 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use js::jsapi::{GetCurrentRealmOrNull, JSAutoRealm};
-//pub use script_bindings::realms::{AlreadyInRealm, InRealm};
 
+//pub use script_bindings::realms::{AlreadyInRealm, InRealm};
 use crate::dom::bindings::reflector::DomObject;
 use crate::dom::globalscope::GlobalScope;
 use crate::script_runtime::JSContext;

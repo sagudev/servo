@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use bluetooth_traits::BluetoothError;
 use canvas_traits::webgl::GLContextAttributes;
-use html5ever::tokenizer::{Tokenizer, TokenSink};
+use html5ever::tokenizer::{TokenSink, Tokenizer};
 use html5ever::tree_builder::{Tracer as HtmlTracer, TreeBuilder, TreeSink};
 use itertools::Itertools;
 use js::jsapi::JSTracer;
@@ -19,57 +19,49 @@ use net_traits::request::{
 use net_traits::ReferrerPolicy as MsgReferrerPolicy;
 use script_layout_interface::{LayoutElementType, LayoutNodeType};
 use script_traits::MediaSessionActionType;
-use selectors::{Element as SelectorsElement, SelectorImpl};
-use selectors::attr::{CaseSensitivity, NamespaceConstraint, AttrSelectorOperation};
+use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::bloom::BloomFilter;
 use selectors::matching::{ElementSelectorFlags, MatchingContext};
-use selectors::parser::{LocalName, PseudoElement, NonTSPseudoClass};
+use selectors::parser::{LocalName, NonTSPseudoClass, PseudoElement};
+use selectors::{Element as SelectorsElement, SelectorImpl};
 use serde::Serialize;
+use servo_media::audio::biquad_filter_node::{BiquadFilterNodeOptions, FilterType};
 use servo_media::audio::buffer_source_node::AudioBufferSourceNodeOptions;
+use servo_media::audio::channel_node::ChannelNodeOptions;
+use servo_media::audio::constant_source_node::ConstantSourceNodeOptions as ServoMediaConstantSourceOptions;
+use servo_media::audio::context::{LatencyCategory, ProcessingState, RealTimeAudioContextOptions};
+use servo_media::audio::gain_node::GainNodeOptions;
+use servo_media::audio::iir_filter_node::IIRFilterNodeOptions;
 use servo_media::audio::node::{
     ChannelCountMode as ServoMediaChannelCountMode,
     ChannelInterpretation as ServoMediaChannelInterpretation,
 };
-use servo_media::audio::context::{LatencyCategory, RealTimeAudioContextOptions};
-use servo_media::audio::param::ParamRate;
-use servo_media::audio::context::{ProcessingState};
-use servo_media::audio::biquad_filter_node::{BiquadFilterNodeOptions, FilterType};
-use servo_media::audio::channel_node::ChannelNodeOptions;
-use servo_media::audio::constant_source_node::ConstantSourceNodeOptions as ServoMediaConstantSourceOptions;
-use servo_media::audio::gain_node::GainNodeOptions;
-use servo_media::audio::iir_filter_node::IIRFilterNodeOptions;
 use servo_media::audio::oscillator_node::{
     OscillatorNodeOptions as ServoMediaOscillatorOptions,
     OscillatorType as ServoMediaOscillatorType,
 };
 use servo_media::audio::panner_node::{DistanceModel, PannerNodeOptions, PanningModel};
+use servo_media::audio::param::ParamRate;
 use servo_media::audio::stereo_panner::StereoPannerOptions as ServoMediaStereoPannerOptions;
 use servo_media::streams::device_monitor::MediaDeviceKind as ServoMediaDeviceKind;
-use servo_media::webrtc::{DataChannelInit, DataChannelState};
-use servo_media::webrtc::{GatheringState, IceConnectionState, SessionDescription, SignalingState, SdpType};
-use style::Namespace;
-use style::values::{AtomIdent, AtomString};
-
-use style::stylesheets::RulesMutateError;
-use webxr_api::{EntityType, Handedness, TargetRayMode, EnvironmentBlendMode, LayerInit, SessionMode};
-use webgpu::ErrorFilter;
-use xml5ever::tokenizer::XmlTokenizer;
-use xml5ever::tree_builder::{Tracer as XmlTracer, XmlTreeBuilder, TreeSink as XmlTreeSink};
-
-use crate::codegen::UnionTypes::AudioContextLatencyCategoryOrDouble;
-use crate::codegen::UnionTypes::AddEventListenerOptionsOrBoolean;
-use crate::codegen::UnionTypes::StringOrUnsignedLong;
-use crate::codegen::UnionTypes::EventListenerOptionsOrBoolean;
-use crate::codegen::UnionTypes::HTMLCanvasElementOrOffscreenCanvas;
-use crate::codegen::Bindings::WebGPUBinding::{GPUCanvasConfiguration, GPUTextureDescriptor, GPUErrorFilter, GPUFeatureName};
-use crate::codegen::Bindings::HeadersBinding::HeadersInit;
-use crate::codegen::Bindings::RequestBinding::{
-    ReferrerPolicy, RequestCache, RequestCredentials, RequestDestination, RequestInfo, RequestInit,
-    RequestMethods, RequestMode, RequestRedirect,
+use servo_media::webrtc::{
+    DataChannelInit, DataChannelState, GatheringState, IceConnectionState, SdpType,
+    SessionDescription, SignalingState,
 };
-use crate::codegen::Bindings::SecurityPolicyViolationEventBinding::SecurityPolicyViolationEventDisposition;
-use crate::codegen::Bindings::AudioContextBinding::{AudioContextOptions, AudioContextLatencyCategory};
+use style::stylesheets::RulesMutateError;
+use style::values::{AtomIdent, AtomString};
+use style::Namespace;
+use webgpu::ErrorFilter;
+use webxr_api::{
+    EntityType, EnvironmentBlendMode, Handedness, LayerInit, SessionMode, TargetRayMode,
+};
+use xml5ever::tokenizer::XmlTokenizer;
+use xml5ever::tree_builder::{Tracer as XmlTracer, TreeSink as XmlTreeSink, XmlTreeBuilder};
+
 use crate::codegen::Bindings::AudioBufferSourceNodeBinding::AudioBufferSourceOptions;
+use crate::codegen::Bindings::AudioContextBinding::{
+    AudioContextLatencyCategory, AudioContextOptions,
+};
 use crate::codegen::Bindings::AudioNodeBinding::{ChannelCountMode, ChannelInterpretation};
 use crate::codegen::Bindings::AudioParamBinding::AutomationRate;
 use crate::codegen::Bindings::BaseAudioContextBinding::AudioContextState;
@@ -77,31 +69,52 @@ use crate::codegen::Bindings::BiquadFilterNodeBinding::{BiquadFilterOptions, Biq
 use crate::codegen::Bindings::ChannelMergerNodeBinding::ChannelMergerOptions;
 use crate::codegen::Bindings::ConstantSourceNodeBinding::ConstantSourceOptions;
 use crate::codegen::Bindings::EventTargetBinding::{AddEventListenerOptions, EventListenerOptions};
-use crate::codegen::Bindings::GainNodeBinding::GainOptions;
-use crate::codegen::Bindings::XRInputSourceBinding::{XRHandedness, XRTargetRayMode};
 use crate::codegen::Bindings::FakeXRDeviceBinding::FakeXRRegionType;
-use crate::codegen::Bindings::WebGLRenderingContextBinding::WebGLContextAttributes;
+use crate::codegen::Bindings::GainNodeBinding::GainOptions;
+use crate::codegen::Bindings::HeadersBinding::HeadersInit;
 use crate::codegen::Bindings::IIRFilterNodeBinding::IIRFilterOptions;
 use crate::codegen::Bindings::MediaDeviceInfoBinding::MediaDeviceKind;
 use crate::codegen::Bindings::MediaSessionBinding::MediaSessionAction;
 use crate::codegen::Bindings::OscillatorNodeBinding::{OscillatorOptions, OscillatorType};
-use crate::codegen::Bindings::PannerNodeBinding::{DistanceModelType, PannerOptions, PanningModelType};
+use crate::codegen::Bindings::PannerNodeBinding::{
+    DistanceModelType, PannerOptions, PanningModelType,
+};
 use crate::codegen::Bindings::PermissionStatusBinding::PermissionName;
 use crate::codegen::Bindings::RTCDataChannelBinding::{RTCDataChannelInit, RTCDataChannelState};
-use crate::codegen::Bindings::RTCPeerConnectionBinding::{RTCIceConnectionState, RTCIceGatheringState, RTCSignalingState};
-use crate::codegen::Bindings::RTCSessionDescriptionBinding::{RTCSessionDescriptionInit, RTCSdpType};
+use crate::codegen::Bindings::RTCPeerConnectionBinding::{
+    RTCIceConnectionState, RTCIceGatheringState, RTCSignalingState,
+};
+use crate::codegen::Bindings::RTCSessionDescriptionBinding::{
+    RTCSdpType, RTCSessionDescriptionInit,
+};
+use crate::codegen::Bindings::RequestBinding::{
+    ReferrerPolicy, RequestCache, RequestCredentials, RequestDestination, RequestInfo, RequestInit,
+    RequestMethods, RequestMode, RequestRedirect,
+};
+use crate::codegen::Bindings::SecurityPolicyViolationEventBinding::SecurityPolicyViolationEventDisposition;
 use crate::codegen::Bindings::StereoPannerNodeBinding::StereoPannerOptions;
+use crate::codegen::Bindings::WebGLRenderingContextBinding::WebGLContextAttributes;
 use crate::codegen::Bindings::WebGPUBinding::GPUFeatureNameValues::pairs;
-use crate::codegen::Bindings::XRWebGLLayerBinding::XRWebGLLayerInit;
+use crate::codegen::Bindings::WebGPUBinding::{
+    GPUCanvasConfiguration, GPUErrorFilter, GPUFeatureName, GPUTextureDescriptor,
+};
+use crate::codegen::Bindings::XRInputSourceBinding::{XRHandedness, XRTargetRayMode};
 use crate::codegen::Bindings::XRSessionBinding::XREnvironmentBlendMode;
-use crate::dom::bindings::codegen::Bindings::XRSystemBinding::XRSessionMode;
+use crate::codegen::Bindings::XRWebGLLayerBinding::XRWebGLLayerInit;
 use crate::codegen::InheritTypes::HTMLElementTypeId;
+use crate::codegen::UnionTypes::{
+    AddEventListenerOptionsOrBoolean, AudioContextLatencyCategoryOrDouble,
+    EventListenerOptionsOrBoolean, HTMLCanvasElementOrOffscreenCanvas, StringOrUnsignedLong,
+};
+use crate::dom::bindings::codegen::Bindings::XRSystemBinding::XRSessionMode;
 use crate::error::Error;
-use crate::inheritance::{NodeTypeId, ElementTypeId, SVGElementTypeId, SVGGraphicsElementTypeId, CharacterDataTypeId};
+use crate::inheritance::{
+    CharacterDataTypeId, ElementTypeId, NodeTypeId, SVGElementTypeId, SVGGraphicsElementTypeId,
+};
 use crate::num::Finite;
 use crate::root::DomRoot;
 use crate::trace::{CustomTraceable, JSTraceable};
-use crate::{DomTypes, DomHelpers};
+use crate::{DomHelpers, DomTypes};
 
 impl Clone for StringOrUnsignedLong {
     fn clone(&self) -> StringOrUnsignedLong {
@@ -379,13 +392,10 @@ impl Serialize for SecurityPolicyViolationEventDisposition {
 impl<'a, D: DomTypes> From<&'a AudioBufferSourceOptions<D>> for AudioBufferSourceNodeOptions {
     fn from(options: &'a AudioBufferSourceOptions<D>) -> Self {
         Self {
-            buffer: options
-                .buffer
-                .as_ref()
-                .and_then(|b| {
-                    let b = b.as_ref()?;
-                    (*<D as DomHelpers<D>>::AudioBuffer_get_channels(b)).clone()
-                }),
+            buffer: options.buffer.as_ref().and_then(|b| {
+                let b = b.as_ref()?;
+                (*<D as DomHelpers<D>>::AudioBuffer_get_channels(b)).clone()
+            }),
             detune: *options.detune,
             loop_enabled: options.loop_,
             loop_end: Some(*options.loopEnd),
@@ -716,7 +726,6 @@ impl From<OscillatorType> for ServoMediaOscillatorType {
     }
 }
 
-
 impl<'a> From<&'a PannerOptions> for PannerNodeOptions {
     fn from(options: &'a PannerOptions) -> Self {
         Self {
@@ -756,7 +765,6 @@ impl From<PanningModelType> for PanningModel {
         }
     }
 }
-
 
 impl From<PermissionName> for embedder_traits::PermissionName {
     fn from(permission_name: PermissionName) -> Self {
@@ -854,7 +862,9 @@ impl std::hash::Hash for GPUFeatureName {
 
 impl Eq for GPUFeatureName {}
 
-unsafe impl<Handle: JSTraceable + Clone, Sink: TreeSink<Handle=Handle> + JSTraceable> CustomTraceable for TreeBuilder<Handle, Sink> {
+unsafe impl<Handle: JSTraceable + Clone, Sink: TreeSink<Handle = Handle> + JSTraceable>
+    CustomTraceable for TreeBuilder<Handle, Sink>
+{
     unsafe fn trace(&self, trc: *mut JSTracer) {
         struct Tracer<Handle>(*mut JSTracer, PhantomData<Handle>);
         let tracer = Tracer::<Handle>(trc, PhantomData);
@@ -875,7 +885,9 @@ unsafe impl<Handle: JSTraceable + Clone, Sink: TreeSink<Handle=Handle> + JSTrace
 }
 
 #[allow(unsafe_code)]
-unsafe impl<Handle: JSTraceable + Clone, Sink: TokenSink<Handle=Handle> + CustomTraceable> CustomTraceable for Tokenizer<Sink> {
+unsafe impl<Handle: JSTraceable + Clone, Sink: TokenSink<Handle = Handle> + CustomTraceable>
+    CustomTraceable for Tokenizer<Sink>
+{
     unsafe fn trace(&self, trc: *mut JSTracer) {
         let tree_builder = &self.sink;
         self.sink.trace(trc);
@@ -883,7 +895,9 @@ unsafe impl<Handle: JSTraceable + Clone, Sink: TokenSink<Handle=Handle> + Custom
 }
 
 #[allow(unsafe_code)]
-unsafe impl<Handle: JSTraceable + Clone, Sink: JSTraceable + XmlTreeSink<Handle=Handle>> CustomTraceable for XmlTokenizer<XmlTreeBuilder<Handle, Sink>> {
+unsafe impl<Handle: JSTraceable + Clone, Sink: JSTraceable + XmlTreeSink<Handle = Handle>>
+    CustomTraceable for XmlTokenizer<XmlTreeBuilder<Handle, Sink>>
+{
     unsafe fn trace(&self, trc: *mut JSTracer) {
         struct Tracer<Handle>(*mut JSTracer, PhantomData<Handle>);
         let tracer = Tracer(trc, PhantomData);
