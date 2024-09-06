@@ -448,7 +448,7 @@ impl WorkerGlobalScopeMethods<crate::DomTypeHolder> for WorkerGlobalScope {
 impl WorkerGlobalScope {
     #[allow(unsafe_code)]
     pub fn execute_script(&self, source: DOMString) {
-        let _aes = AutoEntryScript::new(self.upcast());
+        let _aes = AutoEntryScript::<crate::DomTypeHolder>::new(self.upcast());
         let cx = self.runtime.borrow().as_ref().unwrap().cx();
         rooted!(in(cx) let mut rval = UndefinedValue());
         match self.runtime.borrow().as_ref().unwrap().evaluate_script(

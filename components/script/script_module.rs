@@ -360,7 +360,7 @@ impl ModuleTree {
 
         let realm = enter_realm(&*owner.global());
         let comp = InRealm::Entered(&realm);
-        let _ais = AutoIncumbentScript::new(&owner.global());
+        let _ais = AutoIncumbentScript::<crate::DomTypeHolder>::new(&owner.global());
 
         let mut promise = self.promise.borrow_mut();
         match promise.as_ref() {
@@ -396,7 +396,7 @@ impl ModuleTree {
 
         let realm = enter_realm(&*owner.global());
         let comp = InRealm::Entered(&realm);
-        let _ais = AutoIncumbentScript::new(&owner.global());
+        let _ais = AutoIncumbentScript::<crate::DomTypeHolder>::new(&owner.global());
 
         let mut promise = self.promise.borrow_mut();
         match promise.as_ref() {

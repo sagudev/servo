@@ -1077,7 +1077,7 @@ impl HTMLScriptElement {
         // Step 4
         let window = window_from_node(self);
         let global = window.upcast::<GlobalScope>();
-        let _aes = AutoEntryScript::new(global);
+        let _aes = AutoEntryScript::<crate::DomTypeHolder>::new(global);
 
         let tree = if script.external {
             global.get_module_map().borrow().get(&script.url).cloned()

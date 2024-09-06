@@ -13,20 +13,20 @@ use crate::dom::bindings::trace::JSTraceable;
 use crate::{DomHelpers, DomTypes};
 //use crate::dom::globalscope::GlobalScope;
 
-thread_local!(static STACK: RefCell<Vec<StackEntry>> = const { RefCell::new(Vec::new()) });
+thread_local!(pub static STACK: RefCell<Vec<StackEntry>> = const { RefCell::new(Vec::new()) });
 
 #[derive(Debug, Eq, JSTraceable, PartialEq)]
-enum StackEntryKind {
+pub enum StackEntryKind {
     Incumbent,
     Entry,
 }
 
 #[allow(crown::unrooted_must_root)]
 //#[derive(JSTraceable)]
-struct StackEntry {
+pub struct StackEntry {
     //global: Dom<D::GlobalScope>,
-    global: *const std::ffi::c_void,
-    kind: StackEntryKind,
+    pub global: *const std::ffi::c_void,
+    pub kind: StackEntryKind,
 }
 
 unsafe impl JSTraceable for StackEntry {

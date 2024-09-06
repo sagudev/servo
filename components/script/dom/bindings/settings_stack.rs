@@ -12,9 +12,10 @@ use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::trace::JSTraceable;
 use crate::dom::globalscope::GlobalScope;
 
-thread_local!(static STACK: RefCell<Vec<StackEntry>> = const { RefCell::new(Vec::new()) });
+pub use script_bindings::settings_stack::*;
+//thread_local!(static STACK: RefCell<Vec<StackEntry>> = const { RefCell::new(Vec::new()) });
 
-#[derive(Debug, Eq, JSTraceable, PartialEq)]
+/*#[derive(Debug, Eq, JSTraceable, PartialEq)]
 enum StackEntryKind {
     Incumbent,
     Entry,
@@ -79,7 +80,7 @@ impl Drop for AutoEntryScript {
             self.global.perform_a_microtask_checkpoint();
         }
     }
-}
+}*/
 
 /// Returns the ["entry"] global object.
 ///
@@ -92,12 +93,12 @@ pub fn entry_global() -> DomRoot<GlobalScope> {
                 .iter()
                 .rev()
                 .find(|entry| entry.kind == StackEntryKind::Entry)
-                .map(|entry| DomRoot::from_ref(&*entry.global))
+                .map(|entry| DomRoot::from_ref(unsafe {&*(entry.global as *const GlobalScope)}))
         })
         .unwrap()
 }
 
-/// RAII struct that pushes and pops entries from the script settings stack.
+/*/// RAII struct that pushes and pops entries from the script settings stack.
 pub struct AutoIncumbentScript {
     global: usize,
 }
@@ -179,4 +180,4 @@ pub fn incumbent_global() -> Option<DomRoot<GlobalScope>> {
             .last()
             .map(|entry| DomRoot::from_ref(&*entry.global))
     })
-}
+}*/

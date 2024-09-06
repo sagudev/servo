@@ -118,7 +118,7 @@ impl ReadableStream {
         source: ExternalUnderlyingSource,
     ) -> DomRoot<ReadableStream> {
         let _ar = enter_realm(global);
-        let _ais = AutoIncumbentScript::new(global);
+        let _ais = AutoIncumbentScript::<crate::DomTypeHolder>::new(global);
         let cx = GlobalScope::get_cx();
 
         let source = Rc::new(ExternalUnderlyingSourceController::new(source));
@@ -250,7 +250,7 @@ impl ReadableStream {
 
         let global = self.global();
         let _ar = enter_realm(&*global);
-        let _aes = AutoEntryScript::new(&global);
+        let _aes = AutoEntryScript::<crate::DomTypeHolder>::new(&global);
 
         let cx = GlobalScope::get_cx();
 
