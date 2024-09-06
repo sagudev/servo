@@ -4,6 +4,7 @@
 
 //! Various utilities to glue JavaScript and the DOM implementation together.
 
+use std::cell::Ref;
 use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::NonNull;
@@ -35,6 +36,7 @@ use js::rust::{
 };
 use js::JS_CALLEE;
 use malloc_size_of::MallocSizeOfOps;
+use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 pub use script_bindings::utils::*;
 
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
@@ -42,10 +44,17 @@ use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
     jsstring_to_str, private_from_proto_check, PrototypeCheck,
 };
-use crate::dom::bindings::error::throw_invalid_this;
+use crate::dom::bindings::error::{throw_invalid_this, throw_dom_exception};
 use crate::dom::bindings::inheritance::TopTypeId;
+use crate::dom::bindings::proxyhandler::report_cross_origin_denial;
 use crate::dom::bindings::str::DOMString;
 use crate::dom::bindings::trace::trace_object;
+use crate::dom::globalscope::GlobalScope;
+use crate::dom::promise::Promise;
+use crate::dom::readablestream::ReadableStream;
+use crate::dom::testbinding::TestBinding;
+use crate::dom::webgl2renderingcontext::WebGL2RenderingContext;
+use crate::dom::window::Window;
 use crate::dom::windowproxy::WindowProxyHandler;
 use crate::script_runtime::JSContext as SafeJSContext;
 
@@ -664,3 +673,147 @@ pub unsafe fn exception_to_promise(cx: *mut JSContext, rval: RawMutableHandleVal
     }
 }
 */
+
+impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder {
+    fn throw_dom_exception(
+        cx: SafeJSContext,
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+        result: script_bindings::error::Error,
+    ) {
+        throw_dom_exception(cx, global, result)
+    }
+
+    unsafe fn global_scope_from_object(
+        obj: *mut js::jsapi::JSObject,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
+        GlobalScope::from_object(obj)
+    }
+
+    fn global_scope_origin(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    ) -> &servo_url::MutableOrigin {
+        global.origin()
+    }
+
+    fn Window_create_named_properties_object(
+        cx: crate::script_runtime::JSContext,
+        proto: js::rust::HandleObject,
+        object: js::rust::MutableHandleObject,
+    ) {
+        Window::create_named_properties_object(cx, proto, object)
+    }
+
+    fn Promise_new_resolved(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+        cx: crate::script_runtime::JSContext,
+        value: js::rust::HandleValue,
+    ) -> crate::dom::bindings::error::Fallible<
+        std::rc::Rc<<crate::DomTypeHolder as script_bindings::DomTypes>::Promise>,
+    > {
+        Promise::new_resolved(global, cx, value)
+    }
+
+    unsafe fn GlobalScope_from_object_maybe_wrapped(
+        obj: *mut js::jsapi::JSObject,
+        cx: *mut js::jsapi::JSContext,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
+        GlobalScope::from_object_maybe_wrapped(obj, cx)
+    }
+
+    fn GlobalScope_incumbent() -> Option<
+        crate::dom::bindings::root::DomRoot<
+            <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+        >,
+    > {
+        GlobalScope::incumbent()
+    }
+
+    fn GlobalScope_get_cx() -> crate::script_runtime::JSContext {
+        GlobalScope::get_cx()
+    }
+
+    unsafe fn GlobalScope_from_context(
+        cx: *mut js::jsapi::JSContext,
+        in_realm: crate::realms::InRealm,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
+        GlobalScope::from_context(cx, in_realm)
+    }
+
+    fn GlobalScope_from_reflector(
+        reflector: &impl script_bindings::reflector::DomObject,
+        realm: &script_bindings::realms::AlreadyInRealm,
+    ) -> crate::dom::bindings::root::DomRoot<
+        <crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    > {
+        GlobalScope::from_reflector(reflector, &realm.into())
+    }
+
+    fn GlobalScope_report_an_error(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+        info: crate::dom::bindings::error::ErrorInfo,
+        value: js::rust::HandleValue,
+    ) {
+        global.report_an_error(info, value)
+    }
+
+    fn TestBinding_condition_satisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
+        TestBinding::condition_satisfied(cx, obj)
+    }
+    fn TestBinding_condition_unsatisfied(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
+        TestBinding::condition_unsatisfied(cx, obj)
+    }
+    fn WebGL2RenderingContext_is_webgl2_enabled(
+        cx: crate::script_runtime::JSContext,
+        obj: js::rust::HandleObject,
+    ) -> bool {
+        WebGL2RenderingContext::is_webgl2_enabled(cx, obj)
+    }
+
+    fn perform_a_microtask_checkpoint(
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::GlobalScope,
+    ) {
+        global.perform_a_microtask_checkpoint()
+    }
+
+    unsafe fn ReadableStream_from_js(
+        cx: crate::script_runtime::JSContext,
+        obj: *mut js::jsapi::JSObject,
+        in_realm: crate::realms::InRealm,
+    ) -> Result<
+        crate::dom::bindings::root::DomRoot<
+            <crate::DomTypeHolder as script_bindings::DomTypes>::ReadableStream,
+        >,
+        (),
+    > {
+        ReadableStream::from_js(cx, obj, in_realm)
+    }
+
+    fn DOMException_stringifier(
+        exception: &<crate::DomTypeHolder as script_bindings::DomTypes>::DOMException,
+    ) -> crate::dom::bindings::str::DOMString {
+        exception.stringifier()
+    }
+
+    fn get_map() -> &'static phf::Map<
+        &'static [u8],
+        fn(crate::script_runtime::JSContext, js::rust::HandleObject),
+    > {
+        &InterfaceObjectMap::MAP
+    }
+
+    fn AudioBuffer_get_channels(buffer: &<crate::DomTypeHolder as script_bindings::DomTypes>::AudioBuffer) -> Ref<Option<ServoMediaAudioBuffer>> {
+        buffer.get_channels()
+    }
+}

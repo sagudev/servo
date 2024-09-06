@@ -321,7 +321,7 @@ pub mod dom {
                 };
                 pub use crate::dom::bindings::proxyhandler;
                 pub use crate::dom::bindings::proxyhandler::{
-                    ensure_expando_object, get_expando_object, set_property_descriptor,
+                    ensure_expando_object, get_expando_object, set_property_descriptor, report_cross_origin_denial
                 };
                 pub use crate::dom::bindings::record::Record;
                 pub use crate::dom::bindings::reflector::{

@@ -682,12 +682,6 @@ pub trait DomHelpers<D: DomTypes> {
 
     fn global_scope_origin(global: &D::GlobalScope) -> &servo_url::MutableOrigin;
 
-    fn report_cross_origin_denial(
-        cx: crate::script_runtime::JSContext,
-        id: RawHandleId,
-        access: &str,
-    ) -> bool;
-
     fn Window_create_named_properties_object(
         cx: SafeJSContext,
         proto: HandleObject,
@@ -709,12 +703,21 @@ pub trait DomHelpers<D: DomTypes> {
 
     fn GlobalScope_get_cx() -> crate::script_runtime::JSContext;
 
-    fn GlobalScope_from_context(
+    unsafe fn GlobalScope_from_context(
         cx: *mut JSContext,
         in_realm: crate::realms::InRealm,
     ) -> crate::root::DomRoot<D::GlobalScope>;
 
-    fn GlobalScope_report_an_error(info: crate::error::ErrorInfo, value: HandleValue);
+    fn GlobalScope_from_reflector(
+        reflector: &impl crate::reflector::DomObject,
+        realm: &crate::realms::AlreadyInRealm,
+    ) -> crate::root::DomRoot<D::GlobalScope>;
+
+    fn GlobalScope_report_an_error(
+        global: &D::GlobalScope,
+        info: crate::error::ErrorInfo,
+        value: HandleValue,
+    );
 
     fn TestBinding_condition_satisfied(
         cx: crate::script_runtime::JSContext,
@@ -731,7 +734,7 @@ pub trait DomHelpers<D: DomTypes> {
 
     fn perform_a_microtask_checkpoint(global: &D::GlobalScope);
 
-    fn ReadableStream_from_js(
+    unsafe fn ReadableStream_from_js(
         cx: crate::script_runtime::JSContext,
         obj: *mut JSObject,
         in_realm: crate::realms::InRealm,

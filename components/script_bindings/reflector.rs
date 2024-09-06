@@ -130,9 +130,8 @@ pub trait DomGlobal<D: DomTypes>: DomObject {
     where
         Self: Sized,
     {
-        /*let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
-        GlobalScope::from_reflector(self, &realm)*/
-        todo!()
+        let realm = AlreadyInRealm::assert_for_cx(<D as DomHelpers<D>>::GlobalScope_get_cx());
+        <D as DomHelpers<D>>::GlobalScope_from_reflector(self, &realm)
     }
 }
 

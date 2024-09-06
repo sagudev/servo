@@ -311,7 +311,7 @@ pub unsafe fn report_pending_exception<D: crate::DomTypes>(
 
     if dispatch_event {
         let global = <D as crate::DomHelpers<D>>::GlobalScope_from_context(cx, realm);
-        D::GlobalScope_report_an_error(error_info, value.handle());
+        D::GlobalScope_report_an_error(&global, error_info, value.handle());
     }
 }
 

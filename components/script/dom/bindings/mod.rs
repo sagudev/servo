@@ -208,6 +208,7 @@ pub mod codegen {
         include!(concat!(env!("OUT_DIR"), "/RegisterBindings.rs"));
     }*/
     #[allow(
+        dead_code,
         non_camel_case_types,
         unused_imports,
         unused_variables,

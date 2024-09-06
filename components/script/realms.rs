@@ -9,7 +9,13 @@ use crate::dom::bindings::reflector::DomObject;
 use crate::dom::globalscope::GlobalScope;
 use crate::script_runtime::JSContext;
 
-pub struct AlreadyInRealm;
+pub struct AlreadyInRealm(());
+
+impl<'a> From<&'a script_bindings::realms::AlreadyInRealm> for AlreadyInRealm {
+    fn from(_realm: &'a script_bindings::realms::AlreadyInRealm) -> Self {
+        Self(())
+    }
+}
 
 impl AlreadyInRealm {
     #![allow(unsafe_code)]
