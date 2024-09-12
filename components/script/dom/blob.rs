@@ -196,6 +196,7 @@ pub fn blob_parts_to_bytes(
     Ok(ret)
 }
 
+#[allow(non_snake_case)]
 impl BlobMethods<crate::DomTypeHolder> for Blob {
     // https://w3c.github.io/FileAPI/#constructorBlob
     fn Constructor(

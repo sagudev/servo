@@ -78,6 +78,7 @@ impl BluetoothAdvertisingEvent {
     }
 }
 
+#[allow(non_snake_case)]
 impl BluetoothAdvertisingEventMethods<crate::DomTypeHolder> for BluetoothAdvertisingEvent {
     // https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-bluetoothadvertisingevent
     fn Constructor(

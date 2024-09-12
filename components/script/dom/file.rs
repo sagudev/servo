@@ -26,6 +26,7 @@ pub struct File {
     modified: i64,
 }
 
+#[allow(non_snake_case)]
 impl File {
     #[allow(crown::unrooted_must_root)]
     fn new_inherited(blob_impl: &BlobImpl, name: DOMString, modified: Option<i64>) -> File {
@@ -96,6 +97,7 @@ impl File {
     }
 }
 
+#[allow(non_snake_case)]
 impl FileMethods<crate::DomTypeHolder> for File {
     // https://w3c.github.io/FileAPI/#file-constructor
     fn Constructor(

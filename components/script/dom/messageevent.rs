@@ -67,6 +67,7 @@ pub struct MessageEvent {
     frozen_ports: DomRefCell<Option<Heap<JSVal>>>,
 }
 
+#[allow(non_snake_case)]
 impl MessageEvent {
     pub fn new_inherited(
         origin: DOMString,

@@ -36,6 +36,7 @@ pub struct TrackEvent {
     track: Option<MediaTrack>,
 }
 
+#[allow(non_snake_case)]
 impl TrackEvent {
     #[allow(crown::unrooted_must_root)]
     fn new_inherited(track: &Option<VideoTrackOrAudioTrackOrTextTrack>) -> TrackEvent {
