@@ -7,12 +7,11 @@ use std::thread;
 
 use js::jsapi::{GetScriptedCallerGlobal, HideScriptedCaller, JSTracer, UnhideScriptedCaller};
 use js::rust::Runtime;
+pub use script_bindings::settings_stack::*;
 
 use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::trace::JSTraceable;
 use crate::dom::globalscope::GlobalScope;
-
-pub use script_bindings::settings_stack::*;
 
 /// Returns the ["entry"] global object.
 ///
@@ -25,7 +24,7 @@ pub fn entry_global() -> DomRoot<GlobalScope> {
                 .iter()
                 .rev()
                 .find(|entry| entry.kind == StackEntryKind::Entry)
-                .map(|entry| DomRoot::from_ref(unsafe {&*(entry.global as *const GlobalScope)}))
+                .map(|entry| DomRoot::from_ref(unsafe { &*(entry.global as *const GlobalScope) }))
         })
         .unwrap()
 }

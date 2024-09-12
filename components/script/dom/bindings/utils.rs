@@ -238,7 +238,11 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
         crate::dom::bindings::htmlconstructor::pop_current_element_queue()
     }
 
-    fn call_html_constructor<T: script_bindings::conversions::DerivedFrom<<crate::DomTypeHolder as script_bindings::DomTypes>::Element> + script_bindings::reflector::DomObject>(
+    fn call_html_constructor<
+        T: script_bindings::conversions::DerivedFrom<
+                <crate::DomTypeHolder as script_bindings::DomTypes>::Element,
+            > + script_bindings::reflector::DomObject,
+    >(
         cx: SafeJSContext,
         args: &CallArgs,
         global: &<crate::DomTypeHolder as script_bindings::DomTypes>::Window,
