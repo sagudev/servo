@@ -19,8 +19,8 @@ def main():
     css_properties_json, out_dir = sys.argv[1:]
     doc_servo = os.path.join(SERVO_ROOT, "target", "doc", "servo")
     webidls_dir = os.path.join(SCRIPT_BINDINGS_PATH, "webidls")
-    config_file = "Bindings.conf"
     codegen_dir = os.path.join(SCRIPT_BINDINGS_PATH, "codegen")
+    config_file = os.path.join(codegen_dir, "Bindings.conf")
     sys.path.insert(0, codegen_dir)
 
     import WebIDL
