@@ -93,6 +93,7 @@ pub mod reflector;
 pub mod root;
 pub mod settings_stack;
 pub mod str;
+pub mod structuredclone;
 pub mod trace;
 pub mod utils;
 pub mod weakref;

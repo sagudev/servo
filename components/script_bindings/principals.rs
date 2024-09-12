@@ -18,7 +18,7 @@ use js::jsapi::{
 use js::rust::Runtime;
 use servo_url::MutableOrigin;
 
-//use super::structuredclone::StructuredCloneTags;
+use crate::structuredclone::StructuredCloneTags;
 
 /// An owned reference to Servo's `JSPrincipals` instance.
 #[repr(transparent)]
@@ -128,7 +128,7 @@ pub unsafe extern "C" fn destroy_servo_jsprincipal(principals: *mut JSPrincipals
     DestroyRustJSPrincipals(principals);
 }
 
-/*pub unsafe extern "C" fn write_jsprincipal(
+pub unsafe extern "C" fn write_jsprincipal(
     principal: *mut JSPrincipals,
     _cx: *mut JSContext,
     writer: *mut JSStructuredCloneWriter,
@@ -178,11 +178,10 @@ pub unsafe extern "C" fn read_jsprincipal(
     // we transferred ownership of principal to the caller
     std::mem::forget(principal);
     true
-}*/
+}
 
 const PRINCIPALS_CALLBACKS: JSPrincipalsCallbacks = JSPrincipalsCallbacks {
-    //write: Some(write_jsprincipal),
-    write: None,
+    write: Some(write_jsprincipal),
     isSystemOrAddonPrincipal: Some(principals_is_system_or_addon_principal),
 };
 
