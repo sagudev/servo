@@ -63,12 +63,6 @@ use crate::dom::bindings::root::DomRoot;
 use crate::dom::bindings::str::{ByteString, DOMString, USVString};
 use crate::dom::bindings::trace::{JSTraceable, RootedTraceableBox};
 use crate::dom::bindings::utils::DOMClass;
-/*use crate::dom::filelist::FileList;
-use crate::dom::htmlcollection::HTMLCollection;
-use crate::dom::htmlformcontrolscollection::HTMLFormControlsCollection;
-use crate::dom::htmloptionscollection::HTMLOptionsCollection;
-use crate::dom::nodelist::NodeList;
-use crate::dom::windowproxy::WindowProxy;*/
 
 /// A trait to check whether a given `JSObject` implements an IDL interface.
 pub trait IDLInterface {

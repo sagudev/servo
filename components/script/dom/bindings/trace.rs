@@ -38,8 +38,6 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexMap;
-/*/// A trait to allow tracing (only) DOM objects.
-pub use js::gc::Traceable as JSTraceable;*/
 use js::glue::{CallObjectTracer, CallScriptTracer, CallStringTracer, CallValueTracer};
 use js::jsapi::{GCTraceKindToAscii, Heap, JSObject, JSScript, JSString, JSTracer, TraceKind};
 use js::jsval::JSVal;
@@ -57,7 +55,6 @@ use tendril::TendrilSink;
 use webxr_api::{Finger, Hand};
 
 use crate::dom::bindings::cell::DomRefCell;
-//use crate::dom::bindings::error::Error;
 use crate::dom::bindings::refcounted::{Trusted, TrustedPromise};
 use crate::dom::bindings::reflector::{DomObject, Reflector};
 use crate::dom::bindings::root::{Dom, DomRoot};
@@ -70,32 +67,12 @@ use crate::dom::windowproxy::WindowProxyHandler;
 use crate::script_runtime::{ContextForRequestInterrupt, StreamConsumer};
 use crate::script_thread::IncompleteParserContexts;
 use crate::task::TaskBox;
-/*/// A trait to allow tracing only DOM sub-objects.
-pub unsafe trait CustomTraceable {
-    /// Trace `self`.
-    unsafe fn trace(&self, trc: *mut JSTracer);
-}
-
-unsafe impl<T: CustomTraceable> CustomTraceable for Box<T> {
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        (**self).trace(trc);
-    }
-}*/
 
 unsafe impl<T: CustomTraceable> CustomTraceable for DomRefCell<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         (*self).borrow().trace(trc)
     }
 }
-
-/*unsafe impl<T: JSTraceable> CustomTraceable for OnceCell<T> {
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        if let Some(value) = self.get() {
-            value.trace(tracer)
-        }
-    }
-}*/
 
 /// Wrapper type for nop traceble
 ///
@@ -241,8 +218,6 @@ unsafe_no_jsmanaged_fields!(Box<dyn TaskBox>);
 
 unsafe_no_jsmanaged_fields!(IncompleteParserContexts);
 
-//unsafe_no_jsmanaged_fields!(Reflector);
-
 #[allow(dead_code)]
 /// Trace a `JSScript`.
 pub fn trace_script(tracer: *mut JSTracer, description: &str, script: &Heap<*mut JSScript>) {
@@ -305,66 +280,16 @@ pub fn trace_string(tracer: *mut JSTracer, description: &str, s: &Heap<*mut JSSt
     }
 }
 
-/*unsafe impl<T: JSTraceable> CustomTraceable for ServoArc<T> {
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        (**self).trace(trc)
-    }
-}
-
-unsafe impl<T: JSTraceable> CustomTraceable for RwLock<T> {
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        self.read().trace(trc)
-    }
-}*/
-
 unsafe impl<T: JSTraceable> JSTraceable for DomRefCell<T> {
     unsafe fn trace(&self, trc: *mut JSTracer) {
         (*self).borrow().trace(trc)
     }
 }
 
-/*unsafe impl<T: JSTraceable + Eq + Hash> CustomTraceable for indexmap::IndexSet<T> {
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        for e in self.iter() {
-            e.trace(trc);
-        }
-    }
-}*/
-
-/*// XXXManishearth Check if the following three are optimized to no-ops
-// if e.trace() is a no-op (e.g it is an unsafe_no_jsmanaged_fields type)
-unsafe impl<T: JSTraceable + 'static> CustomTraceable for SmallVec<[T; 1]> {
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        for e in self.iter() {
-            e.trace(trc);
-        }
-    }
-}
-
-unsafe impl<K, V, S> CustomTraceable for IndexMap<K, V, S>
-where
-    K: Hash + Eq + JSTraceable,
-    V: JSTraceable,
-    S: BuildHasher,
-{
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        for (k, v) in self {
-            k.trace(trc);
-            v.trace(trc);
-        }
-    }
-}*/
-
-//unsafe_no_jsmanaged_fields!(Error);
 unsafe_no_jsmanaged_fields!(TrustedPromise);
 
 unsafe_no_jsmanaged_fields!(ContextForRequestInterrupt);
 unsafe_no_jsmanaged_fields!(WindowProxyHandler);
-//unsafe_no_jsmanaged_fields!(DOMString);
-//unsafe_no_jsmanaged_fields!(USVString);
 unsafe_no_jsmanaged_fields!(WebGPUContextId);
 unsafe_no_jsmanaged_fields!(GPUBufferState);
 unsafe_no_jsmanaged_fields!(SourceSet);
@@ -378,167 +303,8 @@ unsafe impl<T: DomObject> JSTraceable for Trusted<T> {
     }
 }
 
-/*unsafe impl<S> CustomTraceable for DocumentStylesheetSet<S>
-where
-    S: JSTraceable + ::style::stylesheets::StylesheetInDocument + PartialEq + 'static,
-{
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        for (s, _origin) in self.iter() {
-            s.trace(tracer)
-        }
-    }
-}
-
-unsafe impl<S> CustomTraceable for AuthorStylesheetSet<S>
-where
-    S: JSTraceable + ::style::stylesheets::StylesheetInDocument + PartialEq + 'static,
-{
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        for s in self.iter() {
-            s.trace(tracer)
-        }
-    }
-}
-
-unsafe impl<S> CustomTraceable for AuthorStyles<S>
-where
-    S: JSTraceable + ::style::stylesheets::StylesheetInDocument + PartialEq + 'static,
-{
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        self.stylesheets.trace(tracer)
-    }
-}
-
-unsafe impl<Sink> CustomTraceable for LossyDecoder<Sink>
-where
-    Sink: JSTraceable + TendrilSink<UTF8>,
-{
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        self.inner_sink().trace(tracer);
-    }
-}
-
-unsafe impl<J> CustomTraceable for Hand<J>
-where
-    J: JSTraceable,
-{
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        // exhaustive match so we don't miss new fields
-        let Hand {
-            ref wrist,
-            ref thumb_metacarpal,
-            ref thumb_phalanx_proximal,
-            ref thumb_phalanx_distal,
-            ref thumb_phalanx_tip,
-            ref index,
-            ref middle,
-            ref ring,
-            ref little,
-        } = *self;
-        wrist.trace(trc);
-        thumb_metacarpal.trace(trc);
-        thumb_phalanx_proximal.trace(trc);
-        thumb_phalanx_distal.trace(trc);
-        thumb_phalanx_tip.trace(trc);
-        index.trace(trc);
-        middle.trace(trc);
-        ring.trace(trc);
-        little.trace(trc);
-    }
-}
-
-unsafe impl<J> CustomTraceable for Finger<J>
-where
-    J: JSTraceable,
-{
-    #[inline]
-    unsafe fn trace(&self, trc: *mut JSTracer) {
-        // exhaustive match so we don't miss new fields
-        let Finger {
-            ref metacarpal,
-            ref phalanx_proximal,
-            ref phalanx_intermediate,
-            ref phalanx_distal,
-            ref phalanx_tip,
-        } = *self;
-        metacarpal.trace(trc);
-        phalanx_proximal.trace(trc);
-        phalanx_intermediate.trace(trc);
-        phalanx_distal.trace(trc);
-        phalanx_tip.trace(trc);
-    }
-}*/
-
 /// Holds a set of JSTraceables that need to be rooted
 pub use js::gc::RootedTraceableSet;
-
-/*/// Roots any JSTraceable thing
-///
-/// If you have a valid DomObject, use DomRoot.
-/// If you have GC things like *mut JSObject or JSVal, use rooted!.
-/// If you have an arbitrary number of DomObjects to root, use rooted_vec!.
-/// If you know what you're doing, use this.
-#[crown::unrooted_must_root_lint::allow_unrooted_interior]
-pub struct RootedTraceableBox<T: JSTraceable + 'static>(js::gc::RootedTraceableBox<T>);
-
-unsafe impl<T: JSTraceable + 'static> JSTraceable for RootedTraceableBox<T> {
-    unsafe fn trace(&self, tracer: *mut JSTracer) {
-        self.0.trace(tracer);
-    }
-}
-
-impl<T: JSTraceable + 'static> RootedTraceableBox<T> {
-    /// DomRoot a JSTraceable thing for the life of this RootedTraceableBox
-    pub fn new(traceable: T) -> RootedTraceableBox<T> {
-        Self(js::gc::RootedTraceableBox::new(traceable))
-    }
-
-    /// Consumes a boxed JSTraceable and roots it for the life of this RootedTraceableBox.
-    pub fn from_box(boxed_traceable: Box<T>) -> RootedTraceableBox<T> {
-        Self(js::gc::RootedTraceableBox::from_box(boxed_traceable))
-    }
-}
-
-impl<T> RootedTraceableBox<Heap<T>>
-where
-    Heap<T>: JSTraceable + 'static,
-    T: GCMethods + Copy,
-{
-    pub fn handle(&self) -> Handle<T> {
-        self.0.handle()
-    }
-}
-
-impl<T: JSTraceable + MallocSizeOf> MallocSizeOf for RootedTraceableBox<T> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        // Briefly resurrect the real Box value so we can rely on the existing calculations.
-        // Then immediately forget about it again to avoid dropping the box.
-        let inner = unsafe { Box::from_raw(self.0.ptr()) };
-        let size = inner.size_of(ops);
-        mem::forget(inner);
-        size
-    }
-}
-
-impl<T: JSTraceable + Default> Default for RootedTraceableBox<T> {
-    fn default() -> RootedTraceableBox<T> {
-        RootedTraceableBox::new(T::default())
-    }
-}
-
-impl<T: JSTraceable> Deref for RootedTraceableBox<T> {
-    type Target = T;
-    fn deref(&self) -> &T {
-        self.0.deref()
-    }
-}
-
-impl<T: JSTraceable> DerefMut for RootedTraceableBox<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        self.0.deref_mut()
-    }
-}*/
 
 /// A vector of items to be rooted with `RootedVec`.
 /// Guaranteed to be empty when not rooted.

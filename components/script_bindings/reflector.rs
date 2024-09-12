@@ -15,7 +15,6 @@ use crate::dom::bindings::iterable::{Iterable, IterableIterator};
 use crate::dom::bindings::root::{Dom, DomRoot, Root};
 use crate::dom::bindings::trace::JSTraceable;
 use crate::dom::bindings::utils::DomHelpers;
-//use crate::dom::globalscope::GlobalScope;
 use crate::realms::AlreadyInRealm;
 use crate::script_runtime::JSContext;
 
@@ -112,16 +111,6 @@ impl Reflector {
 pub trait DomObject: JSTraceable + 'static {
     /// Returns the receiver's reflector.
     fn reflector(&self) -> &Reflector;
-
-    /*/// Returns the global scope of the realm that the DomObject was created in.
-    fn global<D: DomTypes>(&self) -> DomRoot<D::GlobalScope>
-    where
-        Self: Sized,
-    {
-        /*let realm = AlreadyInRealm::assert_for_cx(GlobalScope::get_cx());
-        GlobalScope::from_reflector(self, &realm)*/
-        todo!()
-    }*/
 }
 
 pub trait DomGlobal<D: DomTypes>: DomObject {

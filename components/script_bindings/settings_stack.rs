@@ -89,22 +89,6 @@ impl<D: DomTypes> Drop for AutoEntryScript<D> {
     }
 }
 
-/*/// Returns the ["entry"] global object.
-///
-/// ["entry"]: https://html.spec.whatwg.org/multipage/#entry
-pub fn entry_global() -> DomRoot<GlobalScope> {
-    STACK
-        .with(|stack| {
-            stack
-                .borrow()
-                .iter()
-                .rev()
-                .find(|entry| entry.kind == StackEntryKind::Entry)
-                .map(|entry| DomRoot::from_ref(&*entry.global))
-        })
-        .unwrap()
-}*/
-
 /// RAII struct that pushes and pops entries from the script settings stack.
 pub struct AutoIncumbentScript<D: DomTypes> {
     global: usize,
