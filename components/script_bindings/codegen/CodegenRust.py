@@ -6678,7 +6678,7 @@ class CGInitStatics(CGThing):
         relevantMethods = filter(lambda x: not x.isStatic() or any([r.isPromise() for r, _ in x.signatures()]), relevantMethods)
         methods = [f'{module}::init_{descriptor.internalNameFor(m.identifier.name)}_methodinfo::<D>();' for m in relevantMethods]
         getters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_getterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.isStatic()]
-        setters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_setterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.readonly and not m.isStatic()]
+        setters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_setterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and (not m.readonly or m.getExtendedAttribute("PutForwards")) and not m.isStatic()]
         methods = '\n'.join(methods)
         getters = '\n'.join(getters)
         setters = '\n'.join(setters)
