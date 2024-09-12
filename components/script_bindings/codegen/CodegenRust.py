@@ -1723,12 +1723,14 @@ class PropertyDefiner:
         specsArray.append(specTerminator)
 
         joinedSpecs = ',\n'.join(specsArray)
-        return dedent(
-            f"""
-            static {name}: &[{specType}] = &[
-            {joinedSpecs}
-            ];
-            """)
+
+        initialSpecs = f"static mut {name}: &[{specType}] = &[];\n"
+        initSpecs = (f"pub(crate) fn init_{name}() {{"
+                     f"    unsafe {{ {name} = Box::leak(vec![\n"
+                     f"{joinedSpecs}\n"
+                     "    ].into_boxed_slice()); }\n"
+                     "}\n")
+        return dedent(f"{initialSpecs}{initSpecs}")
 
 
 # The length of a method is the minimum of the lengths of the
@@ -1932,7 +1934,7 @@ class MethodDefiner(PropertyDefiner):
                 array, name,
                 specTemplate, specTerminator,
                 'JSFunctionSpec',
-                condition, partial(specData, in_unsafe=False))
+                condition, specData)
         else:
             return self.generateGuardedArray(
                 array, name,
@@ -2087,7 +2089,7 @@ class AttrDefiner(PropertyDefiner):
                 template,
                 '    JSPropertySpec::ZERO',
                 'JSPropertySpec',
-                condition, partial(specData, in_unsafe=False))
+                condition, specData)
         else:
             return self.generateGuardedArray(
                 array, name,
@@ -3357,11 +3359,20 @@ class CGCrossOriginProperties(CGThing):
     def define(self):
         return f"{self.methods}{self.attributes}" + dedent(
             """
-            static CROSS_ORIGIN_PROPERTIES: proxyhandler::CrossOriginProperties =
+            static mut CROSS_ORIGIN_PROPERTIES: proxyhandler::CrossOriginProperties =
                 proxyhandler::CrossOriginProperties {
-                    attributes: sCrossOriginAttributes,
-                    methods: sCrossOriginMethods,
+                    attributes: &[],
+                    methods: &[],
                 };
+
+            pub(crate) fn init_cross_origin_properties() {
+                unsafe {
+                    CROSS_ORIGIN_PROPERTIES = proxyhandler::CrossOriginProperties {
+                        attributes: sCrossOriginAttributes,
+                        methods: sCrossOriginMethods,
+                    };
+                }
+            }
             """
         )
 
@@ -6667,13 +6678,22 @@ class CGInitStatics(CGThing):
         ] for name in nonempty]
         flat_specs = [x for xs in specs for x in xs]
         specs = '\n'.join(flat_specs)
-        methods = [f'init_{descriptor.internalNameFor(m.identifier.name)}_methodinfo::<D>();' for m in descriptor.interface.members if m.isMethod() and not m.isStatic() and descriptor.internalNameFor(m.identifier.name) not in map(lambda x: f"__{x.lower()}", descriptor.operations)] if not descriptor.interface.isCallback() else []
+        module = f"crate::codegen::Bindings::{toBindingModuleFileFromDescriptor(descriptor)}::{toBindingNamespace(descriptor.interface.identifier.name)}"
+        relevantMethods = [m for m in descriptor.interface.members if m.isMethod()] if not descriptor.interface.isCallback() else []
+        relevantMethods = filter(lambda m: descriptor.internalNameFor(m.identifier.name) not in map(lambda x: f"__{x.lower()}", filter(lambda o: o != "Stringifier", descriptor.operations.keys())), relevantMethods)
+        relevantMethods = filter(lambda x: not x.isStatic() or any([r.isPromise() for r, _ in x.signatures()]), relevantMethods)
+        methods = [f'{module}::init_{descriptor.internalNameFor(m.identifier.name)}_methodinfo::<D>();' for m in relevantMethods]
         getters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_getterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.isStatic()]
         setters = [f'init_{descriptor.internalNameFor(m.identifier.name)}_setterinfo::<D>();' for m in descriptor.interface.members if m.isAttr() and not m.readonly and not m.isStatic()]
         methods = '\n'.join(methods)
         getters = '\n'.join(getters)
         setters = '\n'.join(setters)
-        jitinfo = '' #XXXjdm
+        crossorigin = [
+            "init_sCrossOriginMethods();",
+            "init_sCrossOriginAttributes();",
+            "init_cross_origin_properties();"
+        ] if descriptor.isMaybeCrossOriginObject() else []
+        crossorigin_joined = '\n'.join(crossorigin)
         interface = "init_interface_object::<D>();" if descriptor.interface.hasInterfaceObject() and not descriptor.interface.isNamespace() and not descriptor.interface.isCallback() and not descriptor.interface.getExtendedAttribute("Inline") else ""
         nonproxy = "init_domjs_class::<D>();\ninit_class_ops::<D>();" if not descriptor.proxy and descriptor.concrete else ""
 
@@ -6681,11 +6701,11 @@ class CGInitStatics(CGThing):
         pub(crate) fn init_statics<D: DomTypes>() {{
             {interface}
             {nonproxy}
-            {specs}
             {methods}
             {getters}
             {setters}
-            {jitinfo}
+            {crossorigin_joined}
+            {specs}
         }}
         """
 
