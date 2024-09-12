@@ -745,4 +745,14 @@ pub trait DomHelpers<D: DomTypes> {
     fn get_map() -> &'static phf::Map<&'static [u8], fn(SafeJSContext, HandleObject)>;
 
     fn AudioBuffer_get_channels(buffer: &D::AudioBuffer) -> Ref<Option<ServoMediaAudioBuffer>>;
+
+    fn push_new_element_queue();
+    fn pop_current_element_queue();
+    fn call_html_constructor<T: crate::conversions::DerivedFrom<D::Element> + crate::DomObject>(
+        cx: SafeJSContext,
+        args: &CallArgs,
+        global: &D::Window,
+        proto_id: crate::codegen::PrototypeList::ID,
+        creator: unsafe fn(SafeJSContext, HandleObject, *mut ProtoOrIfaceArray),
+    ) -> bool;
 }

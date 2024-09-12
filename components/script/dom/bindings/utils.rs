@@ -818,4 +818,26 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
     ) -> Ref<Option<ServoMediaAudioBuffer>> {
         buffer.get_channels()
     }
+
+    fn push_new_element_queue() {
+        crate::dom::bindings::htmlconstructor::push_new_element_queue()
+    }
+
+    fn pop_current_element_queue() {
+        crate::dom::bindings::htmlconstructor::pop_current_element_queue()
+    }
+
+    fn call_html_constructor<T: script_bindings::conversions::DerivedFrom<<crate::DomTypeHolder as script_bindings::DomTypes>::Element> + script_bindings::reflector::DomObject>(
+        cx: SafeJSContext,
+        args: &CallArgs,
+        global: &<crate::DomTypeHolder as script_bindings::DomTypes>::Window,
+        proto_id: crate::dom::bindings::codegen::PrototypeList::ID,
+        creator: unsafe fn(SafeJSContext, HandleObject, *mut ProtoOrIfaceArray),
+    ) -> bool {
+        unsafe {
+            crate::dom::bindings::htmlconstructor::call_html_constructor::<T>(
+                cx, args, global, proto_id, creator,
+            )
+        }
+    }
 }

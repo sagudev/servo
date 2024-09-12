@@ -3916,9 +3916,7 @@ class CGCallGenerator(CGThing):
         call = CGList([call, CGWrapper(args, pre="(", post=")")])
 
         if hasCEReactions:
-            #XXXjdm
-            #self.cgRoot.append(CGGeneric("push_new_element_queue();\n"))
-            pass
+            self.cgRoot.append(CGGeneric("<D as DomHelpers<D>>::push_new_element_queue();\n"))
 
         self.cgRoot.append(CGList([
             CGGeneric("let result: "),
@@ -3929,9 +3927,7 @@ class CGCallGenerator(CGThing):
         ]))
 
         if hasCEReactions:
-            #XXXjdm
-            #self.cgRoot.append(CGGeneric("pop_current_element_queue();\n"))
-            pass
+            self.cgRoot.append(CGGeneric("<D as DomHelpers<D>>::pop_current_element_queue();\n"))
 
         if isFallible:
             if static:
@@ -6447,15 +6443,13 @@ let global = DomRoot::downcast::<D::{list(self.exposureSet)[0]}>(global).unwrap(
             assert len(signatures) == 1
             constructorCall = CGGeneric(
                 f"""
-                //XXXjdm
-                /*dom::bindings::htmlconstructor::call_html_constructor::<dom::types::{self.descriptor.name}>(
+                <D as DomHelpers<D>>::call_html_constructor::<D::{self.descriptor.name}>(
                     cx,
                     &args,
                     &global,
                     PrototypeList::ID::{MakeNativeName(self.descriptor.name)},
                     CreateInterfaceObjects{generic},
-                )*/
-                true
+                )
                 """
             )
         else:
