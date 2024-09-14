@@ -259,7 +259,8 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
     fn is_secure_context(cx: SafeJSContext) -> bool {
         unsafe {
             let in_realm_proof = crate::realms::AlreadyInRealm::assert_for_cx(cx);
-            GlobalScope::from_context(*cx, crate::realms::InRealm::Already(&in_realm_proof)).is_secure_context()
+            GlobalScope::from_context(*cx, crate::realms::InRealm::Already(&in_realm_proof))
+                .is_secure_context()
         }
     }
 }

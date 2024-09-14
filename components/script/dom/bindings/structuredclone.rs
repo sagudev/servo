@@ -23,6 +23,7 @@ use js::jsapi::{
 use js::jsval::UndefinedValue;
 use js::rust::wrappers::{JS_ReadStructuredClone, JS_WriteStructuredClone};
 use js::rust::{CustomAutoRooterGuard, HandleValue, MutableHandleValue};
+pub use script_bindings::structuredclone::StructuredCloneTags;
 use script_traits::serializable::BlobImpl;
 use script_traits::transferable::MessagePortImpl;
 use script_traits::StructuredSerializedData;
@@ -38,8 +39,6 @@ use crate::dom::globalscope::GlobalScope;
 use crate::dom::messageport::MessagePort;
 use crate::realms::{enter_realm, AlreadyInRealm, InRealm};
 use crate::script_runtime::JSContext as SafeJSContext;
-
-pub use script_bindings::structuredclone::StructuredCloneTags;
 
 unsafe fn read_blob(
     owner: &GlobalScope,

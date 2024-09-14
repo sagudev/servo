@@ -28,7 +28,12 @@ impl<T: Clone + Copy> Guard<T> {
     /// Expose the value if the condition is satisfied.
     ///
     /// The passed handle is the object on which the value may be exposed.
-    pub fn expose<D: crate::DomTypes>(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> Option<T> {
+    pub fn expose<D: crate::DomTypes>(
+        &self,
+        cx: JSContext,
+        obj: HandleObject,
+        global: HandleObject,
+    ) -> Option<T> {
         if self.condition.is_satisfied::<D>(cx, obj, global) {
             Some(self.value)
         } else {
@@ -55,7 +60,12 @@ fn is_secure_context<D: crate::DomTypes>(cx: JSContext) -> bool {
 }
 
 impl Condition {
-    pub fn is_satisfied<D: crate::DomTypes>(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> bool {
+    pub fn is_satisfied<D: crate::DomTypes>(
+        &self,
+        cx: JSContext,
+        obj: HandleObject,
+        global: HandleObject,
+    ) -> bool {
         match *self {
             Condition::Pref(name) => prefs::pref_map().get(name).as_bool().unwrap_or(false),
             Condition::Func(f) => f(cx, obj),
