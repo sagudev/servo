@@ -728,4 +728,6 @@ pub trait DomHelpers<D: DomTypes> {
         proto_id: crate::codegen::PrototypeList::ID,
         creator: unsafe fn(SafeJSContext, HandleObject, *mut ProtoOrIfaceArray),
     ) -> bool;
+
+    fn is_secure_context(cx: SafeJSContext) -> bool;
 }

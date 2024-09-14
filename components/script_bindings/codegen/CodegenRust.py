@@ -3007,8 +3007,8 @@ def InitLegacyUnforgeablePropertiesOnHolder(descriptor, properties):
     """
     unforgeables = []
 
-    defineLegacyUnforgeableAttrs = "define_guarded_properties(cx, unforgeable_holder.handle(), %s, global);"
-    defineLegacyUnforgeableMethods = "define_guarded_methods(cx, unforgeable_holder.handle(), %s, global);"
+    defineLegacyUnforgeableAttrs = "define_guarded_properties::<D>(cx, unforgeable_holder.handle(), %s, global);"
+    defineLegacyUnforgeableMethods = "define_guarded_methods::<D>(cx, unforgeable_holder.handle(), %s, global);"
 
     unforgeableMembers = [
         (defineLegacyUnforgeableAttrs, properties.unforgeable_attrs),
@@ -3076,7 +3076,6 @@ class CGWrapMethod(CGAbstractMethod):
 
     def definition_body(self):
         unforgeable = CopyLegacyUnforgeablePropertiesToInstance(self.descriptor)
-        genericSuffix = "::<D>" if self.descriptor.hasNamedPropertiesObject() or self.descriptor.interface.legacyFactoryFunctions else ""
         if self.descriptor.proxy:
             if self.descriptor.isMaybeCrossOriginObject():
                 proto = "ptr::null_mut()"
@@ -3142,7 +3141,7 @@ assert!(((*get_object_class(scope.get())).flags & JSCLASS_IS_GLOBAL) != 0);
 let _ac = JSAutoRealm::new(*cx, scope.get());
 
 rooted!(in(*cx) let mut canonical_proto = ptr::null_mut::<JSObject>());
-GetProtoObject{genericSuffix}(cx, scope, canonical_proto.handle_mut());
+GetProtoObject::<D>(cx, scope, canonical_proto.handle_mut());
 assert!(!canonical_proto.is_null());
 
 {create}
@@ -3167,7 +3166,6 @@ class CGWrapGlobalMethod(CGAbstractMethod):
         CGAbstractMethod.__init__(self, descriptor, 'Wrap', retval, args,
                                   pub=True, unsafe=True, templateArgs=['D: DomTypes'])
         self.properties = properties
-        self.needsGeneric = descriptor.hasNamedPropertiesObject()
 
     def definition_body(self):
         pairs = [
@@ -3175,10 +3173,9 @@ class CGWrapGlobalMethod(CGAbstractMethod):
             ("define_guarded_methods", self.properties.methods),
             ("define_guarded_constants", self.properties.consts)
         ]
-        members = [f"{function}(cx, obj.handle(), {array.variableName()}, obj.handle());"
+        members = [f"{function}::<D>(cx, obj.handle(), {array.variableName()}, obj.handle());"
                    for (function, array) in pairs if array.length() > 0]
         membersStr = "\n".join(members)
-        genericSuffix = "::<D>" if self.needsGeneric else ""
 
         return CGGeneric(f"""
 let raw = Root::new(MaybeUnreflectedDom::from_box(object));
@@ -3198,7 +3195,7 @@ let root = raw.reflect_with(obj.get());
 
 let _ac = JSAutoRealm::new(*cx, obj.get());
 rooted!(in(*cx) let mut canonical_proto = ptr::null_mut::<JSObject>());
-GetProtoObject{genericSuffix}(cx, obj.handle(), canonical_proto.handle_mut());
+GetProtoObject::<D>(cx, obj.handle(), canonical_proto.handle_mut());
 assert!(JS_SetPrototype(*cx, obj.handle(), canonical_proto.handle()));
 let mut immutable = false;
 assert!(JS_SetImmutablePrototype(*cx, obj.handle(), &mut immutable));
@@ -3403,7 +3400,7 @@ let global = incumbent_global.reflector().get_jsobject();\n"""
                     """
                     let conditions = ${conditions};
                     let is_satisfied = conditions.iter().any(|c|
-                         c.is_satisfied(
+                         c.is_satisfied::<D>(
                            SafeJSContext::from_ptr(cx),
                            HandleObject::from_raw(obj),
                            global));
@@ -3433,9 +3430,8 @@ class CGCreateInterfaceObjectsMethod(CGAbstractMethod):
     def __init__(self, descriptor, properties, haveUnscopables, haveLegacyWindowAliases):
         args = [Argument('SafeJSContext', 'cx'), Argument('HandleObject', 'global'),
                 Argument('*mut ProtoOrIfaceArray', 'cache')]
-        templateArgs = ["D: DomTypes"] if descriptor.hasNamedPropertiesObject() or descriptor.interface.legacyFactoryFunctions else []
         CGAbstractMethod.__init__(self, descriptor, 'CreateInterfaceObjects', 'void', args,
-                                  unsafe=True, templateArgs=templateArgs)
+                                  unsafe=True, templateArgs=["D: DomTypes"])
         self.properties = properties
         self.haveUnscopables = haveUnscopables
         self.haveLegacyWindowAliases = haveLegacyWindowAliases
@@ -3460,7 +3456,7 @@ class CGCreateInterfaceObjectsMethod(CGAbstractMethod):
 rooted!(in(*cx) let proto = {proto});
 assert!(!proto.is_null());
 rooted!(in(*cx) let mut namespace = ptr::null_mut::<JSObject>());
-create_namespace_object(cx, global, proto.handle(), &NAMESPACE_OBJECT_CLASS,
+create_namespace_object::<D>(cx, global, proto.handle(), &NAMESPACE_OBJECT_CLASS,
                         {methods}, {constants}, {str_to_cstr(name)}, namespace.handle_mut());
 assert!(!namespace.is_null());
 assert!((*cache)[PrototypeList::Constructor::{id} as usize].is_null());
@@ -3474,7 +3470,7 @@ assert!((*cache)[PrototypeList::Constructor::{id} as usize].is_null());
             cName = str_to_cstr(name)
             return CGGeneric(f"""
 rooted!(in(*cx) let mut interface = ptr::null_mut::<JSObject>());
-create_callback_interface_object(cx, global, sConstants, {cName}, interface.handle_mut());
+create_callback_interface_object::<D>(cx, global, sConstants, {cName}, interface.handle_mut());
 assert!(!interface.is_null());
 assert!((*cache)[PrototypeList::Constructor::{name} as usize].is_null());
 (*cache)[PrototypeList::Constructor::{name} as usize] = interface.get();
@@ -3494,7 +3490,7 @@ assert!((*cache)[PrototypeList::Constructor::{name} as usize].is_null());
             getPrototypeProto = f"prototype_proto.set({protoGetter}(*cx))"
         else:
             getPrototypeProto = (
-                f"{toBindingNamespace(parentName)}::GetProtoObject(cx, global, prototype_proto.handle_mut())"
+                f"{toBindingNamespace(parentName)}::GetProtoObject::<D>(cx, global, prototype_proto.handle_mut())"
             )
 
         code = [CGGeneric(f"""
@@ -3535,7 +3531,7 @@ assert!(!prototype_proto.is_null());"""))
 
         code.append(CGGeneric(f"""
 rooted!(in(*cx) let mut prototype = ptr::null_mut::<JSObject>());
-create_interface_prototype_object(cx,
+create_interface_prototype_object::<D>(cx,
                                   global,
                                   prototype_proto.handle(),
                                   &PrototypeClass,
@@ -3563,14 +3559,14 @@ assert!((*cache)[PrototypeList::ID::{proto_properties['id']} as usize].is_null()
             if parentName:
                 parentName = toBindingNamespace(parentName)
                 code.append(CGGeneric(f"""
-{parentName}::GetConstructorObject(cx, global, interface_proto.handle_mut());"""))
+{parentName}::GetConstructorObject::<D>(cx, global, interface_proto.handle_mut());"""))
             else:
                 code.append(CGGeneric("interface_proto.set(GetRealmFunctionPrototype(*cx));"))
             code.append(CGGeneric(f"""
 assert!(!interface_proto.is_null());
 
 rooted!(in(*cx) let mut interface = ptr::null_mut::<JSObject>());
-create_noncallback_interface_object(cx,
+create_noncallback_interface_object::<D>(cx,
                                     global,
                                     interface_proto.handle(),
                                     &*std::ptr::addr_of!(INTERFACE_OBJECT_CLASS),
@@ -3700,16 +3696,15 @@ class CGGetPerInterfaceObject(CGAbstractMethod):
         args = [Argument('SafeJSContext', 'cx'),
                 Argument('HandleObject', 'global'),
                 Argument('MutableHandleObject', 'mut rval')]
-        self.usesGeneric = descriptor.hasNamedPropertiesObject() or descriptor.interface.legacyFactoryFunctions
         CGAbstractMethod.__init__(self, descriptor, name,
-                                  'void', args, pub=pub, templateArgs=["D: DomTypes"] if self.usesGeneric else [])
+                                  'void', args, pub=pub, templateArgs=["D: DomTypes"])
         self.id = f"{idPrefix}::{MakeNativeName(self.descriptor.name)}"
         self.variant = self.id.split('::')[-2]
 
     def definition_body(self):
         return CGGeneric(
             "get_per_interface_object_handle"
-            f"(cx, global, ProtoOrIfaceIndex::{self.variant}({self.id}), CreateInterfaceObjects{'::<D>' if self.usesGeneric else ''}, rval)"
+            f"(cx, global, ProtoOrIfaceIndex::{self.variant}({self.id}), CreateInterfaceObjects::<D>, rval)"
         )
 
 
@@ -3857,10 +3852,9 @@ class CGDefineDOMInterfaceMethod(CGAbstractMethod):
         return CGAbstractMethod.define(self)
 
     def definition_body(self):
-        generics = "::<D>" if self.descriptor.hasNamedPropertiesObject() or self.descriptor.interface.legacyFactoryFunctions else ""
         return CGGeneric(
             "define_dom_interface"
-            f"(cx, global, ProtoOrIfaceIndex::{self.variant}({self.id}), CreateInterfaceObjects{generics}, ConstructorEnabled::<D>)"
+            f"(cx, global, ProtoOrIfaceIndex::{self.variant}({self.id}), CreateInterfaceObjects::<D>, ConstructorEnabled::<D>)"
         )
 
 
@@ -6339,7 +6333,7 @@ class CGDOMJSProxyHandler_getPrototype(CGAbstractExternMethod):
         return dedent(
             """
             let cx = SafeJSContext::from_ptr(cx);
-            proxyhandler::maybe_cross_origin_get_prototype::<D>(cx, proxy, GetProtoObject, proto)
+            proxyhandler::maybe_cross_origin_get_prototype::<D>(cx, proxy, GetProtoObject::<D>, proto)
             """)
 
     def definition_body(self):
@@ -6426,10 +6420,8 @@ class CGClassConstructHook(CGAbstractExternMethod):
         CGAbstractExternMethod.__init__(self, descriptor, name, 'bool', args, templateArgs=["D: DomTypes"])
         self.constructor = constructor
         self.exposureSet = descriptor.interface.exposureSet
-        self.needsGeneric = not not descriptor.interface.legacyFactoryFunctions
 
     def definition_body(self):
-        generic = "::<D>" if self.needsGeneric else ""
         preamble = """let cx = SafeJSContext::from_ptr(cx);
 let args = CallArgs::from_vp(vp, argc);
 let global = <D as DomHelpers<D>>::global_scope_from_object(JS_CALLEE(*cx, vp).to_object());
@@ -6448,7 +6440,7 @@ let global = DomRoot::downcast::<D::{list(self.exposureSet)[0]}>(global).unwrap(
                     &args,
                     &global,
                     PrototypeList::ID::{MakeNativeName(self.descriptor.name)},
-                    CreateInterfaceObjects{generic},
+                    CreateInterfaceObjects::<D>,
                 )
                 """
             )
@@ -6465,7 +6457,7 @@ let proto_result = get_desired_proto(
   cx,
   &args,
   PrototypeList::ID::{MakeNativeName(self.descriptor.name)},
-  CreateInterfaceObjects{generic},
+  CreateInterfaceObjects::<D>,
   desired_proto.handle_mut(),
 );
 assert!(proto_result.is_ok());

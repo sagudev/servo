@@ -28,8 +28,8 @@ impl<T: Clone + Copy> Guard<T> {
     /// Expose the value if the condition is satisfied.
     ///
     /// The passed handle is the object on which the value may be exposed.
-    pub fn expose(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> Option<T> {
-        if self.condition.is_satisfied(cx, obj, global) {
+    pub fn expose<D: crate::DomTypes>(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> Option<T> {
+        if self.condition.is_satisfied::<D>(cx, obj, global) {
             Some(self.value)
         } else {
             None
@@ -50,21 +50,17 @@ pub enum Condition {
     Satisfied,
 }
 
-fn is_secure_context(cx: JSContext) -> bool {
-    false
-    /*unsafe {
-        let in_realm_proof = AlreadyInRealm::assert_for_cx(JSContext::from_ptr(*cx));
-        GlobalScope::from_context(*cx, InRealm::Already(&in_realm_proof)).is_secure_context()
-    }*/
+fn is_secure_context<D: crate::DomTypes>(cx: JSContext) -> bool {
+    <D as crate::DomHelpers<D>>::is_secure_context(cx)
 }
 
 impl Condition {
-    pub fn is_satisfied(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> bool {
+    pub fn is_satisfied<D: crate::DomTypes>(&self, cx: JSContext, obj: HandleObject, global: HandleObject) -> bool {
         match *self {
             Condition::Pref(name) => prefs::pref_map().get(name).as_bool().unwrap_or(false),
             Condition::Func(f) => f(cx, obj),
             Condition::Exposed(globals) => is_exposed_in(global, globals),
-            Condition::SecureContext() => is_secure_context(cx),
+            Condition::SecureContext() => is_secure_context::<D>(cx),
             Condition::Satisfied => true,
         }
     }
