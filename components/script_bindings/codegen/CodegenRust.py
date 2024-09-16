@@ -2767,7 +2767,10 @@ def DomTypes(descriptors, descriptorProvider, dictionaries, callbacks, typedefs,
             if iterableDecl.isSetlike():
                 traits += ["crate::like::Setlike<Key=crate::str::DOMString>"]
             if iterableDecl.hasKeyType():
-                traits += ["crate::reflector::DomObjectIteratorWrap<Self>"]
+                traits += [
+                    "crate::reflector::DomObjectIteratorWrap<Self>",
+                    "crate::iterable::IteratorDerives",
+                ]
 
         if descriptor.weakReferenceable:
             traits += ["crate::weakref::WeakReferenceable"]
@@ -3220,8 +3223,6 @@ class CGIDLInterface(CGThing):
     def define(self):
         interface = self.descriptor.interface
         name = interface.identifier.name
-        #name = self.descriptor.concreteType
-        #name = interface.identifier.name if not self.iteratorOnly else interface.iterableInterface.identifier.name
         bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(name)}"
         if (interface.getUserData("hasConcreteDescendant", False)
                 or interface.getUserData("hasProxyDescendant", False)):
@@ -3242,6 +3243,29 @@ impl IDLInterface for {name} {{
 impl PartialEq for {name} {{
     fn eq(&self, other: &{name}) -> bool {{
         self as *const {name} == other
+    }}
+}}
+"""
+
+
+class CGIteratorDerives(CGThing):
+    """
+    Class for codegen of an implementation of the IDLInterface trait.
+    """
+    def __init__(self, descriptor):
+        CGThing.__init__(self)
+        self.descriptor = descriptor
+
+    def define(self):
+        iterableInterface = self.descriptor.interface.iterableInterface
+        interface = self.descriptor.interface
+        name = iterableInterface.identifier.name
+        bindingModule = f"script_bindings::codegen::Bindings::{toBindingModuleFileFromDescriptor(self.descriptor)}::{toBindingNamespace(interface.identifier.name)}"
+        return f"""
+impl script_bindings::iterable::IteratorDerives for {name} {{
+    #[inline]
+    fn derives(class: &'static DOMClass) -> bool {{
+        unsafe {{ ptr::eq(class, &{bindingModule}::Class.dom_class) }}
     }}
 }}
 """
@@ -8375,6 +8399,8 @@ class GlobalGenRoots():
 
             if (descriptor.concrete or descriptor.hasDescendants()) and not descriptor.interface.isNamespace() and not descriptor.interface.isIteratorInterface():
                 cgThings.append(CGIDLInterface(descriptor))
+            if descriptor.interface.isIteratorInterface():
+                cgThings.append(CGIteratorDerives(descriptor))
 
             if descriptor.weakReferenceable:
                 cgThings.append(CGWeakReferenceableTrait(descriptor))

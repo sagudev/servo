@@ -86,11 +86,11 @@ pub(crate) struct NoTrace<T>(T);
 
 impl<
         D: DomTypes + 'static,
-        T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface,
+        T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface + IteratorDerives,
     > IDLInterface for IterableIterator<D, T>
 {
     fn derives(class: &'static DOMClass) -> bool {
-        <T as IDLInterface>::derives(class)
+        <T as IteratorDerives>::derives(class)
     }
 }
 
@@ -167,6 +167,24 @@ impl<
         Option<HandleObject>,
         Box<Self>,
     ) -> Root<Dom<Self>> = T::ITER_WRAP;
+}
+
+/// A version of the [IDLInterface] trait that is specific to types that have
+/// iterators defined for them. This allows the `script` crate to define the
+/// derives check for the concrete interface type, while the [IteratableIterator]
+/// type defined in this module can be parameterized over an unknown generic.
+pub trait IteratorDerives {
+    fn derives(class: &'static DOMClass) -> bool;
+}
+
+impl<
+        D: DomTypes + 'static,
+        T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D>,
+    > PartialEq for IterableIterator<D, T>
+{
+    fn eq(&self, other: &IterableIterator<D, T>) -> bool {
+        self as *const IterableIterator<D, T> == other
+    }
 }
 
 fn dict_return(
