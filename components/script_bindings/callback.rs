@@ -18,7 +18,6 @@ use js::rust::wrappers::{JS_GetProperty, JS_WrapObject};
 use js::rust::{MutableHandleObject, Runtime};
 
 use crate::codegen::DomTypes::DomTypes;
-use crate::dom::bindings::codegen::Bindings::WindowBinding::Window_Binding::WindowMethods;
 use crate::dom::bindings::error::{report_pending_exception, Error, Fallible};
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::DomObject;
@@ -245,8 +244,7 @@ impl<D: DomTypes> CallSetup<D> {
     pub fn new<T: CallbackContainer<D>>(callback: &T, handling: ExceptionHandling) -> CallSetup<D> {
         let global = unsafe { <D as DomHelpers<D>>::global_scope_from_object(callback.callback()) };
         if let Some(window) = global.downcast::<D::Window>() {
-            //XXXjdm
-            //window.Document().ensure_safe_to_run_script_or_layout();
+            <D as crate::DomHelpers<D>>::ensure_safe_to_run_script_or_layout(&window);
         }
         let cx = <D as DomHelpers<D>>::GlobalScope_get_cx();
 

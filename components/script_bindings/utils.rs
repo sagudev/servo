@@ -730,4 +730,6 @@ pub trait DomHelpers<D: DomTypes> {
     ) -> bool;
 
     fn is_secure_context(cx: SafeJSContext) -> bool;
+
+    fn ensure_safe_to_run_script_or_layout(window: &D::Window);
 }

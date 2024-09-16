@@ -39,6 +39,7 @@ use malloc_size_of::MallocSizeOfOps;
 pub use script_bindings::utils::*;
 use servo_media::audio::buffer_source_node::AudioBuffer as ServoMediaAudioBuffer;
 
+use crate::dom::bindings::codegen::Bindings::WindowBinding::Window_Binding::WindowMethods;
 use crate::dom::bindings::codegen::PrototypeList::{MAX_PROTO_CHAIN_LENGTH, PROTO_OR_IFACE_LENGTH};
 use crate::dom::bindings::codegen::{InterfaceObjectMap, PrototypeList};
 use crate::dom::bindings::conversions::{
@@ -262,5 +263,9 @@ impl script_bindings::DomHelpers<crate::DomTypeHolder> for crate::DomTypeHolder 
             GlobalScope::from_context(*cx, crate::realms::InRealm::Already(&in_realm_proof))
                 .is_secure_context()
         }
+    }
+
+    fn ensure_safe_to_run_script_or_layout(window: &<crate::DomTypeHolder as script_bindings::DomTypes>::Window) {
+        window.Document().ensure_safe_to_run_script_or_layout();
     }
 }
