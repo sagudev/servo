@@ -86,7 +86,12 @@ pub(crate) struct NoTrace<T>(T);
 
 impl<
         D: DomTypes + 'static,
-        T: DomObjectIteratorWrap<D> + JSTraceable + Iterable + DomGlobal<D> + IDLInterface + IteratorDerives,
+        T: DomObjectIteratorWrap<D>
+            + JSTraceable
+            + Iterable
+            + DomGlobal<D>
+            + IDLInterface
+            + IteratorDerives,
     > IDLInterface for IterableIterator<D, T>
 {
     fn derives(class: &'static DOMClass) -> bool {
