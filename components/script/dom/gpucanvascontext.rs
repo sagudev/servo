@@ -37,7 +37,7 @@ use crate::dom::bindings::reflector::{reflect_dom_object, DomObject, Reflector};
 use crate::dom::bindings::root::{DomRoot, LayoutDom};
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::htmlcanvaselement::{HTMLCanvasElement, LayoutCanvasRenderingContextHelpers};
-use crate::dom::node::{document_from_node, Node, NodeDamage};
+use crate::dom::node::{document_from_node, Node};
 
 // TODO: make all this derivables available via new Bindings.conf option
 impl Clone for GPUCanvasConfiguration {
@@ -179,14 +179,17 @@ impl GPUCanvasContext {
     }
 
     pub fn new(global: &GlobalScope, canvas: &HTMLCanvasElement, channel: WebGPU) -> DomRoot<Self> {
-        reflect_dom_object(
+        let this = reflect_dom_object(
             Box::new(GPUCanvasContext::new_inherited(
                 global,
                 HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(DomRoot::from_ref(canvas)),
                 channel,
             )),
             global,
-        )
+        );
+        let document = document_from_node(&*canvas);
+        document.add_webgpu_canvas(&this);
+        this
     }
 }
 
@@ -298,11 +301,12 @@ impl GPUCanvasContext {
         self.context_id
     }
 
-    pub(crate) fn mark_as_dirty(&self) {
-        if let HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(canvas) = &self.canvas {
-            canvas.upcast::<Node>().dirty(NodeDamage::OtherNodeDamage);
-            let document = document_from_node(&**canvas);
-            document.add_dirty_webgpu_canvas(self);
+    pub fn onscreen(&self) -> bool {
+        match self.canvas {
+            HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(ref canvas) => {
+                canvas.upcast::<Node>().is_connected()
+            },
+            HTMLCanvasElementOrOffscreenCanvas::OffscreenCanvas(_) => false,
         }
     }
 
@@ -403,7 +407,9 @@ impl GPUCanvasContextMethods for GPUCanvasContext {
             current_texture
         };
         // Step 5
-        self.mark_as_dirty();
+        if let HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(canvas) = &self.canvas {
+            canvas.upcast::<Node>().dirty(crate::dom::node::NodeDamage::OtherNodeDamage);
+        }
         // Step 6
         Ok(current_texture)
     }
@@ -411,6 +417,13 @@ impl GPUCanvasContextMethods for GPUCanvasContext {
 
 impl Drop for GPUCanvasContext {
     fn drop(&mut self) {
+        match self.canvas {
+            HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(ref canvas) => {
+                let document = document_from_node(&**canvas);
+                document.remove_webgpu_context(self);
+            },
+            _ => {},
+        }
         if let Err(e) = self.channel.0.send(WebGPURequest::DestroyContext {
             context_id: self.context_id,
         }) {

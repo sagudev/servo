@@ -1743,6 +1743,8 @@ impl ScriptThread {
 
             // TODO(#31871): Update the rendering: consolidate all reflow calls into one here?
 
+            document.update_rendering_of_webgpu_canvases();
+
             // TODO: Process top layer removals according to
             // https://drafts.csswg.org/css-position-4/#process-top-layer-removals.
         }
