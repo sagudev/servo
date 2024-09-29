@@ -23,6 +23,7 @@ use super::bindings::codegen::Bindings::WebGPUBinding::{
 };
 use super::bindings::codegen::UnionTypes::HTMLCanvasElementOrOffscreenCanvas;
 use super::bindings::error::{Error, Fallible};
+use super::bindings::refcounted::Trusted;
 use super::bindings::root::MutNullableDom;
 use super::bindings::str::USVString;
 use super::gpuconvert::convert_texture_descriptor;
@@ -38,6 +39,7 @@ use crate::dom::bindings::root::{DomRoot, LayoutDom};
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::htmlcanvaselement::{HTMLCanvasElement, LayoutCanvasRenderingContextHelpers};
 use crate::dom::node::{document_from_node, Node};
+use crate::task_source::TaskSource;
 
 // TODO: make all this derivables available via new Bindings.conf option
 impl Clone for GPUCanvasConfiguration {
@@ -407,9 +409,15 @@ impl GPUCanvasContextMethods for GPUCanvasContext {
             current_texture
         };
         // Step 5
-        if let HTMLCanvasElementOrOffscreenCanvas::HTMLCanvasElement(canvas) = &self.canvas {
-            canvas.upcast::<Node>().dirty(crate::dom::node::NodeDamage::OtherNodeDamage);
-        }
+        let global = self.global();
+        let texture = Trusted::new(&*self);
+        let task_source = global.webgpu_automatic_expiry_task_source();
+        let _ = task_source.queue(
+            task!(expire: move || {
+                texture.root().expire_current_texture();
+            }),
+            &self.global(),
+        );
         // Step 6
         Ok(current_texture)
     }

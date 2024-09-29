@@ -69,6 +69,7 @@ use uuid::Uuid;
 use webgpu::swapchain::WebGPUContextId;
 use webrender_api::units::DeviceIntRect;
 
+use super::bindings::weakref::WeakRef;
 use crate::animation_timeline::AnimationTimeline;
 use crate::animations::Animations;
 use crate::document_loader::{DocumentLoader, LoadType};
@@ -185,8 +186,6 @@ use crate::stylesheet_set::StylesheetSetRef;
 use crate::task::TaskBox;
 use crate::task_source::{TaskSource, TaskSourceName};
 use crate::timers::OneshotTimerCallback;
-
-use super::bindings::weakref::WeakRef;
 
 /// The number of times we are allowed to see spurious `requestAnimationFrame()` calls before
 /// falling back to fake ones.
@@ -2959,7 +2958,9 @@ impl Document {
     }
 
     pub fn remove_webgpu_context(&self, context: &GPUCanvasContext) {
-        self.webgpu_contexts.borrow_mut().remove(&context.context_id());
+        self.webgpu_contexts
+            .borrow_mut()
+            .remove(&context.context_id());
     }
 
     pub fn id_map(&self) -> Ref<HashMapTracedValues<Atom, Vec<Dom<Element>>>> {
