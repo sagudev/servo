@@ -34,7 +34,7 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
 
     let name = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let items = quote! {
+    let mut items = quote! {
         impl #impl_generics ::js::conversions::ToJSValConvertible for #name #ty_generics #where_clause {
             #[allow(unsafe_code)]
             unsafe fn to_jsval(&self,
@@ -63,31 +63,29 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
     };
 
     let mut params = proc_macro2::TokenStream::new();
-    params.append_separated(input.generics.type_params().map(|param| &param.ident), ", ");
+    params.append_separated(input.generics.type_params().map(|param| &param.ident), quote! {,});
 
     // For each field in the struct, we implement ShouldNotImplDomObject for a
     // pair of all the type parameters of the DomObject and and the field type.
     // This allows us to support parameterized DOM objects
     // such as IteratorIterable<T>.
-    //XXXjdm
-    /*items.append_all(field_types.iter().map(|ty| {
+    items.append_all(field_types.iter().map(|ty| {
         quote! {
             impl #impl_generics ShouldNotImplDomObject for ((#params), #ty) #where_clause {}
         }
-    }));*/
+    }));
 
     let mut generics = input.generics.clone();
     generics.params.push(parse_quote!(
         __T: crate::DomObject
     ));
 
-    let (_impl_generics, _, _where_clause) = generics.split_for_impl();
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    //XXXjdm
-    /*items.append_all(quote! {
+    items.append_all(quote! {
         trait ShouldNotImplDomObject {}
         impl #impl_generics ShouldNotImplDomObject for ((#params), __T) #where_clause {}
-    });*/
+    });
 
     let dummy_const = syn::Ident::new(
         &format!("_IMPL_DOMOBJECT_FOR_{}", name),
