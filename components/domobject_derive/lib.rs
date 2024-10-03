@@ -78,13 +78,13 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
     };
 
     let mut params = proc_macro2::TokenStream::new();
-    params.append_separated(input.generics.type_params().map(|param| &param.ident), quote! {,});
+    params.append_separated(
+        input.generics.type_params().map(|param| &param.ident),
+        quote! {,},
+    );
 
     items.append_all(field_types.iter().enumerate().map(|(i, ty)| {
-        let s = syn::Ident::new(
-            &format!("S{i}"),
-            proc_macro2::Span::call_site(),
-        );
+        let s = syn::Ident::new(&format!("S{i}"), proc_macro2::Span::call_site());
         quote! {
             struct #s<#params>(#params);
 
