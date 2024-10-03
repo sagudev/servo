@@ -7,6 +7,8 @@
 use quote::{quote, TokenStreamExt};
 use syn::parse_quote;
 
+/// First field of DomObject must be either reflector or another dom_struct,
+/// all other fields must not implement DomObject
 #[proc_macro_derive(DomObject)]
 pub fn expand_token_stream(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = syn::parse(input).unwrap();
@@ -63,18 +65,18 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
 
         // Generic trait with a blanket impl over `()` for all types.
         // becomes ambiguous if impl
-        trait NoDomObjectInDomStruct<A> {
+        trait NoDomObjectInDomObject<A> {
             // Required for actually being able to reference the trait.
             fn some_item() {}
         }
 
-        impl<T: ?Sized> NoDomObjectInDomStruct<()> for T {}
+        impl<T: ?Sized> NoDomObjectInDomObject<()> for T {}
 
         // Used for the specialized impl when DomObject is implemented.
         #[allow(dead_code)]
         struct Invalid;
         // forbids DomObject
-        impl<T> NoDomObjectInDomStruct<Invalid> for T where T: ?Sized + crate::DomObject {}
+        impl<T> NoDomObjectInDomObject<Invalid> for T where T: ?Sized + crate::DomObject {}
     };
 
     let mut params = proc_macro2::TokenStream::new();
@@ -92,8 +94,8 @@ fn expand_dom_object(input: syn::DeriveInput) -> proc_macro2::TokenStream {
                 fn f() {
                     // If there is only one specialized trait impl, type inference with
                     // `_` can be resolved and this can compile. Fails to compile if
-                    // ty implements `NoDomObjectInDomStruct<Invalid>`.
-                    let _ = <#ty as NoDomObjectInDomStruct<_>>::some_item;
+                    // ty implements `NoDomObjectInDomObject<Invalid>`.
+                    let _ = <#ty as NoDomObjectInDomObject<_>>::some_item;
                 }
             }
         }
