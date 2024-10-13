@@ -2497,8 +2497,7 @@ dependencies = [
 [[package]]
 name = "glow"
 version = "0.14.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d51fa363f025f5c111e03f13eda21162faeacb6911fe8caa0c0349f9cf0c4483"
+source = "git+https://github.com/sagudev/glow?branch=depth-auto-type#7f7b5104ed9d6b0613486bab148c7ffd3a46d031"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -6914,7 +6913,7 @@ dependencies = [
 [[package]]
 name = "surfman"
 version = "0.9.8"
-source = "git+https://github.com/sagudev/surfman?branch=bye-sparkle#948f76d748fc00df7b88c9350ea9935dd3c68db0"
+source = "git+https://github.com/sagudev/surfman?branch=fix-glow-depth#6843f788dfcf3e32a720171e29bca849bc0d629c"
 dependencies = [
  "bitflags 2.6.0",
  "cfg_aliases 0.2.1",
