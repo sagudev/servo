@@ -18,7 +18,7 @@ use ipc_channel::ipc::{IpcBytesReceiver, IpcBytesSender, IpcSender, IpcSharedMem
 use malloc_size_of_derive::MallocSizeOf;
 use pixels::PixelFormat;
 use serde::{Deserialize, Serialize};
-use sparkle::gl;
+use glow as gl;
 use webrender_api::ImageKey;
 use webxr_api::{
     ContextId as WebXRContextId, Error as WebXRError, LayerId as WebXRLayerId,
@@ -938,7 +938,7 @@ macro_rules! gl_enums {
 
 // FIXME: These should come from sparkle
 mod gl_ext_constants {
-    use sparkle::gl::types::GLenum;
+    type GLenum = u32;
 
     pub const COMPRESSED_RGB_S3TC_DXT1_EXT: GLenum = 0x83F0;
     pub const COMPRESSED_RGBA_S3TC_DXT1_EXT: GLenum = 0x83F1;
