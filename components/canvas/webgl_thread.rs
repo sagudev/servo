@@ -25,8 +25,7 @@ use fnv::FnvHashMap;
 use half::f16;
 use log::{debug, error, trace, warn};
 use pixels::{self, unmultiply_inplace, PixelFormat};
-use sparkle::gl;
-use sparkle::gl::{GLint, GLuint, Gl};
+use glow::{self as gl, Context as Gl, HasContext};
 use surfman::chains::{PreserveBuffer, SwapChains, SwapChainsAPI};
 use surfman::{
     self, Adapter, Connection, Context, ContextAttributeFlags, ContextAttributes, Device,

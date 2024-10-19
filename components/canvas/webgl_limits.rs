@@ -3,8 +3,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use canvas_traits::webgl::{GLLimits, WebGLVersion};
-use sparkle::gl;
-use sparkle::gl::{GLenum, Gl, GlType};
+use glow::{self as gl, HasContext};
+use glow::Context as Gl;
+type GLenum = u32;
 
 pub trait GLLimitsDetect {
     fn detect(gl: &Gl, webgl_version: WebGLVersion) -> Self;
@@ -32,7 +33,7 @@ impl GLLimitsDetect for GLLimits {
             max_vertex_output_vectors,
             max_fragment_input_vectors,
         );
-        if gl.get_type() == GlType::Gles {
+        if gl.version().is_embedded {
             max_fragment_uniform_vectors = gl.get_integer(gl::MAX_FRAGMENT_UNIFORM_VECTORS);
             max_varying_vectors = gl.get_integer(gl::MAX_VARYING_VECTORS);
             max_vertex_uniform_vectors = gl.get_integer(gl::MAX_VERTEX_UNIFORM_VECTORS);
