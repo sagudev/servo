@@ -68,7 +68,7 @@ jobs:
       # we don't have to kill this service?
       - name: Kill XProtectBehaviorService
         run: |
-          exit 1
+          echo Killing XProtect.; sudo pkill -9 XProtect >/dev/null || true;
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request_target'
       # This is necessary to checkout the pull request if this run was triggered via a
