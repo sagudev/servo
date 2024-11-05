@@ -139,7 +139,7 @@ class Config(object):
                 self.fail_fast = True
                 continue  # skip over keyword
             if word == "full":
-                words.extend(["linux-wpt", "macos", "windows", "android", "ohos", "lint"])
+                words.extend(["linux", "linux-wpt", "macos", "windows", "android", "ohos", "lint"])
                 continue  # skip over keyword
 
             job = handle_preset(word)
@@ -189,7 +189,7 @@ class TestParser(unittest.TestCase):
                                   "workflow": "linux",
                                   "wpt_layout": "2020",
                                   "profile": "release",
-                                  "unit_tests": False,
+                                  "unit_tests": True,
                                   "wpt_args": ""
                               },
                               {
