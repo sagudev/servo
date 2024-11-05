@@ -33,7 +33,7 @@ jobs:
         id: configuration
         run: |
           {
-            echo 'config<<EOF'
+            echo 'result<<EOF'
             python ./python/servo/try_parser.py ${{ github.event_name == 'pull_request' && 'linux lint' || 'fail-fast full' }}
             echo EOF
            } >> $GITHUB_OUTPUT
