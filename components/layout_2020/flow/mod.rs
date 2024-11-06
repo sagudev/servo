@@ -235,7 +235,7 @@ impl OutsideMarker {
     ) -> Fragment {
         let content_sizes = self.block_container.inline_content_sizes(
             layout_context,
-            &IndefiniteContainingBlock::new_for_style(&self.marker_style),
+            &IndefiniteContainingBlock::new_for_writing_mode(self.marker_style.writing_mode),
         );
         let containing_block_for_children = ContainingBlock {
             inline_size: content_sizes.sizes.max_content,
@@ -1359,9 +1359,8 @@ fn layout_in_flow_replaced_block_level(
     replaced: &ReplacedContent,
     mut sequential_layout_state: Option<&mut SequentialLayoutState>,
 ) -> BoxFragment {
-    let content_box_sizes_and_pbm: ContentBoxSizesAndPBMDeprecated = style
-        .content_box_sizes_and_padding_border_margin(&containing_block.into())
-        .into();
+    let content_box_sizes_and_pbm =
+        style.content_box_sizes_and_padding_border_margin(&containing_block.into());
     let pbm = &content_box_sizes_and_pbm.pbm;
     let content_size = replaced.used_size_as_if_inline_element(
         containing_block,
@@ -2018,7 +2017,7 @@ impl IndependentFormattingContext {
                     .used_size_as_if_inline_element(
                         containing_block,
                         &replaced.style,
-                        &content_box_sizes_and_pbm.clone().into(),
+                        &content_box_sizes_and_pbm,
                     )
                     .to_physical_size(container_writing_mode);
                 let fragments = replaced.contents.make_fragments(
@@ -2058,8 +2057,8 @@ impl IndependentFormattingContext {
 
                 let mut get_content_size = || {
                     let containing_block_for_children =
-                        IndefiniteContainingBlock::new_for_style_and_block_size(
-                            &style,
+                        IndefiniteContainingBlock::new_for_writing_mode_and_block_size(
+                            style.writing_mode,
                             tentative_block_size,
                         );
                     non_replaced

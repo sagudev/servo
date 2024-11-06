@@ -3,10 +3,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use dom_struct::dom_struct;
-use js::conversions::ToJSValConvertible;
 use js::jsapi::Heap;
-use js::jsval::{JSVal, UndefinedValue};
-use js::rust::HandleObject;
+use js::jsval::JSVal;
+use js::rust::{HandleObject, MutableHandleValue};
 use servo_atoms::Atom;
 
 use crate::dom::bindings::codegen::Bindings::EventBinding::Event_Binding::EventMethods;
@@ -17,6 +16,7 @@ use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::{reflect_dom_object_with_proto, DomObject};
 use crate::dom::bindings::root::{Dom, DomRoot};
 use crate::dom::bindings::str::DOMString;
+use crate::dom::bindings::utils::to_frozen_array;
 use crate::dom::event::Event;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::window::Window;
@@ -87,15 +87,11 @@ impl XRInputSourcesChangeEvent {
         }
         let _ac = enter_realm(global);
         let cx = GlobalScope::get_cx();
-        unsafe {
-            rooted!(in(*cx) let mut added_val = UndefinedValue());
-            added.to_jsval(*cx, added_val.handle_mut());
-            changeevent.added.set(added_val.get());
-            rooted!(in(*cx) let mut removed_val = UndefinedValue());
-            removed.to_jsval(*cx, removed_val.handle_mut());
-            changeevent.removed.set(removed_val.get());
-        }
-
+        rooted!(in(*cx) let mut frozen_val: JSVal);
+        to_frozen_array(added, cx, frozen_val.handle_mut());
+        changeevent.added.set(*frozen_val);
+        to_frozen_array(removed, cx, frozen_val.handle_mut());
+        changeevent.removed.set(*frozen_val);
         changeevent
     }
 }
@@ -128,13 +124,13 @@ impl XRInputSourcesChangeEventMethods for XRInputSourcesChangeEvent {
     }
 
     // https://immersive-web.github.io/webxr/#dom-xrinputsourceschangeevent-added
-    fn Added(&self, _cx: JSContext) -> JSVal {
-        self.added.get()
+    fn Added(&self, _cx: JSContext, mut retval: MutableHandleValue) {
+        retval.set(self.added.get())
     }
 
     // https://immersive-web.github.io/webxr/#dom-xrinputsourceschangeevent-removed
-    fn Removed(&self, _cx: JSContext) -> JSVal {
-        self.removed.get()
+    fn Removed(&self, _cx: JSContext, mut retval: MutableHandleValue) {
+        retval.set(self.removed.get())
     }
 
     // https://dom.spec.whatwg.org/#dom-event-istrusted
