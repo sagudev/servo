@@ -158,7 +158,7 @@ impl GPUCommandEncoderMethods<crate::DomTypeHolder> for GPUCommandEncoder {
                 depth: wgpu_com::PassChannel {
                     load_op: ds.depthLoadOp.as_ref().map(Convert::convert),
                     store_op: ds.depthStoreOp.as_ref().map(Convert::convert),
-                    clear_value: ds.depthClearValue.as_ref().map(|v| **v),
+                    clear_value: ds.depthClearValue.map(|v| *v),
                     read_only: ds.depthReadOnly,
                 },
                 stencil: wgpu_com::PassChannel {
