@@ -7304,7 +7304,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "surfman"
 version = "0.9.8"
-source = "git+https://github.com/servo/surfman?rev=b3a406065dc2312f55ca191d92f0ecef0ecce07c#b3a406065dc2312f55ca191d92f0ecef0ecce07c"
+source = "git+https://github.com/sagudev/surfman?branch=android#b15ea41faad03c16d51faf6470b3bb409e9f330d"
 dependencies = [
  "bitflags 2.8.0",
  "cfg_aliases",
