@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import textwrap
 import json
+import base64
 
 from servo.post_build_commands import PostBuildCommands
 import wpt
@@ -373,13 +374,13 @@ class MachCommands(CommandBase):
              description='Extremely minimal testing of Servo for Android',
              category='testing')
     @CommandBase.common_command_arguments(build_configuration=False, build_type=True)
-    def test_android_startup(self, build_type: BuildType):
+    def test_android_startup(self, build_type: BuildType, **kwargs):
         html = """
             <script>
                 window.alert("JavaScript is running!")
             </script>
         """
-        url = "data:text/html;base64," + html.encode("base64").replace("\n", "")
+        url = "data:text/html;base64," + str(base64.urlsafe_b64encode(html.encode('utf-8')))
         args = self.in_android_emulator(build_type)
         args = [sys.executable] + args + [url]
         process = subprocess.Popen(args, stdout=subprocess.PIPE)
