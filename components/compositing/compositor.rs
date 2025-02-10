@@ -2263,10 +2263,10 @@ impl IOCompositor {
         // Set the viewport background based on prefs.
         let color = servo_config::pref!(shell_background_color_rgba);
         gl.clear_color(
-            color[0] as f32,
-            color[1] as f32,
-            color[2] as f32,
-            color[3] as f32,
+            1.0 as f32,
+            0 as f32,
+            0 as f32,
+            1.0 as f32,
         );
 
         // Clear the viewport rect of each top-level browsing context.
