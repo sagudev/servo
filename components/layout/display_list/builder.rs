@@ -1775,7 +1775,7 @@ impl Fragment {
                         let (sender, receiver) = ipc::channel().unwrap();
                         ipc_renderer
                             .send(CanvasMsg::FromLayout(
-                                FromLayoutMsg::SendData(sender),
+                                FromLayoutMsg::UpdateImage(sender),
                                 canvas_fragment_info.canvas_id,
                             ))
                             .unwrap();
