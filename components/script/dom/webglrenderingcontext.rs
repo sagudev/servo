@@ -1924,8 +1924,8 @@ impl CanvasContext for WebGLRenderingContext {
     }
 
     fn get_image_data_as_shared_memory(&self) -> Option<IpcSharedMemory> {
-        // TODO: add a method in WebGLRenderingContext to get the pixels.
-        None
+        self.get_image_data()
+            .map(|data| IpcSharedMemory::from_bytes(&data))
     }
 
     // Used by HTMLCanvasElement.toDataURL

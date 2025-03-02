@@ -387,14 +387,8 @@ impl HTMLCanvasElement {
 
         let data = match self.context.borrow().as_ref() {
             Some(CanvasContext::Context2d(context)) => context.get_image_data_as_shared_memory(),
-            Some(CanvasContext::WebGL(_context)) => {
-                // TODO: add a method in WebGLRenderingContext to get the pixels.
-                return None;
-            },
-            Some(CanvasContext::WebGL2(_context)) => {
-                // TODO: add a method in WebGL2RenderingContext to get the pixels.
-                return None;
-            },
+            Some(CanvasContext::WebGL(context)) => context.get_image_data_as_shared_memory(),
+            Some(CanvasContext::WebGL2(context)) => context.get_image_data_as_shared_memory(),
             #[cfg(feature = "webgpu")]
             Some(CanvasContext::WebGPU(context)) => context.get_image_data_as_shared_memory(),
             Some(CanvasContext::Placeholder(context)) => return context.fetch_all_data(),
