@@ -84,6 +84,7 @@ pub fn rgba8_premultiply_inplace(pixels: &mut [u8]) -> bool {
     is_opaque
 }
 
+#[inline(always)]
 pub fn multiply_u8_color(a: u8, b: u8) -> u8 {
     (a as u32 * b as u32 / 255) as u8
 }
@@ -252,6 +253,85 @@ pub fn unmultiply_inplace<const SWAP_RB: bool>(pixels: &mut [u8]) {
                 rgba[1] = g as u8;
                 rgba[0] = r as u8;
             }
+        }
+    }
+}
+
+#[repr(u8)]
+pub enum Multiply {
+    PreMultiply = 1,
+    UnMultiply = 2,
+}
+
+pub fn transform_inplace(
+    pixels: &mut [u8],
+    multiply: Option<Multiply>,
+    swap_rb: bool,
+    clear_alpha: bool,
+) {
+    match (multiply, swap_rb, clear_alpha) {
+        (None, true, true) => generic_transform_inplace::<0, true, true>(pixels),
+        (None, true, false) => generic_transform_inplace::<0, true, false>(pixels),
+        (None, false, true) => generic_transform_inplace::<0, false, true>(pixels),
+        (None, false, false) => generic_transform_inplace::<0, false, false>(pixels),
+        (Some(Multiply::PreMultiply), true, true) => {
+            generic_transform_inplace::<1, true, true>(pixels)
+        },
+        (Some(Multiply::PreMultiply), true, false) => {
+            generic_transform_inplace::<1, true, false>(pixels)
+        },
+        (Some(Multiply::PreMultiply), false, true) => {
+            generic_transform_inplace::<1, false, true>(pixels)
+        },
+        (Some(Multiply::PreMultiply), false, false) => {
+            generic_transform_inplace::<1, false, false>(pixels)
+        },
+        (Some(Multiply::UnMultiply), true, true) => {
+            generic_transform_inplace::<2, true, true>(pixels)
+        },
+        (Some(Multiply::UnMultiply), true, false) => {
+            generic_transform_inplace::<2, true, false>(pixels)
+        },
+        (Some(Multiply::UnMultiply), false, true) => {
+            generic_transform_inplace::<2, false, true>(pixels)
+        },
+        (Some(Multiply::UnMultiply), false, false) => {
+            generic_transform_inplace::<2, false, false>(pixels)
+        },
+    }
+}
+
+pub fn generic_transform_inplace<
+    const MULTIPLY: u32, // 1 premultiply, 2 unmultiply
+    const SWAP_RB: bool,
+    const CLEAR_ALPHA: bool,
+>(
+    pixels: &mut [u8],
+) {
+    for rgba in pixels.chunks_mut(4) {
+        match MULTIPLY {
+            1 => {
+                let a = rgba[3];
+                multiply_u8_color(rgba[0], a);
+                multiply_u8_color(rgba[1], a);
+                multiply_u8_color(rgba[2], a);
+            },
+            2 => {
+                let a = rgba[3] as u32;
+
+                if a > 0 {
+                    rgba[0] = (rgba[0] as u32 * 255 / a) as u8;
+                    rgba[1] = (rgba[1] as u32 * 255 / a) as u8;
+                    rgba[2] = (rgba[2] as u32 * 255 / a) as u8;
+                }
+            },
+            _ => {},
+        }
+        if SWAP_RB {
+            rgba.swap(0, 2);
+        }
+        if CLEAR_ALPHA {
+            rgba[3] = u8::MAX;
         }
     }
 }
