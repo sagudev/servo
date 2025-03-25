@@ -206,16 +206,3 @@ jobs:
           S3_UPLOAD_CREDENTIALS: ${{ secrets.S3_UPLOAD_CREDENTIALS }}
           NIGHTLY_REPO_TOKEN: ${{ secrets.NIGHTLY_REPO_TOKEN }}
           NIGHTLY_REPO: ${{ github.repository_owner }}/servo-nightly-builds
-  bencher:
-    needs: ["build"]
-    if: ${{ inputs.bencher && inputs.profile != 'debug' && github.event_name != 'workflow_dispatch' && github.event_name != 'merge_group' }}
-    uses: ./.github/workflows/bencher.yml
-    with:
-      target: 'windows'
-      profile: ${{ inputs.profile }}
-      compressed-file-path: ''
-      binary-path: ${{ inputs.profile }}-binary-windows/Servo.exe
-      file-size: true
-      speedometer: false
-      dromaeo: false
-    secrets: inherit

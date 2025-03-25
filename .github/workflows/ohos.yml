@@ -133,23 +133,6 @@ jobs:
           name: ${{ inputs.profile }}-binary-ohos-${{ matrix.target }}
           path: target/openharmony/${{ matrix.target }}/${{ inputs.profile }}/entry/build/default/outputs/default/servoshell-default-unsigned.hap
 
-  bencher:
-    needs: ["build"]
-    strategy:
-      matrix:
-        target: ['aarch64-unknown-linux-ohos', 'x86_64-unknown-linux-ohos']
-    if: ${{ inputs.bencher && inputs.profile != 'debug' && github.event_name != 'workflow_dispatch' && github.event_name != 'merge_group' }}
-    uses: ./.github/workflows/bencher.yml
-    with:
-      target: ohos-${{ matrix.target }}
-      profile: ${{ inputs.profile }}
-      compressed-file-path: ${{ inputs.profile }}-binary-ohos-${{ matrix.target }}/servoshell-default-${{ needs.build.outputs.signed && 'signed' || 'unsigned' }}.hap
-      binary-path: libs/${{ matrix.target == 'aarch64-unknown-linux-ohos' && 'arm64-v8a' || matrix.target == 'x86_64-unknown-linux-ohos' && 'x86_64' }}/libservoshell.so
-      file-size: true
-      speedometer: false
-      dromaeo: false
-    secrets: inherit
-
   # Note: We could potentially also merge this build job with the above one,
   # if we figure out how to make hvigor build for harmonyos without the HOS commandline-tools installed.
   build-harmonyos-aarch64:
