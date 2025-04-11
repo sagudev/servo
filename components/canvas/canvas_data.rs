@@ -19,7 +19,7 @@ use log::warn;
 use num_traits::ToPrimitive;
 use range::Range;
 use servo_arc::Arc as ServoArc;
-use snapshot::Snapshot;
+use snapshot::{Data, Snapshot, Transparent, BGRA};
 use style::color::AbsoluteColor;
 use style::properties::style_structs::Font as FontStyleStruct;
 use unicode_script::Script;
@@ -1528,7 +1528,7 @@ impl<'a> CanvasData<'a> {
         &self,
         read_rect: Option<Rect<u64>>,
         canvas_size: Option<Size2D<u64>>,
-    ) -> Snapshot {
+    ) -> Snapshot::<Data, BGRA, Transparent::<true>> {
         let canvas_size = canvas_size.unwrap_or(self.drawtarget.get_size().cast());
 
         let data = if let Some(read_rect) = read_rect {
@@ -1546,12 +1546,8 @@ impl<'a> CanvasData<'a> {
             self.drawtarget.snapshot_data().to_vec()
         };
 
-        Snapshot::new(
+        Snapshot::<Data, BGRA, Transparent::<true>>::new(
             canvas_size,
-            snapshot::PixelFormat::BGRA,
-            snapshot::AlphaMode::Transparent {
-                premultiplied: true,
-            },
             data,
         )
     }

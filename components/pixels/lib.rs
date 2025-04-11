@@ -259,43 +259,27 @@ pub fn unmultiply_inplace<const SWAP_RB: bool>(pixels: &mut [u8]) {
 
 #[repr(u8)]
 pub enum Multiply {
+    None = 0,
     PreMultiply = 1,
     UnMultiply = 2,
 }
 
-pub fn transform_inplace(
-    pixels: &mut [u8],
-    multiply: Option<Multiply>,
-    swap_rb: bool,
-    clear_alpha: bool,
-) {
+pub fn transform_inplace(pixels: &mut [u8], multiply: Multiply, swap_rb: bool, clear_alpha: bool) {
     match (multiply, swap_rb, clear_alpha) {
-        (None, true, true) => generic_transform_inplace::<0, true, true>(pixels),
-        (None, true, false) => generic_transform_inplace::<0, true, false>(pixels),
-        (None, false, true) => generic_transform_inplace::<0, false, true>(pixels),
-        (None, false, false) => generic_transform_inplace::<0, false, false>(pixels),
-        (Some(Multiply::PreMultiply), true, true) => {
-            generic_transform_inplace::<1, true, true>(pixels)
-        },
-        (Some(Multiply::PreMultiply), true, false) => {
-            generic_transform_inplace::<1, true, false>(pixels)
-        },
-        (Some(Multiply::PreMultiply), false, true) => {
-            generic_transform_inplace::<1, false, true>(pixels)
-        },
-        (Some(Multiply::PreMultiply), false, false) => {
+        (Multiply::None, true, true) => generic_transform_inplace::<0, true, true>(pixels),
+        (Multiply::None, true, false) => generic_transform_inplace::<0, true, false>(pixels),
+        (Multiply::None, false, true) => generic_transform_inplace::<0, false, true>(pixels),
+        (Multiply::None, false, false) => generic_transform_inplace::<0, false, false>(pixels),
+        (Multiply::PreMultiply, true, true) => generic_transform_inplace::<1, true, true>(pixels),
+        (Multiply::PreMultiply, true, false) => generic_transform_inplace::<1, true, false>(pixels),
+        (Multiply::PreMultiply, false, true) => generic_transform_inplace::<1, false, true>(pixels),
+        (Multiply::PreMultiply, false, false) => {
             generic_transform_inplace::<1, false, false>(pixels)
         },
-        (Some(Multiply::UnMultiply), true, true) => {
-            generic_transform_inplace::<2, true, true>(pixels)
-        },
-        (Some(Multiply::UnMultiply), true, false) => {
-            generic_transform_inplace::<2, true, false>(pixels)
-        },
-        (Some(Multiply::UnMultiply), false, true) => {
-            generic_transform_inplace::<2, false, true>(pixels)
-        },
-        (Some(Multiply::UnMultiply), false, false) => {
+        (Multiply::UnMultiply, true, true) => generic_transform_inplace::<2, true, true>(pixels),
+        (Multiply::UnMultiply, true, false) => generic_transform_inplace::<2, true, false>(pixels),
+        (Multiply::UnMultiply, false, true) => generic_transform_inplace::<2, false, true>(pixels),
+        (Multiply::UnMultiply, false, false) => {
             generic_transform_inplace::<2, false, false>(pixels)
         },
     }

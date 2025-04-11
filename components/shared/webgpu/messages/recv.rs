@@ -9,7 +9,7 @@ use arrayvec::ArrayVec;
 use base::id::PipelineId;
 use ipc_channel::ipc::{IpcSender, IpcSharedMemory};
 use serde::{Deserialize, Serialize};
-use snapshot::IpcSnapshot;
+use snapshot::AnySnapshot;
 use webrender_api::ImageKey;
 use webrender_api::units::DeviceIntSize;
 use wgpu_core::Label;
@@ -166,7 +166,7 @@ pub enum WebGPURequest {
     /// Obtains image from latest presentation buffer (same as wr update)
     GetImage {
         context_id: WebGPUContextId,
-        sender: IpcSender<IpcSnapshot>,
+        sender: IpcSender<AnySnapshot<IpcSharedMemory>>,
     },
     ValidateTextureDescriptor {
         device_id: DeviceId,

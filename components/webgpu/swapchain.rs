@@ -10,10 +10,10 @@ use std::sync::{Arc, Mutex};
 use arrayvec::ArrayVec;
 use compositing_traits::{WebrenderExternalImageApi, WebrenderImageSource};
 use euclid::default::Size2D;
-use ipc_channel::ipc::IpcSender;
+use ipc_channel::ipc::{IpcSender, IpcSharedMemory};
 use log::{error, warn};
 use serde::{Deserialize, Serialize};
-use snapshot::{IpcSnapshot, Snapshot};
+use snapshot::AnySnapshot;
 use webgpu_traits::{
     ContextConfiguration, Error, PRESENTATION_BUFFER_COUNT, WebGPUContextId, WebGPUMsg,
 };
@@ -365,7 +365,7 @@ impl crate::WGPU {
         );
     }
 
-    pub(crate) fn get_image(&self, context_id: WebGPUContextId) -> IpcSnapshot {
+    pub(crate) fn get_image(&self, context_id: WebGPUContextId) -> AnySnapshot<IpcSharedMemory> {
         let webgpu_contexts = self.wgpu_image_map.lock().unwrap();
         let context_data = webgpu_contexts.get(&context_id).unwrap();
         let size = context_data.image_desc.size().cast().cast_unit();
@@ -388,9 +388,9 @@ impl crate::WGPU {
                     premultiplied: true,
                 }
             };
-            Snapshot::from_vec(size, format, alpha_mode, present_buffer.slice().to_vec())
+            AnySnapshot::from_vec(size, format, alpha_mode, present_buffer.slice().to_vec())
         } else {
-            Snapshot::cleared(size)
+            AnySnapshot::cleared(size)
         };
         data.as_ipc()
     }

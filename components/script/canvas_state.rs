@@ -23,6 +23,7 @@ use net_traits::request::CorsSettings;
 use pixels::PixelFormat;
 use profile_traits::ipc as profiled_ipc;
 use servo_url::{ImmutableOrigin, ServoUrl};
+use snapshot::Transparent;
 use style::color::{AbsoluteColor, ColorFlags, ColorSpace};
 use style::context::QuirksMode;
 use style::parser::ParserContext;
@@ -353,12 +354,7 @@ impl CanvasState {
         let (sender, receiver) = ipc::channel().unwrap();
         self.send_canvas_2d_msg(Canvas2dMsg::GetImageData(rect, canvas_size, sender));
         let mut snapshot = receiver.recv().unwrap().to_owned();
-        snapshot.transform(
-            snapshot::AlphaMode::Transparent {
-                premultiplied: false,
-            },
-            snapshot::PixelFormat::RGBA,
-        );
+        snapshot.transform::<snapshot::RGBA, Transparent::<false>>();
         snapshot.to_vec()
     }
 

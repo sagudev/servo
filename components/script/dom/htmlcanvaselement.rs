@@ -549,7 +549,9 @@ impl HTMLCanvasElementMethods<crate::DomTypeHolder> for HTMLCanvasElement {
         let image_type = EncodedImageType::from(mime_type);
         snapshot.transform(
             if image_type == EncodedImageType::Jpeg {
-                snapshot::AlphaMode::AsOpaque { premultiplied: true, }
+                snapshot::AlphaMode::AsOpaque {
+                    premultiplied: true,
+                }
             } else {
                 snapshot::AlphaMode::Transparent {
                     premultiplied: false,

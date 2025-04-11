@@ -6,13 +6,15 @@ use std::default::Default;
 use std::str::FromStr;
 
 use euclid::default::{Point2D, Rect, Size2D, Transform2D};
-use ipc_channel::ipc::{IpcBytesReceiver, IpcSender};
+use ipc_channel::ipc::{IpcBytesReceiver, IpcSender, IpcSharedMemory};
 use malloc_size_of_derive::MallocSizeOf;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
-use snapshot::IpcSnapshot;
+use snapshot::{AnySnapshot, Snapshot, Transparent, BGRA};
 use style::color::AbsoluteColor;
 use style::properties::style_structs::Font as FontStyleStruct;
+
+type CanvasSnapshot = Snapshot<IpcSharedMemory, BGRA, Transparent::<true>>;
 
 #[derive(Clone, Copy, Debug, Deserialize, MallocSizeOf, PartialEq, Serialize)]
 pub enum PathSegment {
@@ -88,7 +90,7 @@ pub enum CanvasMsg {
 pub enum Canvas2dMsg {
     Arc(Point2D<f32>, f32, f32, f32, bool),
     ArcTo(Point2D<f32>, Point2D<f32>, f32),
-    DrawImage(IpcSnapshot, Rect<f64>, Rect<f64>, bool),
+    DrawImage(AnySnapshot<IpcSharedMemory>, Rect<f64>, Rect<f64>, bool),
     DrawEmptyImage(Size2D<f64>, Rect<f64>, Rect<f64>),
     DrawImageInOther(CanvasId, Size2D<f64>, Rect<f64>, Rect<f64>, bool),
     BeginPath,
@@ -102,7 +104,7 @@ pub enum Canvas2dMsg {
     FillPath(FillOrStrokeStyle, Vec<PathSegment>),
     FillText(String, f64, f64, Option<f64>, FillOrStrokeStyle, bool),
     FillRect(Rect<f32>, FillOrStrokeStyle),
-    GetImageData(Rect<u64>, Size2D<u64>, IpcSender<IpcSnapshot>),
+    GetImageData(Rect<u64>, Size2D<u64>, IpcSender<CanvasSnapshot>),
     GetTransform(IpcSender<Transform2D<f32>>),
     IsPointInCurrentPath(f64, f64, FillRule, IpcSender<bool>),
     IsPointInPath(Vec<PathSegment>, f64, f64, FillRule, IpcSender<bool>),
@@ -138,7 +140,7 @@ pub enum Canvas2dMsg {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum FromScriptMsg {
-    SendPixels(IpcSender<IpcSnapshot>),
+    SendPixels(IpcSender<CanvasSnapshot>),
 }
 
 #[derive(Clone, Debug, Deserialize, MallocSizeOf, Serialize)]

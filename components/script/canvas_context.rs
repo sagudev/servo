@@ -6,7 +6,7 @@
 
 use euclid::default::Size2D;
 use script_layout_interface::{HTMLCanvasData, HTMLCanvasDataSource};
-use snapshot::Snapshot;
+use snapshot::{AnySnapshot, Data};
 
 use crate::dom::bindings::codegen::UnionTypes::HTMLCanvasElementOrOffscreenCanvas;
 use crate::dom::bindings::inheritance::Castable;
@@ -30,7 +30,7 @@ pub(crate) trait CanvasContext {
 
     fn resize(&self);
 
-    fn get_image_data(&self) -> Option<Snapshot>;
+    fn get_image_data(&self) -> Option<AnySnapshot<Data>>;
 
     fn origin_is_clean(&self) -> bool {
         true
