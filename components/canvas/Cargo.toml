@@ -33,3 +33,4 @@ snapshot = { workspace = true }
 stylo = { workspace = true }
 unicode-script = { workspace = true }
 webrender_api = { workspace = true }
+vello = { workspace = true }

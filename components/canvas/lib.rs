@@ -5,6 +5,7 @@
 #![deny(unsafe_code)]
 
 mod raqote_backend;
+mod vello_backend;
 
 pub mod canvas_data;
 pub mod canvas_paint_thread;
