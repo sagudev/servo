@@ -413,17 +413,21 @@ impl GenericPathBuilder<VelloBackend> for kurbo::BezPath {
         radius: f32,
         start_angle: f32,
         end_angle: f32,
-        anticlockwise: bool, // TODO(vello): anticlockwise?
+        anticlockwise: bool,
     ) {
+        let mut arc = kurbo::Arc::new(
+            origin.convert(),
+            kurbo::Vec2::new(radius as f64, radius as f64),
+            start_angle as f64,
+            end_angle as f64 - start_angle as f64,
+            0.,
+        );
+        if anticlockwise {
+            arc = arc.reversed();
+        }
         self.extend(
-            kurbo::Arc::new(
-                origin.convert(),
-                kurbo::Vec2::new(radius as f64, radius as f64),
-                start_angle as f64,
-                end_angle as f64 - start_angle as f64,
-                0.,
-            )
-            .path_elements(0.1), // TODO(vello): tol?
+            arc
+            .path_elements(0.1),
         );
     }
 
@@ -471,7 +475,7 @@ impl GenericPathBuilder<VelloBackend> for kurbo::BezPath {
             sweep,
         };
         let arc = kurbo::Arc::from_svg_arc(&sarc).unwrap();
-        self.extend(arc.path_elements(0.1)); // TODO(vello): tol?
+        self.extend(arc.path_elements(0.1));
     }
 
     fn finish(&mut self) -> kurbo::BezPath {
