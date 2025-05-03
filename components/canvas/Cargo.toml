@@ -13,7 +13,6 @@ path = "lib.rs"
 
 [features]
 vello = ["dep:vello", "dep:pollster", "dep:futures-intrusive"]
-default = ["vello"]
 
 [dependencies]
 app_units = { workspace = true }
