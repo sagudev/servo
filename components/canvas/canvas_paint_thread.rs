@@ -283,6 +283,7 @@ impl<'a> CanvasPaintThread<'a> {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 enum Canvas<'a> {
     Raqote(CanvasData<'a, RaqoteBackend>),
     #[cfg(feature = "vello")]
