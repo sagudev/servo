@@ -7,11 +7,14 @@
 
 use std::borrow::Cow;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::num::NonZeroUsize;
 use std::rc::Rc;
 
 use canvas_traits::canvas::*;
 use euclid::default::{Point2D, Rect, Size2D, Transform2D, Vector2D};
+use fonts::{ByteIndex, FontIdentifier, FontTemplateRefMethods as _};
+use range::Range;
 use style::color::AbsoluteColor;
 use vello::kurbo::{self, Shape as _};
 use vello::peniko;
@@ -26,6 +29,15 @@ use crate::backend::{
     PatternHelpers, StrokeOptionsHelpers,
 };
 use crate::canvas_data::{CanvasPaintState, Filter, TextRun};
+
+thread_local! {
+    /// The shared font cache used by all canvases that render on a thread. It would be nicer
+    /// to have a global cache, but it looks like font-kit uses a per-thread FreeType, so
+    /// in order to ensure that fonts are particular to a thread we have to make our own
+    /// cache thread local as well.
+    /// TODO: this is not true for vello
+    static SHARED_FONT_CACHE: RefCell<HashMap<FontIdentifier, peniko::Font>> = RefCell::default();
+}
 
 #[derive(Clone, Default)]
 pub(crate) struct VelloBackend;
@@ -172,7 +184,10 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 alpha: 1.0,
             },
             None,
-            &kurbo::Rect::from_origin_size(destination.cast::<f64>().convert(), source.size.cast::<f64>().convert()),
+            &kurbo::Rect::from_origin_size(
+                destination.cast::<f64>().convert(),
+                source.size.cast::<f64>().convert(),
+            ),
         );
     }
 
@@ -248,9 +263,55 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         text_runs: Vec<TextRun>,
         start: Point2D<f32>,
         pattern: &peniko::Brush,
-        _draw_options: &DrawOptions,
+        draw_options: &DrawOptions,
     ) {
-        todo!();
+        let mut advance = 0.;
+        for run in text_runs.iter() {
+            let glyphs = &run.glyphs;
+
+            let template = &run.font.template;
+
+            SHARED_FONT_CACHE.with(|font_cache| {
+                let identifier = template.identifier();
+                if !font_cache.borrow().contains_key(&identifier) {
+                    font_cache.borrow_mut().insert(
+                        identifier.clone(),
+                        peniko::Font::new(
+                            peniko::Blob::from(run.font.data().as_ref().to_vec()),
+                            identifier.index(),
+                        ),
+                    );
+                }
+
+                let font_cache = font_cache.borrow();
+                let Some(font) = font_cache.get(&identifier) else {
+                    return;
+                };
+
+                self.scene
+                    .draw_glyphs(font)
+                    .transform(self.transform)
+                    .brush(pattern)
+                    .brush_alpha(draw_options.alpha)
+                    .font_size(run.font.descriptor.pt_size.to_f32_px())
+                    .draw(
+                        peniko::Fill::NonZero,
+                        glyphs
+                            .iter_glyphs_for_byte_range(&Range::new(ByteIndex(0), glyphs.len()))
+                            .map(|glyph| {
+                                let glyph_offset = glyph.offset().unwrap_or(Point2D::zero());
+                                let x = advance + start.x + glyph_offset.x.to_f32_px();
+                                let y = start.y + glyph_offset.y.to_f32_px();
+                                advance += glyph.advance().to_f32_px();
+                                vello::Glyph {
+                                    id: glyph.id(),
+                                    x,
+                                    y,
+                                }
+                            }),
+                    );
+            });
+        }
     }
 
     fn fill_rect(
@@ -411,8 +472,9 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 let start = (row * padded_byte_width).try_into().unwrap();
                 result_unpadded.extend(&data[start..start + (self.size.width * 4) as usize]);
             }
+            // TODO(perf): support both or make vello do bgra
             // swap RB
-            pixels::generic_transform_inplace::<0, true, false>(&mut result_unpadded); // TODO(perf): support both or make vello do bgra
+            pixels::generic_transform_inplace::<0, true, false>(&mut result_unpadded);
             result_unpadded
         };
         buffer.unmap();
