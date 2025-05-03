@@ -158,7 +158,22 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn copy_surface(&mut self, surface: Vec<u8>, source: Rect<i32>, destination: Point2D<i32>) {
-        todo!()
+        self.scene.fill(
+            peniko::Fill::NonZero,
+            kurbo::Affine::IDENTITY,
+            &peniko::Image {
+                data: peniko::Blob::from(surface),
+                format: peniko::ImageFormat::Rgba8,
+                width: source.size.width as u32,
+                height: source.size.height as u32,
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                quality: peniko::ImageQuality::Medium,
+                alpha: 1.0,
+            },
+            None,
+            &kurbo::Rect::from_origin_size(destination.cast::<f64>().convert(), source.size.cast::<f64>().convert()),
+        );
     }
 
     fn create_path_builder(&self) -> kurbo::BezPath {
@@ -188,7 +203,27 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         filter: Filter,
         draw_options: &DrawOptions,
     ) {
-        todo!()
+        self.scene.fill(
+            peniko::Fill::NonZero,
+            self.transform,
+            &peniko::Image {
+                data: peniko::Blob::from(surface),
+                format: peniko::ImageFormat::Rgba8,
+                width: source.size.width as u32,
+                height: source.size.height as u32,
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                quality: peniko::ImageQuality::Medium,
+                alpha: 1.0,
+            },
+            Some(
+                kurbo::Affine::translate((-dest.origin.x, -dest.origin.y)).then_scale_non_uniform(
+                    source.size.width / dest.size.width,
+                    source.size.height / dest.size.height,
+                ),
+            ),
+            &dest.convert(),
+        );
     }
 
     fn draw_surface_with_shadow(
@@ -200,7 +235,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         sigma: f32,
         operator: peniko::BlendMode,
     ) {
-        todo!()
+        log::warn!("no support for drawing shadows");
     }
 
     fn fill(&mut self, path: &kurbo::BezPath, pattern: peniko::Brush, _draw_options: &DrawOptions) {
@@ -425,10 +460,7 @@ impl GenericPathBuilder<VelloBackend> for kurbo::BezPath {
         if anticlockwise {
             arc = arc.reversed();
         }
-        self.extend(
-            arc
-            .path_elements(0.1),
-        );
+        self.extend(arc.path_elements(0.1));
     }
 
     fn bezier_curve_to(&mut self, p1: &Point2D<f32>, p2: &Point2D<f32>, p3: &Point2D<f32>) {
@@ -555,6 +587,15 @@ impl Convert<kurbo::Point> for Point2D<f32> {
         kurbo::Point {
             x: self.x as f64,
             y: self.y as f64,
+        }
+    }
+}
+
+impl Convert<kurbo::Point> for Point2D<f64> {
+    fn convert(self) -> kurbo::Point {
+        kurbo::Point {
+            x: self.x,
+            y: self.y,
         }
     }
 }
@@ -742,7 +783,19 @@ impl Convert<kurbo::Size> for Size2D<f32> {
     }
 }
 
+impl Convert<kurbo::Size> for Size2D<f64> {
+    fn convert(self) -> kurbo::Size {
+        kurbo::Size::new(self.width, self.height)
+    }
+}
+
 impl Convert<kurbo::Rect> for Rect<f32> {
+    fn convert(self) -> kurbo::Rect {
+        kurbo::Rect::from_center_size(self.center().convert(), self.size.convert())
+    }
+}
+
+impl Convert<kurbo::Rect> for Rect<f64> {
     fn convert(self) -> kurbo::Rect {
         kurbo::Rect::from_center_size(self.center().convert(), self.size.convert())
     }
