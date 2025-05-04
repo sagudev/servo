@@ -207,7 +207,10 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn create_source_surface_from_data(&self, data: &[u8]) -> Option<Vec<u8>> {
-        Some(data.to_vec())
+        // data is bgra
+        let mut data = data.to_vec();
+        pixels::generic_transform_inplace::<0, true, false>(&mut data);
+        Some(data)
     }
 
     fn draw_surface(
