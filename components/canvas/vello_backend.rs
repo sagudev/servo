@@ -180,7 +180,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 height: source.size.height as u32,
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
-                quality: peniko::ImageQuality::Medium,
+                quality: peniko::ImageQuality::Low,
                 alpha: 1.0,
             },
             None,
@@ -231,7 +231,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 height: source.size.height as u32,
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
-                quality: peniko::ImageQuality::Medium,
+                quality: peniko::ImageQuality::Low, // TODO: image smoothing
                 alpha: 1.0,
             },
             Some(
@@ -809,7 +809,7 @@ impl Convert<peniko::Brush> for FillOrStrokeStyle {
                 } else {
                     peniko::Extend::Pad
                 },
-                quality: peniko::ImageQuality::Medium, // TODO: global option
+                quality: peniko::ImageQuality::Low, // TODO: global option
                 alpha: 1.0,
             }),
         }
