@@ -84,8 +84,6 @@ jobs:
             --total-chunks ${{ inputs.number-of-wpt-chunks }} --this-chunk ${{ matrix.chunk_id }} \
             --log-raw wpt-full-logs/linux/raw/${{ matrix.chunk_id }}.log \
             --log-wptreport wpt-full-logs/linux/wptreport/${{ matrix.chunk_id }}.json \
-            --log-raw-unexpected wpt-filtered-logs/linux/${{ matrix.chunk_id }}.log \
-            --filter-intermittents wpt-filtered-logs/linux/${{ matrix.chunk_id }}.json \
             ${{ inputs.wpt-args }}
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
