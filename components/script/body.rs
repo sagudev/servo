@@ -230,6 +230,15 @@ impl TransmitBodyConnectHandler {
             return;
         }
 
+        /*|| {
+            let rooted_stream = stream.root();
+            let rejection_handler = Box::new(TransmitBodyPromiseRejectionHandler {
+                bytes_sender: bytes_sender.clone(),
+                stream: Dom::from_ref(&rooted_stream.clone()),
+                control_sender: control_sender.clone(),
+            });
+        };*/
+
         self.task_source.queue(
             task!(setup_native_body_promise_handler: move || {
                 let rooted_stream = stream.root();
