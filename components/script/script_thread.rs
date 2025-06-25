@@ -1354,6 +1354,8 @@ impl ScriptThread {
 
             #[cfg(feature = "webgpu")]
             document.update_rendering_of_webgpu_canvases();
+            document.flush_dirty_webgl_canvases();
+            document.flush_dirty_2d_canvases();
 
             // > Step 22: For each doc of docs, update the rendering or user interface of
             // > doc and its node navigable to reflect the current state.
