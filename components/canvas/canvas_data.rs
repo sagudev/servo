@@ -414,6 +414,7 @@ pub(crate) struct CanvasData<'a, B: Backend> {
 
 impl<'a, B: Backend> CanvasData<'a, B> {
     pub(crate) fn new(
+        canvas_id: CanvasId,
         size: Size2D<u64>,
         compositor_api: CrossProcessCompositorApi,
         font_context: Arc<FontContext>,
@@ -421,7 +422,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
     ) -> CanvasData<'a, B> {
         let size = size.max(MIN_WR_IMAGE_SIZE);
         let draw_target = backend.create_drawtarget(size);
-        let image_key = compositor_api.generate_image_key().unwrap();
+        let image_key = canvas_id.image_key();
         let descriptor = ImageDescriptor {
             size: size.cast().cast_unit(),
             stride: None,

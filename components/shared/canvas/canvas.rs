@@ -5,6 +5,7 @@
 use std::default::Default;
 use std::str::FromStr;
 
+use base::id::CanvasContextId;
 use euclid::default::{Point2D, Rect, Size2D, Transform2D};
 use ipc_channel::ipc::{IpcBytesReceiver, IpcSender};
 use malloc_size_of_derive::MallocSizeOf;
@@ -74,8 +75,10 @@ pub enum FillRule {
     Evenodd,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, MallocSizeOf, PartialEq, Serialize)]
-pub struct CanvasId(pub u64);
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, MallocSizeOf)]
+pub struct Canvas2D;
+
+pub type CanvasId = CanvasContextId<Canvas2D>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum CanvasMsg {

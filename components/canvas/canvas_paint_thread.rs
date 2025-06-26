@@ -20,14 +20,12 @@ use net_traits::ResourceThreads;
 use pixels::Snapshot;
 use style::color::AbsoluteColor;
 use style::properties::style_structs::Font as FontStyleStruct;
-use webrender_api::ImageKey;
 
 use crate::canvas_data::*;
 use crate::raqote_backend::RaqoteBackend;
 
 pub struct CanvasPaintThread<'a> {
     canvases: HashMap<CanvasId, Canvas<'a>>,
-    next_canvas_id: CanvasId,
     compositor_api: CrossProcessCompositorApi,
     font_context: Arc<FontContext>,
 }
@@ -40,7 +38,6 @@ impl<'a> CanvasPaintThread<'a> {
     ) -> CanvasPaintThread<'a> {
         CanvasPaintThread {
             canvases: HashMap::new(),
-            next_canvas_id: CanvasId(0),
             compositor_api: compositor_api.clone(),
             font_context: Arc::new(FontContext::new(
                 system_font_service,
@@ -94,9 +91,8 @@ impl<'a> CanvasPaintThread<'a> {
                         }
                         recv(create_receiver) -> msg => {
                             match msg {
-                                Ok(ConstellationCanvasMsg::Create { sender: creator, size }) => {
-                                    let canvas_data = canvas_paint_thread.create_canvas(size);
-                                    creator.send(canvas_data).unwrap();
+                                Ok(ConstellationCanvasMsg::Create { canvas_id, size }) => {
+                                    canvas_paint_thread.create_canvas(canvas_id, size);
                                 },
                                 Ok(ConstellationCanvasMsg::Exit(exit_sender)) => {
                                     let _ = exit_sender.send(());
@@ -116,20 +112,15 @@ impl<'a> CanvasPaintThread<'a> {
         (create_sender, ipc_sender)
     }
 
-    pub fn create_canvas(&mut self, size: Size2D<u64>) -> (CanvasId, ImageKey) {
-        let canvas_id = self.next_canvas_id;
-        self.next_canvas_id.0 += 1;
-
+    pub fn create_canvas(&mut self, canvas_id: CanvasId, size: Size2D<u64>) {
         let canvas_data = CanvasData::new(
+            canvas_id,
             size,
             self.compositor_api.clone(),
             self.font_context.clone(),
             RaqoteBackend,
         );
-        let image_key = canvas_data.image_key();
         self.canvases.insert(canvas_id, Canvas::Raqote(canvas_data));
-
-        (canvas_id, image_key)
     }
 
     fn process_canvas_2d_message(&mut self, message: Canvas2dMsg, canvas_id: CanvasId) {

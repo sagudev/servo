@@ -17,7 +17,7 @@ use malloc_size_of::MallocSizeOfOps;
 use malloc_size_of_derive::MallocSizeOf;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
-use webrender_api::{ExternalScrollId, PipelineId as WebRenderPipelineId};
+use webrender_api::{ExternalScrollId, ImageKey, PipelineId as WebRenderPipelineId};
 
 /// Asserts the size of a type at compile time.
 macro_rules! size_of_test {
@@ -399,4 +399,17 @@ pub const TEST_WEBVIEW_ID: WebViewId = WebViewId(TEST_BROWSING_CONTEXT_ID);
 pub struct ScrollTreeNodeId {
     /// The index of this scroll tree node in the tree's array of nodes.
     pub index: usize,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, MallocSizeOf)]
+pub struct CanvasContextId<T>(ImageKey, PhantomData<T>);
+
+impl<T> CanvasContextId<T> {
+    pub const fn new(key: ImageKey) -> Self {
+        CanvasContextId(key, PhantomData)
+    }
+
+    pub const fn image_key(&self) -> ImageKey {
+        self.0
+    }
 }

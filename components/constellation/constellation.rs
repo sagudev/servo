@@ -4495,7 +4495,7 @@ where
         let (canvas_data_sender, canvas_data_receiver) = unbounded();
 
         if let Err(e) = self.canvas_sender.send(ConstellationCanvasMsg::Create {
-            sender: canvas_data_sender,
+            canvas_id,
             size,
         }) {
             return warn!("Create canvas paint thread failed ({})", e);
