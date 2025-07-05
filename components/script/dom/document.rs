@@ -3577,6 +3577,8 @@ impl Document {
             receiver.recv().unwrap();
         }
 
+        dbg!("canvas flusseh");
+
         self.window().reflow(ReflowGoal::UpdateTheRendering, can_gc)
     }
 

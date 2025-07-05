@@ -1032,6 +1032,7 @@ impl LayoutThread {
         // in a previous refow, we cannot skip display list generation here the next time
         // a display list is requested.
         if !self.need_new_display_list.get() && !damage.contains(RestyleDamage::REPAINT) {
+            dbg!("RestyleDamage::REPAINT");
             return false;
         }
 
@@ -1048,6 +1049,7 @@ impl LayoutThread {
             self.device().device_pixel_ratio(),
             &self.debug,
         );
+        dbg!("send_display_list");
         self.compositor_api.send_display_list(
             self.webview_id,
             &stacking_context_tree.compositor_info,

@@ -2126,6 +2126,7 @@ impl Window {
     /// NOTE: This method should almost never be called directly! Layout and rendering updates should
     /// happen as part of the HTML event loop via *update the rendering*.
     fn force_reflow(&self, reflow_goal: ReflowGoal) -> bool {
+        dbg!("force reflow");
         let document = self.Document();
         document.ensure_safe_to_run_script_or_layout();
 
@@ -2174,6 +2175,8 @@ impl Window {
             None
         };
 
+        dbg!("ReflowRequest");
+
         let reflow = ReflowRequest {
             document: document.upcast::<Node>().to_trusted_node_address(),
             restyle,
@@ -2191,6 +2194,8 @@ impl Window {
         let Some(results) = self.layout.borrow_mut().reflow(reflow) else {
             return false;
         };
+
+        dbg!("reflow complete");
 
         debug!("script: layout complete");
         if let Some(marker) = marker {
