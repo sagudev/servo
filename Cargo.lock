@@ -1088,7 +1088,7 @@ dependencies = [
  "fonts",
  "ipc-channel",
  "log",
- "lyon_geom",
+ "lyon_geom 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "net_traits",
  "pixels",
  "range",
@@ -1108,6 +1108,7 @@ dependencies = [
  "euclid",
  "glow",
  "ipc-channel",
+ "lyon_path",
  "malloc_size_of_derive",
  "pixels",
  "serde",
@@ -5001,6 +5002,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "lyon_geom"
+version = "1.0.6"
+source = "git+https://github.com/sagudev/lyon?branch=clone#9a6938a3459826ae0f260825f5c8db3587434a9e"
+dependencies = [
+ "arrayvec",
+ "euclid",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
+name = "lyon_path"
+version = "1.0.7"
+source = "git+https://github.com/sagudev/lyon?branch=clone#9a6938a3459826ae0f260825f5c8db3587434a9e"
+dependencies = [
+ "lyon_geom 1.0.6 (git+https://github.com/sagudev/lyon?branch=clone)",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
 name = "mac"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6700,7 +6722,7 @@ checksum = "324990858d2a5df9ccd30b2e8b474030bd503297378a3fc0944c37af00eb8903"
 dependencies = [
  "euclid",
  "font-kit",
- "lyon_geom",
+ "lyon_geom 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "pathfinder_geometry",
  "png",
  "sw-composite",

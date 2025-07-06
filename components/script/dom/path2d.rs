@@ -4,8 +4,10 @@
 
 use std::cell::RefCell;
 
-use canvas_traits::canvas::PathSegment;
+use canvas_traits::canvas::{extend_path_builder_with_path, ArcFlags, Path, PathBuilder, SvgPathBuilder as _};
 use dom_struct::dom_struct;
+use euclid::default::Point2D;
+use euclid::{Vector2D, Angle};
 use js::rust::HandleObject;
 use script_bindings::str::DOMString;
 
@@ -21,14 +23,15 @@ use crate::svgpath::PathParser;
 pub(crate) struct Path2D {
     reflector_: Reflector,
     #[no_trace]
-    path: RefCell<Vec<PathSegment>>,
+    #[ignore_malloc_size_of = "lyon"]
+    path: RefCell<PathBuilder>,
 }
 
 impl Path2D {
     pub(crate) fn new() -> Path2D {
         Self {
             reflector_: Reflector::new(),
-            path: RefCell::new(vec![]),
+            path: RefCell::new(Path::svg_builder()),
         }
     }
     pub(crate) fn new_with_path(other: &Path2D) -> Path2D {
@@ -38,7 +41,7 @@ impl Path2D {
         }
     }
     pub(crate) fn new_with_str(path: &str) -> Path2D {
-        let mut path_segments = Vec::new();
+        let mut path_segments = Path::svg_builder();
 
         for segment in PathParser::new(path) {
             if let Ok(segment) = segment {
@@ -53,11 +56,8 @@ impl Path2D {
             path: RefCell::new(path_segments),
         }
     }
-    pub(crate) fn push(&self, seg: PathSegment) {
-        self.path.borrow_mut().push(seg);
-    }
-    pub(crate) fn segments(&self) -> Vec<PathSegment> {
-        self.path.borrow().clone()
+    pub(crate) fn segments(&self) -> Path {
+        self.path.borrow().clone().build()
     }
 }
 
@@ -65,19 +65,14 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
     /// <https://html.spec.whatwg.org/multipage/#dom-path2d-addpath>
     fn AddPath(&self, other: &Path2D) {
         // Step 7. Add all the subpaths in c to a.
-        if std::ptr::eq(&self.path, &other.path) {
-            // Note: this is not part of the spec, but it is a workaround to
-            // avoids borrow conflict when path is same as other.path
-            self.path.borrow_mut().extend_from_within(..);
-        } else {
-            let mut dest = self.path.borrow_mut();
-            dest.extend(other.path.borrow().iter().copied());
-        }
+        let other = other.path.borrow_mut().clone().build();
+        let mut path_builder = self.path.borrow_mut();
+        extend_path_builder_with_path(&mut path_builder, &other);
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-closepath>
     fn ClosePath(&self) {
-        self.push(PathSegment::ClosePath);
+        self.path.borrow_mut().close();
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-moveto>
@@ -88,10 +83,7 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
         }
 
         // Step 2. Create a new subpath with the specified point as its first (and only) point.
-        self.push(PathSegment::MoveTo {
-            x: x as f32,
-            y: y as f32,
-        });
+        self.path.borrow_mut().move_to(Point2D::new(x, y).cast());
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-lineto>
@@ -101,10 +93,7 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return;
         }
 
-        self.push(PathSegment::LineTo {
-            x: x as f32,
-            y: y as f32,
-        });
+        self.path.borrow_mut().line_to(Point2D::new(x, y).cast());
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-quadraticcurveto>
@@ -114,12 +103,7 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return;
         }
 
-        self.push(PathSegment::Quadratic {
-            cpx: cpx as f32,
-            cpy: cpy as f32,
-            x: x as f32,
-            y: y as f32,
-        });
+        self.path.borrow_mut().quadratic_bezier_to(Point2D::new(cpx, cpy).cast(), Point2D::new(x, y).cast());
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-beziercurveto>
@@ -135,14 +119,7 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return;
         }
 
-        self.push(PathSegment::Bezier {
-            cp1x: cp1x as f32,
-            cp1y: cp1y as f32,
-            cp2x: cp2x as f32,
-            cp2y: cp2y as f32,
-            x: x as f32,
-            y: y as f32,
-        });
+        self.path.borrow_mut().cubic_bezier_to(Point2D::new(cp1x, cp1y).cast(), Point2D::new(cp2x, cp2y).cast(), Point2D::new(x, y).cast());
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-context-2d-arcto>
@@ -158,13 +135,10 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return Err(Error::IndexSize);
         }
 
-        self.push(PathSegment::ArcTo {
-            cp1x: x1 as f32,
-            cp1y: y1 as f32,
-            cp2x: x2 as f32,
-            cp2y: y2 as f32,
-            radius: r as f32,
-        });
+        self.path.borrow_mut().arc_to(Vector2D::splat(r).cast(), Angle::new(), ArcFlags {
+            large_arc: false,
+            sweep: false,
+        }, Point2D::new(x2, y2));
         Ok(())
     }
 
@@ -177,6 +151,7 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
         // Step 2. Create a new subpath containing just the four points
         // (x, y), (x+w, y), (x+w, y+h), (x, y+h), in that order,
         // with those four points connected by straight lines.
+        self.path.borrow_mut().move_to(Point2D::new(x,y).cast());
         self.push(PathSegment::MoveTo {
             x: x as f32,
             y: y as f32,
@@ -228,16 +203,13 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return Err(Error::IndexSize);
         }
 
-        self.push(PathSegment::Ellipse {
-            x: x as f32,
-            y: y as f32,
-            radius_x: r as f32,
-            radius_y: r as f32,
-            rotation: 0.,
-            start_angle: start as f32,
-            end_angle: end as f32,
-            anticlockwise,
-        });
+        let sweep = if anticlockwise {
+            Angle::radians(start-end)
+        } else {
+            Angle::radians(end-start)
+        };
+
+        self.path.borrow_mut().arc(Point2D::new(x, y).cast(), Vector2D::splat(r).cast(), sweep.cast(), Angle::radians(start).cast());
         Ok(())
     }
 
@@ -270,16 +242,13 @@ impl Path2DMethods<crate::DomTypeHolder> for Path2D {
             return Err(Error::IndexSize);
         }
 
-        self.push(PathSegment::Ellipse {
-            x: x as f32,
-            y: y as f32,
-            radius_x: rx as f32,
-            radius_y: ry as f32,
-            rotation: rotation as f32,
-            start_angle: start as f32,
-            end_angle: end as f32,
-            anticlockwise,
-        });
+        let sweep = if anticlockwise {
+            Angle::radians(start-end)
+        } else {
+            Angle::radians(end-start)
+        };
+
+        self.path.borrow_mut().arc(Point2D::new(x, y).cast(), Vector2D::new(rx, ry).cast(), sweep.cast(), Angle::radians(start + rotation).cast());
         Ok(())
     }
 

@@ -4,6 +4,8 @@
 
 use std::str::FromStr;
 
+use euclid::default::Point2D;
+
 use crate::svgpath::{Error, Stream};
 
 /// An [SVG number](https://www.w3.org/TR/SVG2/types.html#InterfaceSVGNumber).
@@ -111,6 +113,11 @@ impl Stream<'_> {
         self.skip_spaces();
         self.parse_list_separator();
         Ok(n)
+    }
+
+    /// Parses point from a list of numbers
+    pub fn parse_point(&mut self) -> Result<Point2D<f32>, Error> {
+        Ok(Point2D::new(self.parse_list_number()?, self.parse_list_number()?))
     }
 }
 

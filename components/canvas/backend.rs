@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use canvas_traits::canvas::{
-    CompositionOrBlending, FillOrStrokeStyle, LineCapStyle, LineJoinStyle, PathSegment,
+    CompositionOrBlending, Event, FillOrStrokeStyle, LineCapStyle, LineJoinStyle, Path
 };
 use compositing_traits::SerializableImageData;
 use euclid::Angle;
@@ -240,72 +240,31 @@ pub(crate) trait GenericPath<B: Backend<Path = Self>> {
         });
     }
     fn contains_point(&self, x: f64, y: f64, path_transform: &Transform2D<f32>) -> bool;
-    fn add_segments(&mut self, path: &[PathSegment]) {
+    fn add_segments(&mut self, path: &Path) {
         let mut build_ref = PathBuilderRef::<B> {
             builder: self,
             transform: Transform2D::identity(),
         };
-        for &seg in path {
-            match seg {
-                PathSegment::ClosePath => build_ref.close(),
-                PathSegment::MoveTo { x, y } => build_ref.move_to(&Point2D::new(x, y)),
-                PathSegment::LineTo { x, y } => build_ref.line_to(&Point2D::new(x, y)),
-                PathSegment::Quadratic { cpx, cpy, x, y } => {
-                    build_ref.quadratic_curve_to(&Point2D::new(cpx, cpy), &Point2D::new(x, y))
+        for event in path {
+            match &event {
+                Event::Begin { at } => build_ref.move_to(at),
+                Event::Line { from, to } => {
+                    build_ref.move_to(from);
+                    build_ref.line_to(to);
                 },
-                PathSegment::Bezier {
-                    cp1x,
-                    cp1y,
-                    cp2x,
-                    cp2y,
-                    x,
-                    y,
-                } => build_ref.bezier_curve_to(
-                    &Point2D::new(cp1x, cp1y),
-                    &Point2D::new(cp2x, cp2y),
-                    &Point2D::new(x, y),
-                ),
-                PathSegment::ArcTo {
-                    cp1x,
-                    cp1y,
-                    cp2x,
-                    cp2y,
-                    radius,
-                } => build_ref.arc_to(&Point2D::new(cp1x, cp1y), &Point2D::new(cp2x, cp2y), radius),
-                PathSegment::Ellipse {
-                    x,
-                    y,
-                    radius_x,
-                    radius_y,
-                    rotation,
-                    start_angle,
-                    end_angle,
-                    anticlockwise,
-                } => build_ref.ellipse(
-                    &Point2D::new(x, y),
-                    radius_x,
-                    radius_y,
-                    rotation,
-                    start_angle,
-                    end_angle,
-                    anticlockwise,
-                ),
-                PathSegment::SvgArc {
-                    radius_x,
-                    radius_y,
-                    rotation,
-                    large_arc,
-                    sweep,
-                    x,
-                    y,
-                } => build_ref.svg_arc(
-                    radius_x,
-                    radius_y,
-                    rotation,
-                    large_arc,
-                    sweep,
-                    &Point2D::new(x, y),
-                ),
+                Event::Quadratic { from, ctrl, to } => {
+                    build_ref.move_to(from);
+                    build_ref.quadratic_curve_to(ctrl, to);
+                },
+                Event::Cubic { from, ctrl1, ctrl2, to } => {
+                    build_ref.move_to(from);
+                    build_ref.bezier_curve_to(&ctrl1, &ctrl2, to);
+                },
+                Event::End { close, .. } => {
+                    if *close {
+                        build_ref.close();
+                    }
+                },
             }
         }
     }

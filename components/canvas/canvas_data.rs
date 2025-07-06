@@ -788,7 +788,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
         );
     }
 
-    pub(crate) fn fill_path(&mut self, path_segments: &[PathSegment]) {
+    pub(crate) fn fill_path(&mut self, path_segments: &Path) {
         if self.state.fill_style.is_zero_size_gradient() {
             return; // Paint nothing if gradient size is zero.
         }
@@ -817,7 +817,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
         );
     }
 
-    pub(crate) fn stroke_path(&mut self, path_segments: &[PathSegment]) {
+    pub(crate) fn stroke_path(&mut self, path_segments: &Path) {
         if self.state.stroke_style.is_zero_size_gradient() {
             return; // Paint nothing if gradient size is zero.
         }
@@ -841,7 +841,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
         self.drawtarget.push_clip(&path);
     }
 
-    pub(crate) fn clip_path(&mut self, path_segments: &[PathSegment]) {
+    pub(crate) fn clip_path(&mut self, path_segments: &Path) {
         let mut path = B::Path::new();
         path.add_segments(path_segments);
         self.drawtarget.push_clip(&path);
@@ -868,7 +868,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
 
     pub(crate) fn is_point_in_path_(
         &mut self,
-        path_segments: &[PathSegment],
+        path_segments: &Path,
         x: f64,
         y: f64,
         _fill_rule: FillRule,

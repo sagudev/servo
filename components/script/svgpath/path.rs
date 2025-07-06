@@ -2,9 +2,46 @@
 // Copyright 2025 the Servo Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use canvas_traits::canvas::PathSegment;
+use canvas_traits::canvas::{Path, PathBuilder, SvgPathBuilder};
 
 use crate::svgpath::{Error, Stream};
+
+pub fn path_parser(string: &'a str) -> Result<PathBuilder, Error> {
+    let mut path = Path::svg_builder();
+
+    let mut stream = Stream::from(string);
+    let cmd = b' ';
+    loop {
+        stream.skip_spaces();
+
+        let Ok(curr_byte) = stream.curr_byte() else {
+            break;
+        };
+
+        cmd = if cmd == b' ' {
+            if let move_to @ (b'm' | b'M') = curr_byte {
+                stream.advance(1);
+                move_to
+            } else {
+                return Err(Error);
+            }
+        } else if curr_byte.is_ascii_alphabetic() {
+            stream.advance(1);
+            curr_byte
+        } else {
+            match cmd {
+                b'm' => b'l',
+                b'M' => b'L',
+                b'z' | b'Z' => return Err(Error),
+                cmd => cmd,
+            }
+        };
+
+        5
+    }
+
+    Ok(path)
+}
 
 pub struct PathParser<'a> {
     stream: Stream<'a>,
@@ -15,7 +52,7 @@ pub struct PathParser<'a> {
 impl<'a> PathParser<'a> {
     pub fn new(string: &'a str) -> Self {
         Self {
-            stream: Stream::from(string),
+            ,
             state: State::default(),
             last_cmd: b' ',
         }
@@ -64,35 +101,19 @@ pub struct State {
     cubic: (f32, f32),
 }
 
-pub fn to_point(s: &mut Stream<'_>, cmd: u8, state: &mut State) -> Result<PathSegment, Error> {
-    let abs = cmd.is_ascii_uppercase();
-    let cmd = cmd.to_ascii_lowercase();
-    let (dx, dy) = if abs { (0., 0.) } else { state.pos };
-    let seg = match cmd {
-        b'm' => PathSegment::MoveTo {
-            x: s.parse_list_number()? + dx,
-            y: s.parse_list_number()? + dy,
-        },
-        b'l' => PathSegment::LineTo {
-            x: s.parse_list_number()? + dx,
-            y: s.parse_list_number()? + dy,
-        },
-        b'h' => PathSegment::LineTo {
-            x: s.parse_list_number()? + dx,
-            y: state.pos.1,
-        },
-        b'v' => PathSegment::LineTo {
-            x: state.pos.0,
-            y: s.parse_list_number()? + dy,
-        },
-        b'c' => PathSegment::Bezier {
-            cp1x: s.parse_list_number()? + dx,
-            cp1y: s.parse_list_number()? + dy,
-            cp2x: s.parse_list_number()? + dx,
-            cp2y: s.parse_list_number()? + dy,
-            x: s.parse_list_number()? + dx,
-            y: s.parse_list_number()? + dy,
-        },
+pub fn to_point(s: &mut Stream<'_>, cmd: u8, path: &mut PathBuilder) -> Result<(), Error> {
+
+    match cmd {
+        b'm' => path.relative_move_to(s.parse_point()?.to_vector()),
+        b'M' => path.move_to(s.parse_point()?),
+        b'l' => path.relative_line_to(s.parse_point()?.to_vector()),
+        b'L' => path.line_to(s.parse_point()?),
+        b'h' => path.relative_horizontal_line_to(s.parse_list_number()?),
+        b'H' => path.horizontal_line_to(s.parse_list_number()?),
+        b'v' => path.relative_vertical_line_to(s.parse_list_number()?),
+        b'V' => path.vertical_line_to(s.parse_list_number()?),
+        b'c' => path.relative_cubic_bezier_to(s.parse_point()?.to_vector(),s.parse_point()?.to_vector(),s.parse_point()?.to_vector()),
+        b'C' => path.cubic_bezier_to(s.parse_point()?,s.parse_point()?,s.parse_point()?),
         b's' => PathSegment::Bezier {
             cp1x: state.cubic.0,
             cp1y: state.cubic.1,
@@ -122,7 +143,7 @@ pub fn to_point(s: &mut Stream<'_>, cmd: u8, state: &mut State) -> Result<PathSe
             x: s.parse_list_number()? + dx,
             y: s.parse_list_number()? + dy,
         },
-        b'z' => PathSegment::ClosePath,
+        b'z' |  b'Z' => path.close(),
         _ => return Err(crate::svgpath::Error),
     };
 

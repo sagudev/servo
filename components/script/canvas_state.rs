@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use canvas_traits::canvas::{
     Canvas2dMsg, CanvasId, CanvasMsg, CompositionOrBlending, Direction, FillOrStrokeStyle,
-    FillRule, LineCapStyle, LineJoinStyle, LinearGradientStyle, PathSegment, RadialGradientStyle,
+    FillRule, LineCapStyle, LineJoinStyle, LinearGradientStyle, Path, RadialGradientStyle,
     RepetitionStyle, TextAlign, TextBaseline, TextMetrics as CanvasTextMetrics,
 };
 use constellation_traits::ScriptToConstellationMessage;
@@ -1797,7 +1797,7 @@ impl CanvasState {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-fill
-    pub(crate) fn fill_(&self, path: Vec<PathSegment>, _fill_rule: CanvasFillRule) {
+    pub(crate) fn fill_(&self, path: Path, _fill_rule: CanvasFillRule) {
         // TODO: Process fill rule
         let style = self.state.borrow().fill_style.to_fill_or_stroke_style();
         self.send_canvas_2d_msg(Canvas2dMsg::FillPath(style, path));
@@ -1809,7 +1809,7 @@ impl CanvasState {
         self.send_canvas_2d_msg(Canvas2dMsg::Stroke(style));
     }
 
-    pub(crate) fn stroke_(&self, path: Vec<PathSegment>) {
+    pub(crate) fn stroke_(&self, path: Path) {
         let style = self.state.borrow().stroke_style.to_fill_or_stroke_style();
         self.send_canvas_2d_msg(Canvas2dMsg::StrokePath(style, path));
     }
@@ -1821,7 +1821,7 @@ impl CanvasState {
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-clip
-    pub(crate) fn clip_(&self, path: Vec<PathSegment>, _fill_rule: CanvasFillRule) {
+    pub(crate) fn clip_(&self, path: Path, _fill_rule: CanvasFillRule) {
         // TODO: Process fill rule
         self.send_canvas_2d_msg(Canvas2dMsg::ClipPath(path));
     }
@@ -1852,7 +1852,7 @@ impl CanvasState {
     pub(crate) fn is_point_in_path_(
         &self,
         global: &GlobalScope,
-        path: Vec<PathSegment>,
+        path: Path,
         x: f64,
         y: f64,
         fill_rule: CanvasFillRule,

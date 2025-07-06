@@ -7,6 +7,8 @@ use std::str::FromStr;
 
 use euclid::default::{Point2D, Rect, Size2D, Transform2D};
 use ipc_channel::ipc::IpcSender;
+use lyon_path::builder::WithSvg;
+use lyon_path::BuilderImpl;
 use malloc_size_of_derive::MallocSizeOf;
 use pixels::IpcSnapshot;
 use serde::{Deserialize, Serialize};
@@ -14,57 +16,35 @@ use strum::{Display, EnumString};
 use style::color::AbsoluteColor;
 use style::properties::style_structs::Font as FontStyleStruct;
 
-#[derive(Clone, Copy, Debug, Deserialize, MallocSizeOf, PartialEq, Serialize)]
-pub enum PathSegment {
-    ClosePath,
-    MoveTo {
-        x: f32,
-        y: f32,
-    },
-    LineTo {
-        x: f32,
-        y: f32,
-    },
-    Quadratic {
-        cpx: f32,
-        cpy: f32,
-        x: f32,
-        y: f32,
-    },
-    Bezier {
-        cp1x: f32,
-        cp1y: f32,
-        cp2x: f32,
-        cp2y: f32,
-        x: f32,
-        y: f32,
-    },
-    ArcTo {
-        cp1x: f32,
-        cp1y: f32,
-        cp2x: f32,
-        cp2y: f32,
-        radius: f32,
-    },
-    Ellipse {
-        x: f32,
-        y: f32,
-        radius_x: f32,
-        radius_y: f32,
-        rotation: f32,
-        start_angle: f32,
-        end_angle: f32,
-        anticlockwise: bool,
-    },
-    SvgArc {
-        radius_x: f32,
-        radius_y: f32,
-        rotation: f32,
-        large_arc: bool,
-        sweep: bool,
-        x: f32,
-        y: f32,
-    },
+pub type PathBuilder = WithSvg<BuilderImpl>;
+pub use lyon_path::Path;
+pub use lyon_path::Event;
+pub use lyon_path::builder::SvgPathBuilder;
+pub use lyon_path::ArcFlags;
+
+pub fn extend_path_builder_with_path(path_builder: &mut PathBuilder, path: &Path) {
+    for event in path {
+        match event {
+                Event::Begin { at } => {path_builder.move_to(at);},
+                Event::Line { from, to } => {
+                    path_builder.move_to(from);
+                    path_builder.line_to(to);
+                },
+                Event::Quadratic { from, ctrl, to } => {
+                    path_builder.move_to(from);
+                    path_builder.quadratic_bezier_to(ctrl, to);
+                },
+                Event::Cubic { from, ctrl1, ctrl2, to } => {
+                    path_builder.move_to(from);
+                    path_builder.cubic_bezier_to(ctrl1, ctrl2, to);
+                },
+                Event::End { close, .. } => {
+                    if close {
+                        path_builder.close();
+                    }
+                },
+            }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -95,17 +75,17 @@ pub enum Canvas2dMsg {
     BezierCurveTo(Point2D<f32>, Point2D<f32>, Point2D<f32>),
     ClearRect(Rect<f32>),
     Clip,
-    ClipPath(Vec<PathSegment>),
+    ClipPath(Path),
     ClosePath,
     Ellipse(Point2D<f32>, f32, f32, f32, f32, f32, bool),
     Fill(FillOrStrokeStyle),
-    FillPath(FillOrStrokeStyle, Vec<PathSegment>),
+    FillPath(FillOrStrokeStyle, Path),
     FillText(String, f64, f64, Option<f64>, FillOrStrokeStyle, bool),
     FillRect(Rect<f32>, FillOrStrokeStyle),
     GetImageData(Rect<u32>, Size2D<u32>, IpcSender<IpcSnapshot>),
     GetTransform(IpcSender<Transform2D<f32>>),
     IsPointInCurrentPath(f64, f64, FillRule, IpcSender<bool>),
-    IsPointInPath(Vec<PathSegment>, f64, f64, FillRule, IpcSender<bool>),
+    IsPointInPath(Path, f64, f64, FillRule, IpcSender<bool>),
     LineTo(Point2D<f32>),
     MoveTo(Point2D<f32>),
     MeasureText(String, IpcSender<TextMetrics>),
@@ -116,7 +96,7 @@ pub enum Canvas2dMsg {
     SaveContext,
     StrokeRect(Rect<f32>, FillOrStrokeStyle),
     Stroke(FillOrStrokeStyle),
-    StrokePath(FillOrStrokeStyle, Vec<PathSegment>),
+    StrokePath(FillOrStrokeStyle, Path),
     SetLineWidth(f32),
     SetLineCap(LineCapStyle),
     SetLineJoin(LineJoinStyle),
