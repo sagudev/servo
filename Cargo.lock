@@ -1086,7 +1086,7 @@ dependencies = [
  "servo_config",
  "stylo",
  "unicode-script",
- "vello",
+ "vello_cpu",
  "webrender_api",
 ]
 
@@ -1336,6 +1336,9 @@ name = "color"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ae467d04a8a8aea5d9a49018a6ade2e4221d92968e8ce55a48c0b1164e5f698"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "color_quant"
@@ -1356,7 +1359,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2470,6 +2473,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fearless_simd"
+version = "0.2.0"
+source = "git+https://github.com/linebender/fearless_simd?rev=3d1a77c#3d1a77cfb4515c0da307d50dc782c08840b90c70"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
 name = "filetime"
 version = "0.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3506,16 +3517,6 @@ dependencies = [
  "gstreamer-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "guillotiere"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62d5865c036cb1393e23c50693df631d3f5d7bcca4c04fe4cc0fd592e74a782"
-dependencies = [
- "euclid",
- "svg_fmt",
 ]
 
 [[package]]
@@ -4838,7 +4839,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.6",
 ]
 
 [[package]]
@@ -6225,6 +6226,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f9529efd019889b2a205193c14ffb6e2839b54ed9d2720674f10f4b04d87ac9"
 dependencies = [
+ "bytemuck",
  "color",
  "kurbo",
  "smallvec",
@@ -6875,12 +6877,6 @@ name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
-
-[[package]]
-name = "renderdoc-sys"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
 name = "resvg"
@@ -9142,45 +9138,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 
 [[package]]
-name = "vello"
-version = "0.5.0"
-source = "git+https://github.com/linebender/vello?rev=ecf6b282dba01e5dc50e9463b87b6baeccdb3094#ecf6b282dba01e5dc50e9463b87b6baeccdb3094"
+name = "vello_common"
+version = "0.0.1"
+source = "git+https://github.com/linebender/vello?rev=ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a#ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a"
 dependencies = [
  "bytemuck",
- "futures-intrusive",
+ "fearless_simd",
  "log",
  "peniko",
  "png",
- "skrifa",
- "static_assertions",
- "thiserror 2.0.12",
- "vello_encoding",
- "vello_shaders",
- "wgpu",
-]
-
-[[package]]
-name = "vello_encoding"
-version = "0.5.0"
-source = "git+https://github.com/linebender/vello?rev=ecf6b282dba01e5dc50e9463b87b6baeccdb3094#ecf6b282dba01e5dc50e9463b87b6baeccdb3094"
-dependencies = [
- "bytemuck",
- "guillotiere",
- "peniko",
  "skrifa",
  "smallvec",
 ]
 
 [[package]]
-name = "vello_shaders"
-version = "0.5.0"
-source = "git+https://github.com/linebender/vello?rev=ecf6b282dba01e5dc50e9463b87b6baeccdb3094#ecf6b282dba01e5dc50e9463b87b6baeccdb3094"
+name = "vello_cpu"
+version = "0.0.1"
+source = "git+https://github.com/linebender/vello?rev=ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a#ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a"
 dependencies = [
  "bytemuck",
- "log",
- "naga",
- "thiserror 2.0.12",
- "vello_encoding",
+ "vello_common",
 ]
 
 [[package]]
@@ -9712,34 +9689,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a751b3277700db47d3e574514de2eced5e54dc8a5436a3bf7a0b248b2cee16f3"
 
 [[package]]
-name = "wgpu"
-version = "25.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec8fb398f119472be4d80bc3647339f56eb63b2a331f6a3d16e25d8144197dd9"
-dependencies = [
- "arrayvec",
- "bitflags 2.9.1",
- "cfg_aliases",
- "document-features",
- "hashbrown",
- "js-sys",
- "log",
- "naga",
- "parking_lot",
- "portable-atomic",
- "profiling",
- "raw-window-handle",
- "smallvec",
- "static_assertions",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "wgpu-core",
- "wgpu-hal",
- "wgpu-types",
-]
-
-[[package]]
 name = "wgpu-core"
 version = "25.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9757,9 +9706,7 @@ dependencies = [
  "naga",
  "once_cell",
  "parking_lot",
- "portable-atomic",
  "profiling",
- "raw-window-handle",
  "rustc-hash 1.1.0",
  "serde",
  "smallvec",
@@ -9831,11 +9778,9 @@ dependencies = [
  "objc",
  "ordered-float",
  "parking_lot",
- "portable-atomic",
  "profiling",
  "range-alloc",
  "raw-window-handle",
- "renderdoc-sys",
  "smallvec",
  "thiserror 2.0.12",
  "wasm-bindgen",
@@ -9894,7 +9839,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

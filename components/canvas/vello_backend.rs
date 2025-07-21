@@ -13,8 +13,6 @@
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::num::NonZeroUsize;
-use std::rc::Rc;
 
 use canvas_traits::canvas::{
     BlendingStyle, CanvasGradientStop, CompositionOrBlending, CompositionStyle, FillOrStrokeStyle,
@@ -27,13 +25,7 @@ use ipc_channel::ipc::IpcSharedMemory;
 use pixels::{Snapshot, SnapshotAlphaMode, SnapshotPixelFormat};
 use range::Range;
 use style::color::AbsoluteColor;
-use vello::wgpu::{
-    BackendOptions, Backends, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Device,
-    Extent3d, Instance, InstanceDescriptor, InstanceFlags, MapMode, Queue, TexelCopyBufferInfo,
-    TexelCopyBufferLayout, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-    TextureViewDescriptor,
-};
-use vello::{kurbo, peniko};
+use vello_cpu::{kurbo, peniko};
 use webrender_api::{ImageDescriptor, ImageDescriptorFlags};
 
 use crate::backend::{
@@ -106,7 +98,7 @@ impl Backend for VelloBackend {
     }
 
     fn new_paint_state<'a>(&self) -> CanvasPaintState<'a, Self> {
-        let pattern = Pattern::new(peniko::Brush::Solid(peniko::color::AlphaColor::BLACK));
+        let pattern = Pattern::new(peniko::color::AlphaColor::BLACK.into());
         CanvasPaintState {
             draw_options: DrawOptions::default(),
             fill_style: pattern.clone(),
@@ -132,162 +124,46 @@ impl Backend for VelloBackend {
     }
 }
 
-pub(crate) struct DrawTarget {
-    device: Device,
-    queue: Queue,
-    renderer: Rc<RefCell<vello::Renderer>>,
-    scene: vello::Scene,
-    transform: kurbo::Affine,
-    size: Size2D<u32>,
-}
-
-fn options() -> vello::RendererOptions {
-    vello::RendererOptions {
-        use_cpu: false,
-        num_init_threads: NonZeroUsize::new(1),
-        antialiasing_support: vello::AaSupport::area_only(),
-        pipeline_cache: None,
-    }
+pub struct DrawTarget {
+    scene: vello_cpu::RenderContext,
+    size: Size2D<u16>,
+    pixmap: RefCell<vello_cpu::Pixmap>,
 }
 
 impl DrawTarget {
-    fn new(size: Size2D<u32>) -> Self {
-        // TODO: we should read prefs instead of env
-
-        // we forbid GL because it clashes with servo's GL usage
-        let backends = Backends::from_env().unwrap_or_default() - Backends::GL;
-        let flags = InstanceFlags::from_build_config().with_env();
-        let backend_options = BackendOptions::from_env_or_default();
-        let instance = Instance::new(&InstanceDescriptor {
-            backends,
-            flags,
-            backend_options,
-        });
-        let mut context = vello::util::RenderContext {
-            instance,
-            devices: Vec::new(),
-        };
-        let device_id = pollster::block_on(context.device(None)).unwrap();
-        let device_handle = &mut context.devices[device_id];
-        let device = device_handle.device.clone();
-        let queue = device_handle.queue.clone();
-        let renderer = vello::Renderer::new(&device, options()).unwrap();
-        let scene = vello::Scene::new();
-        device.on_uncaptured_error(Box::new(|error| {
-            log::error!("VELLO WGPU ERROR: {error}");
-        }));
+    fn new(size: Size2D<u16>) -> Self {
         Self {
-            device,
-            queue,
-            renderer: Rc::new(RefCell::new(renderer)),
-            scene,
-            transform: kurbo::Affine::IDENTITY,
+            scene: vello_cpu::RenderContext::new(size.width, size.height),
+            pixmap: RefCell::new(vello_cpu::Pixmap::new(size.width, size.height)),
             size,
         }
     }
 
-    fn with_draw_options<F: FnOnce(&mut Self)>(&mut self, draw_options: &DrawOptions, f: F) {
-        self.scene.push_layer(
-            draw_options.blend_mode,
-            1.0,
-            kurbo::Affine::IDENTITY,
-            &kurbo::Rect::ZERO.with_size(self.size.convert()),
-        );
-        f(self);
-        self.scene.pop_layer();
+    fn update_pixmap(&self) {
+        let mut pixmap = self.pixmap.borrow_mut();
+        //self.scene.flush();
+        self.scene
+            .render_to_pixmap(&mut pixmap, vello_cpu::RenderMode::OptimizeQuality);
     }
 
-    fn render_and_download<F, R>(&self, f: F) -> R
-    where
-        F: FnOnce(u32, Option<&[u8]>) -> R,
-    {
-        let size = Extent3d {
-            width: self.size.width,
-            height: self.size.height,
-            depth_or_array_layers: 1,
-        };
-        let target = self.device.create_texture(&TextureDescriptor {
-            label: Some("Target texture"),
-            size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: TextureDimension::D2,
-            format: TextureFormat::Rgba8Unorm,
-            usage: TextureUsages::STORAGE_BINDING | TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
-        let view = target.create_view(&TextureViewDescriptor::default());
-        self.renderer
-            .borrow_mut()
-            .render_to_texture(
-                &self.device,
-                &self.queue,
-                &self.scene,
-                &view,
-                &vello::RenderParams {
-                    base_color: peniko::color::AlphaColor::TRANSPARENT,
-                    width: self.size.width,
-                    height: self.size.height,
-                    antialiasing_method: vello::AaConfig::Area,
-                },
-            )
-            .unwrap();
-        // TODO(perf): do a render pass that will multiply with alpha on GPU
-        let padded_byte_width = (self.size.width * 4).next_multiple_of(256);
-        let buffer_size = padded_byte_width as u64 * self.size.height as u64;
-        let buffer = self.device.create_buffer(&BufferDescriptor {
-            label: Some("val"),
-            size: buffer_size,
-            usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        let mut encoder = self
-            .device
-            .create_command_encoder(&CommandEncoderDescriptor {
-                label: Some("Copy out buffer"),
-            });
-        encoder.copy_texture_to_buffer(
-            target.as_image_copy(),
-            TexelCopyBufferInfo {
-                buffer: &buffer,
-                layout: TexelCopyBufferLayout {
-                    offset: 0,
-                    bytes_per_row: Some(padded_byte_width),
-                    rows_per_image: None,
-                },
-            },
-            size,
+    fn push_draw_options(&mut self, draw_options: &DrawOptions) {
+        self.scene.push_layer(
+            None,
+            Some(draw_options.blend_mode),
+            Some(draw_options.alpha),
+            None,
         );
-        self.queue.submit([encoder.finish()]);
-        let result = {
-            let buf_slice = buffer.slice(..);
-            let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
-            buf_slice.map_async(MapMode::Read, move |v| sender.send(v).unwrap());
-            if let Err(error) =
-                vello::util::block_on_wgpu(&self.device, receiver.receive()).unwrap()
-            {
-                log::warn!("VELLO WGPU MAP ASYNC ERROR {error}");
-                return f(padded_byte_width, None);
-            }
-            let data = buf_slice.get_mapped_range();
-            f(padded_byte_width, Some(&data))
-        };
-        buffer.unmap();
-        result
+    }
+
+    fn pop_draw_options(&mut self) {
+        self.scene.pop_layer();
     }
 }
 
 impl GenericDrawTarget<VelloBackend> for DrawTarget {
     fn clear_rect(&mut self, rect: &Rect<f32>) {
-        self.scene
-            .push_layer(peniko::Compose::Clear, 0.0, self.transform, &rect.convert());
-        self.scene.fill(
-            peniko::Fill::NonZero,
-            self.transform,
-            peniko::BrushRef::Solid(peniko::color::AlphaColor::TRANSPARENT),
-            None,
-            &rect.convert(),
-        );
+        self.scene.push_blend_layer(peniko::Compose::Clear.into());
+        self.scene.fill_rect(&rect.convert());
         self.scene.pop_layer();
     }
 
@@ -303,13 +179,10 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         // then there is also this nasty vello bug where clipping does not work correctly:
         // https://xi.zulipchat.com/#narrow/channel/197075-vello/topic/Servo.202D.20canvas.20backend/near/525153593
 
-        self.scene
-            .push_layer(peniko::Compose::Copy, 1.0, kurbo::Affine::IDENTITY, &rect);
+        self.scene.push_blend_layer(peniko::Compose::Copy.into());
 
-        self.scene.fill(
-            peniko::Fill::NonZero,
-            kurbo::Affine::IDENTITY,
-            &peniko::Image {
+        self.scene
+            .set_paint(vello_cpu::Image::from_peniko_image(&peniko::Image {
                 data: peniko::Blob::from(surface),
                 format: peniko::ImageFormat::Rgba8,
                 width: source.size.width as u32,
@@ -318,23 +191,13 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 y_extend: peniko::Extend::Pad,
                 quality: peniko::ImageQuality::Low,
                 alpha: 1.0,
-            },
-            Some(kurbo::Affine::translate(destination.to_vec2())),
-            &rect,
-        );
-
+            }));
+        self.scene.fill_rect(&rect);
         self.scene.pop_layer();
     }
 
     fn create_similar_draw_target(&self, size: &Size2D<i32>) -> Self {
-        Self {
-            device: self.device.clone(),
-            queue: self.queue.clone(),
-            renderer: self.renderer.clone(),
-            scene: vello::Scene::new(),
-            transform: kurbo::Affine::IDENTITY,
-            size: size.cast(),
-        }
+        Self::new(size.cast())
     }
 
     fn draw_surface(
@@ -346,34 +209,31 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         draw_options: &DrawOptions,
     ) {
         let scale_up = dest.size.width > source.size.width || dest.size.height > source.size.height;
-        self.with_draw_options(draw_options, move |self_| {
-            self_.scene.fill(
-                peniko::Fill::NonZero,
-                self_.transform,
-                &peniko::Image {
-                    data: peniko::Blob::from(surface),
-                    format: peniko::ImageFormat::Rgba8,
-                    width: source.size.width as u32,
-                    height: source.size.height as u32,
-                    x_extend: peniko::Extend::Pad,
-                    y_extend: peniko::Extend::Pad,
-                    // we should only do bicubic when scaling up
-                    quality: if scale_up {
-                        filter.convert()
-                    } else {
-                        peniko::ImageQuality::Low
-                    },
-                    alpha: draw_options.alpha,
+        self.push_draw_options(draw_options);
+        self.scene
+            .set_paint(vello_cpu::Image::from_peniko_image(&peniko::Image {
+                data: peniko::Blob::from(surface),
+                format: peniko::ImageFormat::Rgba8,
+                width: source.size.width as u32,
+                height: source.size.height as u32,
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                // we should only do bicubic when scaling up
+                quality: if scale_up {
+                    filter.convert()
+                } else {
+                    peniko::ImageQuality::Low
                 },
-                Some(
-                    kurbo::Affine::translate((dest.origin.x, dest.origin.y)).pre_scale_non_uniform(
-                        dest.size.width / source.size.width,
-                        dest.size.height / source.size.height,
-                    ),
-                ),
-                &dest.convert(),
-            )
-        })
+                alpha: 1.0,
+            }));
+        self.scene.set_paint_transform(
+            kurbo::Affine::translate((dest.origin.x, dest.origin.y)).pre_scale_non_uniform(
+                dest.size.width / source.size.width,
+                dest.size.height / source.size.height,
+            ),
+        );
+        self.scene.fill_rect(&dest.convert());
+        self.pop_draw_options();
     }
 
     fn draw_surface_with_shadow(
@@ -395,15 +255,10 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn fill(&mut self, path: &Path, pattern: &Pattern, draw_options: &DrawOptions) {
-        self.with_draw_options(draw_options, |self_| {
-            self_.scene.fill(
-                peniko::Fill::NonZero,
-                self_.transform,
-                &pattern.brush.clone().multiply_alpha(draw_options.alpha),
-                None,
-                &path.0,
-            );
-        })
+        self.push_draw_options(draw_options);
+        self.scene.set_paint(pattern.brush.clone());
+        self.scene.fill_path(&path.0);
+        self.pop_draw_options();
     }
 
     fn fill_text(
@@ -413,69 +268,59 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         pattern: &Pattern,
         draw_options: &DrawOptions,
     ) {
-        let pattern = pattern.brush.clone().multiply_alpha(draw_options.alpha);
-        self.with_draw_options(draw_options, |self_| {
-            let mut advance = 0.;
-            for run in text_runs.iter() {
-                let glyphs = &run.glyphs;
+        self.push_draw_options(draw_options);
+        self.scene.set_paint(pattern.brush.clone());
+        let mut advance = 0.;
+        for run in text_runs.iter() {
+            let glyphs = &run.glyphs;
 
-                let template = &run.font.template;
+            let template = &run.font.template;
 
-                SHARED_FONT_CACHE.with(|font_cache| {
-                    let identifier = template.identifier();
-                    if !font_cache.borrow().contains_key(&identifier) {
-                        font_cache.borrow_mut().insert(
-                            identifier.clone(),
-                            peniko::Font::new(
-                                peniko::Blob::from(run.font.data().as_ref().to_vec()),
-                                identifier.index(),
-                            ),
-                        );
-                    }
+            SHARED_FONT_CACHE.with(|font_cache| {
+                let identifier = template.identifier();
+                if !font_cache.borrow().contains_key(&identifier) {
+                    font_cache.borrow_mut().insert(
+                        identifier.clone(),
+                        peniko::Font::new(
+                            peniko::Blob::from(run.font.data().as_ref().to_vec()),
+                            identifier.index(),
+                        ),
+                    );
+                }
 
-                    let font_cache = font_cache.borrow();
-                    let Some(font) = font_cache.get(&identifier) else {
-                        return;
-                    };
+                let font_cache = font_cache.borrow();
+                let Some(font) = font_cache.get(&identifier) else {
+                    return;
+                };
 
-                    self_
-                        .scene
-                        .draw_glyphs(font)
-                        .transform(self_.transform)
-                        .brush(&pattern)
-                        .font_size(run.font.descriptor.pt_size.to_f32_px())
-                        .draw(
-                            peniko::Fill::NonZero,
-                            glyphs
-                                .iter_glyphs_for_byte_range(&Range::new(ByteIndex(0), glyphs.len()))
-                                .map(|glyph| {
-                                    let glyph_offset = glyph.offset().unwrap_or(Point2D::zero());
-                                    let x = advance + start.x + glyph_offset.x.to_f32_px();
-                                    let y = start.y + glyph_offset.y.to_f32_px();
-                                    advance += glyph.advance().to_f32_px();
-                                    vello::Glyph {
-                                        id: glyph.id(),
-                                        x,
-                                        y,
-                                    }
-                                }),
-                        );
-                });
-            }
-        })
+                self.scene
+                    .glyph_run(font)
+                    .font_size(run.font.descriptor.pt_size.to_f32_px())
+                    .fill_glyphs(
+                        glyphs
+                            .iter_glyphs_for_byte_range(&Range::new(ByteIndex(0), glyphs.len()))
+                            .map(|glyph| {
+                                let glyph_offset = glyph.offset().unwrap_or(Point2D::zero());
+                                let x = advance + start.x + glyph_offset.x.to_f32_px();
+                                let y = start.y + glyph_offset.y.to_f32_px();
+                                advance += glyph.advance().to_f32_px();
+                                vello_cpu::Glyph {
+                                    id: glyph.id(),
+                                    x,
+                                    y,
+                                }
+                            }),
+                    );
+            });
+        }
+        self.pop_draw_options();
     }
 
     fn fill_rect(&mut self, rect: &Rect<f32>, pattern: &Pattern, draw_options: &DrawOptions) {
-        let pattern = pattern.brush.clone().multiply_alpha(draw_options.alpha);
-        self.with_draw_options(draw_options, |self_| {
-            self_.scene.fill(
-                peniko::Fill::NonZero,
-                self_.transform,
-                &pattern,
-                None,
-                &rect.convert(),
-            );
-        })
+        self.push_draw_options(draw_options);
+        self.scene.set_paint(pattern.brush.clone());
+        self.scene.fill_rect(&rect.convert());
+        self.pop_draw_options();
     }
 
     fn get_size(&self) -> Size2D<i32> {
@@ -483,7 +328,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn get_transform(&self) -> Transform2D<f32> {
-        self.transform.convert()
+        self.scene.transform().convert()
     }
 
     fn pop_clip(&mut self) {
@@ -491,8 +336,12 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn push_clip(&mut self, path: &Path) {
-        self.scene
-            .push_layer(peniko::Mix::Clip, 1.0, self.transform, &path.0);
+        self.scene.push_layer(
+            Some(&path.0),
+            Some(peniko::Mix::Clip.into()),
+            Some(1.0),
+            None,
+        );
     }
 
     fn push_clip_rect(&mut self, rect: &Rect<i32>) {
@@ -508,7 +357,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn set_transform(&mut self, matrix: &Transform2D<f32>) {
-        self.transform = matrix.convert();
+        self.scene.set_transform(matrix.convert());
     }
 
     fn stroke(
@@ -518,15 +367,11 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         stroke_options: &kurbo::Stroke,
         draw_options: &DrawOptions,
     ) {
-        self.with_draw_options(draw_options, |self_| {
-            self_.scene.stroke(
-                stroke_options,
-                self_.transform,
-                &pattern.brush.clone().multiply_alpha(draw_options.alpha),
-                None,
-                &path.0,
-            );
-        })
+        self.push_draw_options(draw_options);
+        self.scene.set_paint(pattern.brush.clone());
+        self.scene.set_stroke(stroke_options.clone());
+        self.scene.stroke_path(&path.0);
+        self.pop_draw_options();
     }
 
     fn stroke_rect(
@@ -536,64 +381,42 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         stroke_options: &kurbo::Stroke,
         draw_options: &DrawOptions,
     ) {
-        self.with_draw_options(draw_options, |self_| {
-            self_.scene.stroke(
-                stroke_options,
-                self_.transform,
-                &pattern.brush.clone().multiply_alpha(draw_options.alpha),
-                None,
-                &rect.convert(),
-            );
-        })
+        self.push_draw_options(draw_options);
+        self.scene.set_paint(pattern.brush.clone());
+        self.scene.set_stroke(stroke_options.clone());
+        self.scene.stroke_rect(&rect.convert());
+        self.pop_draw_options();
     }
 
     fn image_descriptor_and_serializable_data(&self) -> (ImageDescriptor, SerializableImageData) {
-        let size = self.size;
-        self.render_and_download(|stride, data| {
-            let image_desc = ImageDescriptor {
-                format: webrender_api::ImageFormat::RGBA8,
-                size: size.cast().cast_unit(),
-                stride: data.map(|_| stride as i32),
-                offset: 0,
-                flags: ImageDescriptorFlags::empty(),
+        self.update_pixmap();
+        let image_desc = ImageDescriptor {
+            format: webrender_api::ImageFormat::RGBA8,
+            size: self.size.cast().cast_unit(),
+            stride: None,
+            offset: 0,
+            flags: ImageDescriptorFlags::empty(),
+        };
+        let data = SerializableImageData::Raw({
+            let mut data = IpcSharedMemory::from_bytes(self.pixmap.borrow().data_as_u8_slice());
+            #[allow(unsafe_code)]
+            unsafe {
+                pixels::generic_transform_inplace::<1, false, false>(data.deref_mut());
             };
-            let data = SerializableImageData::Raw(if let Some(data) = data {
-                let mut data = IpcSharedMemory::from_bytes(data);
-                #[allow(unsafe_code)]
-                unsafe {
-                    pixels::generic_transform_inplace::<1, false, false>(data.deref_mut());
-                };
-                data
-            } else {
-                IpcSharedMemory::from_byte(0, size.area() as usize * 4)
-            });
-            (image_desc, data)
-        })
+            data
+        });
+        (image_desc, data)
     }
 
     fn snapshot(&self) -> pixels::Snapshot {
-        let size = self.size;
-        self.render_and_download(|padded_byte_width, data| {
-            let data = data
-                .map(|data| {
-                    let mut result_unpadded = Vec::<u8>::with_capacity(size.area() as usize * 4);
-                    for row in 0..self.size.height {
-                        let start = (row * padded_byte_width).try_into().unwrap();
-                        result_unpadded
-                            .extend(&data[start..start + (self.size.width * 4) as usize]);
-                    }
-                    result_unpadded
-                })
-                .unwrap_or_else(|| vec![0; size.area() as usize * 4]);
-            Snapshot::from_vec(
-                size,
-                SnapshotPixelFormat::RGBA,
-                SnapshotAlphaMode::Transparent {
-                    premultiplied: false,
-                },
-                data,
-            )
-        })
+        Snapshot::from_vec(
+            self.size.cast(),
+            SnapshotPixelFormat::RGBA,
+            SnapshotAlphaMode::Transparent {
+                premultiplied: false,
+            },
+            self.pixmap.borrow().data_as_u8_slice().to_vec(),
+        )
     }
 
     fn surface(&self) -> Vec<u8> {
@@ -665,13 +488,13 @@ impl StrokeOptionsHelpers for kurbo::Stroke {
 
 #[derive(Clone)]
 pub(crate) struct Pattern {
-    brush: peniko::Brush,
+    brush: vello_cpu::PaintType,
     repeat_x: bool,
     repeat_y: bool,
 }
 
 impl Pattern {
-    fn new(brush: peniko::Brush) -> Self {
+    fn new(brush: vello_cpu::PaintType) -> Self {
         Self {
             brush,
             repeat_x: false,
@@ -683,7 +506,7 @@ impl Pattern {
 impl PatternHelpers for Pattern {
     fn is_zero_size_gradient(&self) -> bool {
         match &self.brush {
-            peniko::Brush::Gradient(gradient) => {
+            vello_cpu::PaintType::Gradient(gradient) => {
                 if gradient.stops.is_empty() {
                     return true;
                 }
@@ -702,33 +525,39 @@ impl PatternHelpers for Pattern {
                     } => start_angle == end_angle,
                 }
             },
-            peniko::Brush::Image(_) | peniko::Brush::Solid(_) => false,
+            vello_cpu::PaintType::Image(_) | vello_cpu::PaintType::Solid(_) => false,
         }
     }
 
     fn x_bound(&self) -> Option<u32> {
         match &self.brush {
-            peniko::Brush::Image(image) => {
+            vello_cpu::PaintType::Image(vello_cpu::Image {
+                source: vello_cpu::ImageSource::Pixmap(image),
+                ..
+            }) => {
                 if self.repeat_x {
                     None
                 } else {
-                    Some(image.width)
+                    Some(image.width().into())
                 }
             },
-            peniko::Brush::Gradient(_) | peniko::Brush::Solid(_) => None,
+            _ => None,
         }
     }
 
     fn y_bound(&self) -> Option<u32> {
         match &self.brush {
-            peniko::Brush::Image(image) => {
+            vello_cpu::PaintType::Image(vello_cpu::Image {
+                source: vello_cpu::ImageSource::Pixmap(image),
+                ..
+            }) => {
                 if self.repeat_y {
                     None
                 } else {
-                    Some(image.height)
+                    Some(image.height().into())
                 }
             },
-            peniko::Brush::Gradient(_) | peniko::Brush::Solid(_) => None,
+            _ => None,
         }
     }
 }
@@ -863,13 +692,15 @@ impl Convert<Pattern> for FillOrStrokeStyle {
     fn convert(self) -> Pattern {
         use canvas_traits::canvas::FillOrStrokeStyle::*;
         match self {
-            Color(absolute_color) => Pattern::new(peniko::Brush::Solid(absolute_color.convert())),
+            Color(absolute_color) => {
+                Pattern::new(vello_cpu::PaintType::Solid(absolute_color.convert()))
+            },
             LinearGradient(style) => {
                 let start = kurbo::Point::new(style.x0, style.y0);
                 let end = kurbo::Point::new(style.x1, style.y1);
                 let mut gradient = peniko::Gradient::new_linear(start, end);
                 gradient.stops = style.stops.convert();
-                Pattern::new(peniko::Brush::Gradient(gradient))
+                Pattern::new(vello_cpu::PaintType::Gradient(gradient))
             },
             RadialGradient(style) => {
                 let center1 = kurbo::Point::new(style.x0, style.y0);
@@ -881,7 +712,7 @@ impl Convert<Pattern> for FillOrStrokeStyle {
                     style.r1 as f32,
                 );
                 gradient.stops = style.stops.convert();
-                Pattern::new(peniko::Brush::Gradient(gradient))
+                Pattern::new(vello_cpu::PaintType::Gradient(gradient))
             },
             Surface(surface_style) => {
                 let data = surface_style
@@ -895,24 +726,26 @@ impl Convert<Pattern> for FillOrStrokeStyle {
                     )
                     .0;
                 Pattern {
-                    brush: peniko::Brush::Image(peniko::Image {
-                        data: peniko::Blob::from(data),
-                        format: peniko::ImageFormat::Rgba8,
-                        width: surface_style.surface_size.width,
-                        height: surface_style.surface_size.height,
-                        x_extend: if surface_style.repeat_x {
-                            peniko::Extend::Repeat
-                        } else {
-                            peniko::Extend::Pad
+                    brush: vello_cpu::PaintType::Image(vello_cpu::Image::from_peniko_image(
+                        &peniko::Image {
+                            data: peniko::Blob::from(data),
+                            format: peniko::ImageFormat::Rgba8,
+                            width: surface_style.surface_size.width,
+                            height: surface_style.surface_size.height,
+                            x_extend: if surface_style.repeat_x {
+                                peniko::Extend::Repeat
+                            } else {
+                                peniko::Extend::Pad
+                            },
+                            y_extend: if surface_style.repeat_y {
+                                peniko::Extend::Repeat
+                            } else {
+                                peniko::Extend::Pad
+                            },
+                            quality: peniko::ImageQuality::Low,
+                            alpha: 1.0,
                         },
-                        y_extend: if surface_style.repeat_y {
-                            peniko::Extend::Repeat
-                        } else {
-                            peniko::Extend::Pad
-                        },
-                        quality: peniko::ImageQuality::Low,
-                        alpha: 1.0,
-                    }),
+                    )),
                     repeat_x: surface_style.repeat_x,
                     repeat_y: surface_style.repeat_y,
                 }
