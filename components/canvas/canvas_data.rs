@@ -127,7 +127,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
         backend: B,
     ) -> CanvasData<'a, B> {
         let size = size.max(MIN_WR_IMAGE_SIZE);
-        let draw_target = backend.create_drawtarget(size);
+        let mut draw_target = backend.create_drawtarget(size);
         let image_key = compositor_api.generate_image_key_blocking().unwrap();
         let (descriptor, data) = draw_target.image_descriptor_and_serializable_data();
         compositor_api.add_image(image_key, descriptor, data);
@@ -745,7 +745,7 @@ impl<'a, B: Backend> CanvasData<'a, B> {
     /// read_rect: The area of the canvas we want to read from
     #[allow(unsafe_code)]
     pub(crate) fn read_pixels(
-        &self,
+        &mut self,
         read_rect: Option<Rect<u32>>,
         canvas_size: Option<Size2D<u32>>,
     ) -> Snapshot {

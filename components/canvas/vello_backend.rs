@@ -127,23 +127,31 @@ impl Backend for VelloBackend {
 pub struct DrawTarget {
     scene: vello_cpu::RenderContext,
     size: Size2D<u16>,
-    pixmap: RefCell<vello_cpu::Pixmap>,
+    pixmap: vello_cpu::Pixmap,
+    clips: Vec<Path>,
 }
 
 impl DrawTarget {
     fn new(size: Size2D<u16>) -> Self {
         Self {
             scene: vello_cpu::RenderContext::new(size.width, size.height),
-            pixmap: RefCell::new(vello_cpu::Pixmap::new(size.width, size.height)),
+            pixmap: vello_cpu::Pixmap::new(size.width, size.height),
             size,
+            clips: Vec::new(),
         }
     }
 
-    fn update_pixmap(&self) {
-        let mut pixmap = self.pixmap.borrow_mut();
+    fn pixmap(&mut self) -> &[u8] {
         //self.scene.flush();
+        for _ in &self.clips {
+            self.scene.pop_layer();
+        }
         self.scene
-            .render_to_pixmap(&mut pixmap, vello_cpu::RenderMode::OptimizeQuality);
+            .render_to_pixmap(&mut self.pixmap, vello_cpu::RenderMode::OptimizeQuality);
+        for path in &self.clips {
+            self.scene.push_clip_layer(&path.0);
+        }
+        self.pixmap.data_as_u8_slice()
     }
 
     fn push_draw_options(&mut self, draw_options: &DrawOptions) {
@@ -332,15 +340,14 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn pop_clip(&mut self) {
+        self.clips.pop();
         self.scene.pop_layer();
     }
 
     fn push_clip(&mut self, path: &Path) {
-        self.scene.push_layer(
-            Some(&path.0),
-            Some(peniko::Mix::Clip.into()),
-            Some(1.0),
-            None,
+        self.clips.push(path.clone());
+        self.scene.push_clip_layer(
+            &path.0
         );
     }
 
@@ -388,8 +395,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         self.pop_draw_options();
     }
 
-    fn image_descriptor_and_serializable_data(&self) -> (ImageDescriptor, SerializableImageData) {
-        self.update_pixmap();
+    fn image_descriptor_and_serializable_data(&mut self) -> (ImageDescriptor, SerializableImageData) {
         let image_desc = ImageDescriptor {
             format: webrender_api::ImageFormat::RGBA8,
             size: self.size.cast().cast_unit(),
@@ -398,7 +404,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
             flags: ImageDescriptorFlags::empty(),
         };
         let data = SerializableImageData::Raw({
-            let mut data = IpcSharedMemory::from_bytes(self.pixmap.borrow().data_as_u8_slice());
+            let mut data = IpcSharedMemory::from_bytes(self.pixmap());
             #[allow(unsafe_code)]
             unsafe {
                 pixels::generic_transform_inplace::<1, false, false>(data.deref_mut());
@@ -408,18 +414,18 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         (image_desc, data)
     }
 
-    fn snapshot(&self) -> pixels::Snapshot {
+    fn snapshot(&mut self) -> pixels::Snapshot {
         Snapshot::from_vec(
             self.size.cast(),
             SnapshotPixelFormat::RGBA,
             SnapshotAlphaMode::Transparent {
                 premultiplied: false,
             },
-            self.pixmap.borrow().data_as_u8_slice().to_vec(),
+            self.pixmap().to_vec(),
         )
     }
 
-    fn surface(&self) -> Vec<u8> {
+    fn surface(&mut self) -> Vec<u8> {
         self.snapshot().to_vec(None, None).0
     }
 

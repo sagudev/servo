@@ -574,7 +574,7 @@ impl GenericDrawTarget<RaqoteBackend> for raqote::DrawTarget {
     fn set_transform(&mut self, matrix: &Transform2D<f32>) {
         self.set_transform(matrix);
     }
-    fn surface(&self) -> <RaqoteBackend as Backend>::SourceSurface {
+    fn surface(&mut self) -> <RaqoteBackend as Backend>::SourceSurface {
         self.get_data_u8().to_vec()
     }
     fn stroke(
@@ -610,7 +610,7 @@ impl GenericDrawTarget<RaqoteBackend> for raqote::DrawTarget {
     }
 
     fn image_descriptor_and_serializable_data(
-        &self,
+        &mut self,
     ) -> (
         webrender_api::ImageDescriptor,
         compositing_traits::SerializableImageData,
@@ -626,7 +626,7 @@ impl GenericDrawTarget<RaqoteBackend> for raqote::DrawTarget {
         (descriptor, data)
     }
 
-    fn snapshot(&self) -> Snapshot {
+    fn snapshot(&mut self) -> Snapshot {
         Snapshot::from_vec(
             self.get_size().cast(),
             SnapshotPixelFormat::BGRA,
