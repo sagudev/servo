@@ -347,9 +347,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
 
     fn push_clip(&mut self, path: &Path) {
         self.clips.push(path.clone());
-        self.scene.push_clip_layer(
-            &path.0
-        );
+        self.scene.push_clip_layer(&path.0);
     }
 
     fn push_clip_rect(&mut self, rect: &Rect<i32>) {
@@ -396,7 +394,9 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         self.pop_draw_options();
     }
 
-    fn image_descriptor_and_serializable_data(&mut self) -> (ImageDescriptor, SerializableImageData) {
+    fn image_descriptor_and_serializable_data(
+        &mut self,
+    ) -> (ImageDescriptor, SerializableImageData) {
         let image_desc = ImageDescriptor {
             format: webrender_api::ImageFormat::RGBA8,
             size: self.size.cast().cast_unit(),
