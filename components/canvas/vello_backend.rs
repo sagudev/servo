@@ -340,8 +340,9 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
     }
 
     fn pop_clip(&mut self) {
-        self.clips.pop();
-        self.scene.pop_layer();
+        if self.clips.pop().is_some() {
+            self.scene.pop_layer();
+        }
     }
 
     fn push_clip(&mut self, path: &Path) {
