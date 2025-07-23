@@ -13,6 +13,7 @@
 
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use canvas_traits::canvas::{
     BlendingStyle, CanvasGradientStop, CompositionOrBlending, CompositionStyle, FillOrStrokeStyle,
@@ -51,7 +52,7 @@ impl Backend for VelloBackend {
     type DrawOptions = DrawOptions;
     type CompositionOp = peniko::BlendMode;
     type DrawTarget = DrawTarget;
-    type SourceSurface = Vec<u8>; // TODO: this should be texture
+    type SourceSurface = Arc<vello_cpu::Pixmap>;
     type GradientStop = peniko::ColorStop;
     type GradientStops = peniko::ColorStops;
 
@@ -175,7 +176,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         self.scene.pop_layer();
     }
 
-    fn copy_surface(&mut self, surface: Vec<u8>, source: Rect<i32>, destination: Point2D<i32>) {
+    fn copy_surface(&mut self, surface: Arc<vello_cpu::Pixmap>, source: Rect<i32>, destination: Point2D<i32>) {
         let destination = destination.cast::<f64>().convert();
         let rect = kurbo::Rect::from_origin_size(destination, source.size.cast::<f64>().convert());
 
@@ -190,16 +191,12 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         self.scene.push_blend_layer(peniko::Compose::Copy.into());
 
         self.scene
-            .set_paint(vello_cpu::Image::from_peniko_image(&peniko::Image {
-                data: peniko::Blob::from(surface),
-                format: peniko::ImageFormat::Rgba8,
-                width: source.size.width as u32,
-                height: source.size.height as u32,
+            .set_paint(vello_cpu::Image {
+                source: vello_cpu::ImageSource::Pixmap(surface),
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
                 quality: peniko::ImageQuality::Low,
-                alpha: 1.0,
-            }));
+            });
         self.scene.fill_rect(&rect);
         self.scene.pop_layer();
     }
@@ -210,7 +207,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
 
     fn draw_surface(
         &mut self,
-        surface: Vec<u8>,
+        surface: Arc<vello_cpu::Pixmap>,
         dest: Rect<f64>,
         source: Rect<f64>,
         filter: Filter,
@@ -219,11 +216,9 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
         let scale_up = dest.size.width > source.size.width || dest.size.height > source.size.height;
         self.push_draw_options(draw_options);
         self.scene
-            .set_paint(vello_cpu::Image::from_peniko_image(&peniko::Image {
-                data: peniko::Blob::from(surface),
-                format: peniko::ImageFormat::Rgba8,
-                width: source.size.width as u32,
-                height: source.size.height as u32,
+            .set_paint(
+                vello_cpu::Image {
+                source: vello_cpu::ImageSource::Pixmap(surface),
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
                 // we should only do bicubic when scaling up
@@ -232,8 +227,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
                 } else {
                     peniko::ImageQuality::Low
                 },
-                alpha: 1.0,
-            }));
+            });
         self.scene.set_paint_transform(
             kurbo::Affine::translate((dest.origin.x, dest.origin.y)).pre_scale_non_uniform(
                 dest.size.width / source.size.width,
@@ -246,7 +240,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
 
     fn draw_surface_with_shadow(
         &self,
-        _surface: Vec<u8>,
+        _surface: Arc<vello_cpu::Pixmap>,
         _dest: &Point2D<f32>,
         _color: &peniko::Color,
         _offset: &Vector2D<f32>,
@@ -404,14 +398,7 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
             offset: 0,
             flags: ImageDescriptorFlags::empty(),
         };
-        let data = SerializableImageData::Raw({
-            let mut data = IpcSharedMemory::from_bytes(self.pixmap());
-            #[allow(unsafe_code)]
-            unsafe {
-                pixels::generic_transform_inplace::<1, false, false>(data.deref_mut());
-            };
-            data
-        });
+        let data = SerializableImageData::Raw(IpcSharedMemory::from_bytes(self.pixmap()));
         (image_desc, data)
     }
 
@@ -420,25 +407,31 @@ impl GenericDrawTarget<VelloBackend> for DrawTarget {
             self.size.cast(),
             SnapshotPixelFormat::RGBA,
             SnapshotAlphaMode::Transparent {
-                premultiplied: false,
+                premultiplied: true,
             },
             self.pixmap().to_vec(),
         )
     }
 
-    fn surface(&mut self) -> Vec<u8> {
-        self.snapshot().to_vec(None, None).0
+    fn surface(&mut self) -> Arc<vello_cpu::Pixmap> {
+        self.pixmap(); // sync pixmap
+        Arc::new(vello_cpu::Pixmap::from_parts(self.pixmap.clone().take(), self.pixmap.width(), self.pixmap.height()))
     }
 
-    fn create_source_surface_from_data(&self, data: Snapshot) -> Option<Vec<u8>> {
-        let (data, _, _) = data.to_vec(
-            Some(SnapshotAlphaMode::Transparent {
-                premultiplied: false,
-            }),
-            Some(SnapshotPixelFormat::RGBA),
-        );
-        Some(data)
+    fn create_source_surface_from_data(&self, data: Snapshot) -> Option<Arc<vello_cpu::Pixmap>> {
+        Some(snapshot_as_pixmap(data))
     }
+}
+
+fn snapshot_as_pixmap(data: Snapshot) -> Arc<vello_cpu::Pixmap> {
+    let size = data.size().cast();
+    let (data, _, _) = data.to_vec(
+        Some(SnapshotAlphaMode::Transparent {
+            premultiplied: true,
+        }),
+        Some(SnapshotPixelFormat::RGBA),
+    );
+    Arc::new(vello_cpu::Pixmap::from_parts(bytemuck::cast_vec(data), size.width, size.height))
 }
 
 #[derive(Clone, Debug)]
@@ -722,23 +715,12 @@ impl Convert<Pattern> for FillOrStrokeStyle {
                 Pattern::new(vello_cpu::PaintType::Gradient(gradient))
             },
             Surface(surface_style) => {
-                let data = surface_style
+                let pixmap = snapshot_as_pixmap(surface_style
                     .surface_data
-                    .to_owned()
-                    .to_vec(
-                        Some(SnapshotAlphaMode::Transparent {
-                            premultiplied: false,
-                        }),
-                        Some(SnapshotPixelFormat::RGBA),
-                    )
-                    .0;
+                    .to_owned());
                 Pattern {
-                    brush: vello_cpu::PaintType::Image(vello_cpu::Image::from_peniko_image(
-                        &peniko::Image {
-                            data: peniko::Blob::from(data),
-                            format: peniko::ImageFormat::Rgba8,
-                            width: surface_style.surface_size.width,
-                            height: surface_style.surface_size.height,
+                    brush: vello_cpu::PaintType::Image(vello_cpu::Image {
+                            source: vello_cpu::ImageSource::Pixmap(pixmap),
                             x_extend: if surface_style.repeat_x {
                                 peniko::Extend::Repeat
                             } else {
@@ -750,9 +732,8 @@ impl Convert<Pattern> for FillOrStrokeStyle {
                                 peniko::Extend::Pad
                             },
                             quality: peniko::ImageQuality::Low,
-                            alpha: 1.0,
                         },
-                    )),
+                    ),
                     repeat_x: surface_style.repeat_x,
                     repeat_y: surface_style.repeat_y,
                 }
