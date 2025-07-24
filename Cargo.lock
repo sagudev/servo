@@ -9141,7 +9141,7 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 [[package]]
 name = "vello_common"
 version = "0.0.1"
-source = "git+https://github.com/linebender/vello?rev=ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a#ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a"
+source = "git+https://github.com/linebender/vello?branch=laurenz%2Fgrad_fix_attempt#9acdadf96ff2bfcf02e4394e5b4e0948736f3d4f"
 dependencies = [
  "bytemuck",
  "fearless_simd",
@@ -9155,7 +9155,7 @@ dependencies = [
 [[package]]
 name = "vello_cpu"
 version = "0.0.1"
-source = "git+https://github.com/linebender/vello?rev=ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a#ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a"
+source = "git+https://github.com/linebender/vello?branch=laurenz%2Fgrad_fix_attempt#9acdadf96ff2bfcf02e4394e5b4e0948736f3d4f"
 dependencies = [
  "bytemuck",
  "vello_common",

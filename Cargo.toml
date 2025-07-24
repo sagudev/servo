@@ -167,7 +167,7 @@ unicode-segmentation = "1.12.0"
 url = "2.5"
 urlpattern = "0.3"
 uuid = { version = "1.12.1", features = ["v4"] }
-vello_cpu = { git = "https://github.com/linebender/vello", rev = "ce8e7a9716b6114b755565bb6a5d7a3e3ce1817a" }
+vello_cpu = { git = "https://github.com/linebender/vello", branch = "laurenz/grad_fix_attempt" }
 webdriver = "0.53.0"
 webgpu_traits = { path = "components/shared/webgpu" }
 webpki-roots = "1.0"
