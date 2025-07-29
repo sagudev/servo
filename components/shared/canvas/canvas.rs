@@ -402,7 +402,7 @@ pub enum FillRule {
 pub struct CanvasId(pub u64);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, MallocSizeOf, PartialEq, Serialize)]
-pub struct SurfaceId(pub u64);
+pub struct SurfaceId(CanvasId, u32);
 
 #[derive(Clone, Copy, Debug, Deserialize, MallocSizeOf, Serialize)]
 pub struct CompositionOptions {

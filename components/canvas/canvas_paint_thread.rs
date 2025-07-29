@@ -16,7 +16,7 @@ use compositing_traits::CrossProcessCompositorApi;
 use crossbeam_channel::{Sender, select, unbounded};
 use euclid::default::{Rect, Size2D, Transform2D};
 use fonts::{FontContext, SystemFontServiceProxy};
-use ipc_channel::ipc::{self, IpcSender};
+use ipc_channel::ipc::{self, IpcSender, IpcSharedMemory};
 use ipc_channel::router::ROUTER;
 use log::warn;
 use net_traits::ResourceThreads;
@@ -27,6 +27,7 @@ use crate::canvas_data::*;
 
 pub struct CanvasPaintThread {
     canvases: HashMap<CanvasId, Canvas>,
+    patterns: HashMap<SurfaceId, Snapshot<IpcSharedMemory>>,
     next_canvas_id: CanvasId,
     compositor_api: CrossProcessCompositorApi,
     font_context: Arc<FontContext>,
@@ -40,6 +41,7 @@ impl CanvasPaintThread {
     ) -> CanvasPaintThread {
         CanvasPaintThread {
             canvases: HashMap::new(),
+            patterns: HashMap::new(),
             next_canvas_id: CanvasId(0),
             compositor_api: compositor_api.clone(),
             font_context: Arc::new(FontContext::new(
@@ -131,7 +133,8 @@ impl CanvasPaintThread {
                 composition_options,
                 transform,
             ) => {
-                self.canvas(canvas_id).fill_text(
+                let (canvas, patterns) = self.canvas_and_patterns(canvas_id);
+                canvas.fill_text(
                     text,
                     x,
                     y,
@@ -145,13 +148,8 @@ impl CanvasPaintThread {
                 );
             },
             Canvas2dMsg::FillRect(rect, style, shadow_options, composition_options, transform) => {
-                self.canvas(canvas_id).fill_rect(
-                    &rect,
-                    style,
-                    shadow_options,
-                    composition_options,
-                    transform,
-                );
+                let (canvas, patterns) = self.canvas_and_patterns(canvas_id);
+                canvas.fill_rect(&rect, style, shadow_options, composition_options, transform);
             },
             Canvas2dMsg::StrokeRect(
                 rect,
@@ -161,7 +159,8 @@ impl CanvasPaintThread {
                 composition_options,
                 transform,
             ) => {
-                self.canvas(canvas_id).stroke_rect(
+                let (canvas, patterns) = self.canvas_and_patterns(canvas_id);
+                canvas.stroke_rect(
                     &rect,
                     style,
                     line_options,
@@ -181,7 +180,8 @@ impl CanvasPaintThread {
                 composition_options,
                 transform,
             ) => {
-                self.canvas(canvas_id).fill_path(
+                let (canvas, patterns) = self.canvas_and_patterns(canvas_id);
+                canvas.fill_path(
                     &path,
                     fill_rule,
                     style,
@@ -198,7 +198,8 @@ impl CanvasPaintThread {
                 composition_options,
                 transform,
             ) => {
-                self.canvas(canvas_id).stroke_path(
+                let (canvas, patterns) = self.canvas_and_patterns(canvas_id);
+                canvas.stroke_path(
                     &path,
                     style,
                     line_options,
@@ -283,17 +284,29 @@ impl CanvasPaintThread {
                 sender.send(()).unwrap();
             },
             Canvas2dMsg::PopClip => self.canvas(canvas_id).pop_clip(),
-            Canvas2dMsg::CreateSurfacePattern(surface_id, snapshot) => self
-                .canvas(canvas_id)
-                .create_surface_pattern(surface_id, snapshot),
+            Canvas2dMsg::CreateSurfacePattern(surface_id, snapshot) => {
+                assert!(self.patterns.insert(surface_id, snapshot).is_none());
+            },
             Canvas2dMsg::DropSurfacePattern(surface_id) => {
-                self.canvas(canvas_id).drop_surface(surface_id)
+                self.canvases
+                    .iter_mut()
+                    .for_each(|(_, canvas)| canvas.drop_surface(surface_id));
             },
         }
     }
 
     fn canvas(&mut self, canvas_id: CanvasId) -> &mut Canvas {
         self.canvases.get_mut(&canvas_id).expect("Bogus canvas id")
+    }
+
+    fn canvas_and_patterns(
+        &mut self,
+        canvas_id: CanvasId,
+    ) -> (&mut Canvas, &HashMap<SurfaceId, Snapshot<IpcSharedMemory>>) {
+        (
+            self.canvases.get_mut(&canvas_id).expect("Bogus canvas id"),
+            &self.patterns,
+        )
     }
 }
 
@@ -697,23 +710,6 @@ impl Canvas {
             #[cfg(feature = "vello_cpu")]
             Canvas::VelloCPU(canvas_data) => canvas_data.recreate(size),
             _ => unreachable!(),
-        }
-    }
-
-    fn create_surface_pattern(
-        &mut self,
-        surface_id: SurfaceId,
-        snapshot: Snapshot<ipc::IpcSharedMemory>,
-    ) {
-        match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.create_surface_pattern(surface_id, snapshot),
-            #[cfg(feature = "vello")]
-            Canvas::Vello(canvas_data) => canvas_data.create_surface_pattern(surface_id, snapshot),
-            #[cfg(feature = "vello_cpu")]
-            Canvas::VelloCPU(canvas_data) => {
-                canvas_data.create_surface_pattern(surface_id, snapshot)
-            },
         }
     }
 

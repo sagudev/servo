@@ -29,7 +29,7 @@ pub(crate) trait GenericDrawTarget {
         source: Rect<i32>,
         destination: Point2D<i32>,
     );
-    fn create_source_surface_from_data(&self, data: Snapshot) -> Option<Self::SourceSurface>;
+    fn create_source_surface_from_data(&self, data: Snapshot) -> Self::SourceSurface;
     fn draw_surface(
         &mut self,
         surface: Self::SourceSurface,

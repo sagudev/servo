@@ -380,7 +380,7 @@ impl Snapshot<IpcSharedMemory> {
         }
     }
     */
-    pub fn to_owned(self) -> Snapshot<SnapshotData> {
+    pub fn to_owned(&self) -> Snapshot<SnapshotData> {
         let Snapshot {
             size,
             data,
@@ -388,10 +388,10 @@ impl Snapshot<IpcSharedMemory> {
             alpha_mode,
         } = self;
         Snapshot {
-            size,
+            size: *size,
             data: SnapshotData::Owned(data.to_vec()),
-            format,
-            alpha_mode,
+            format: *format,
+            alpha_mode: *alpha_mode,
         }
     }
 

@@ -209,8 +209,8 @@ impl GenericDrawTarget for raqote::DrawTarget {
     fn create_similar_draw_target(&self, size: &Size2D<i32>) -> Self {
         raqote::DrawTarget::new(size.width, size.height)
     }
-    fn create_source_surface_from_data(&self, snapshot: Snapshot) -> Option<Self::SourceSurface> {
-        Some(snapshot_to_surface(snapshot))
+    fn create_source_surface_from_data(&self, snapshot: Snapshot) -> Self::SourceSurface {
+        snapshot_to_surface(snapshot)
     }
     fn draw_surface(
         &mut self,

@@ -15,6 +15,7 @@ use fonts::{
     ByteIndex, FontBaseline, FontContext, FontGroup, FontMetrics, FontRef, GlyphInfo, GlyphStore,
     LAST_RESORT_GLYPH_ADVANCE, ShapingFlags, ShapingOptions,
 };
+use ipc_channel::ipc::IpcSharedMemory;
 use log::warn;
 use pixels::Snapshot;
 use range::Range;
@@ -136,10 +137,20 @@ impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
     }
 
     fn resolve_style(
-        &self,
+        &mut self,
         style: FillOrStrokeStyle,
+        patterns: &HashMap<SurfaceId, Snapshot<IpcSharedMemory>>,
     ) -> FillOrStrokeStyle<DrawTarget::SourceSurface> {
-        style.resolve_surface(|surface_id| self.pattern_surfaces.get(&surface_id).unwrap().clone())
+        style.resolve_surface(|surface_id| {
+            if let Some(surface_pattern) = self.pattern_surfaces.get(&surface_id) {
+                surface_pattern.clone()
+            } else {
+                let surface_pattern = self.drawtarget
+                    .create_source_surface_from_data(patterns.get(&surface_id).unwrap().to_owned());
+                self.pattern_surfaces.insert(surface_id, surface_pattern.clone());
+                surface_pattern
+            }
+        })
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -765,23 +776,6 @@ impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
 
     pub(crate) fn pop_clip(&mut self) {
         self.drawtarget.pop_clip();
-    }
-
-    pub(crate) fn create_surface_pattern(
-        &mut self,
-        surface_id: SurfaceId,
-        snapshot: Snapshot<ipc_channel::ipc::IpcSharedMemory>,
-    ) {
-        assert!(
-            self.pattern_surfaces
-                .insert(
-                    surface_id,
-                    self.drawtarget
-                        .create_source_surface_from_data(snapshot.to_owned())
-                        .unwrap()
-                )
-                .is_none()
-        )
     }
 
     pub(crate) fn drop_surface(&mut self, surface_id: SurfaceId) {
