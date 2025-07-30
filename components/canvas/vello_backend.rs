@@ -15,6 +15,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::num::NonZeroUsize;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use canvas_traits::canvas::{
     CompositionOptions, FillOrStrokeStyle, FillRule, LineOptions, Path, ShadowOptions,
@@ -27,9 +28,10 @@ use pixels::{Snapshot, SnapshotAlphaMode, SnapshotPixelFormat};
 use range::Range;
 use vello::wgpu::{
     BackendOptions, Backends, Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor,
-    Device, Extent3d, Instance, InstanceDescriptor, InstanceFlags, MapMode, Queue,
-    TexelCopyBufferInfo, TexelCopyBufferLayout, Texture, TextureDescriptor, TextureDimension,
-    TextureFormat, TextureUsages, TextureView, TextureViewDescriptor,
+    Device, Extent3d, Instance, InstanceDescriptor, InstanceFlags, MapMode, Origin3d, Queue,
+    TexelCopyBufferInfo, TexelCopyBufferLayout, TexelCopyTextureInfoBase, Texture, TextureAspect,
+    TextureDescriptor, TextureDimension, TextureFormat, TextureUsages, TextureView,
+    TextureViewDescriptor,
 };
 use vello::{kurbo, peniko};
 use webrender_api::{ImageDescriptor, ImageDescriptorFlags};
@@ -52,6 +54,16 @@ pub(crate) struct VelloDrawTarget {
     scene: vello::Scene,
     size: Size2D<u32>,
     downloader: GPUTextureDownloader,
+    images: Vec<peniko::Image>,
+}
+
+impl Drop for VelloDrawTarget {
+    fn drop(&mut self) {
+        let mut renderer = self.renderer.borrow_mut();
+        self.images.iter().for_each(|image| {
+            renderer.override_image(image, None);
+        });
+    }
 }
 
 fn options() -> vello::RendererOptions {
@@ -111,10 +123,6 @@ impl GPUTextureDownloader {
         }
     }
 
-    fn view(&self) -> &TextureView {
-        &self.texture_view
-    }
-
     fn download<R>(&self, f: impl FnOnce(u32, Option<&[u8]>) -> R) -> R {
         // TODO(perf): do a render pass that will multiply with alpha on GPU
         let mut encoder = self
@@ -165,17 +173,14 @@ impl VelloDrawTarget {
         self.scene.pop_layer();
     }
 
-    fn render_and_download<F, R>(&self, f: F) -> R
-    where
-        F: FnOnce(u32, Option<&[u8]>) -> R,
-    {
+    fn render_to_texture(&self, texture_view: &TextureView) {
         self.renderer
             .borrow_mut()
             .render_to_texture(
                 &self.device,
                 &self.queue,
                 &self.scene,
-                self.downloader.view(),
+                texture_view,
                 &vello::RenderParams {
                     base_color: peniko::color::AlphaColor::TRANSPARENT,
                     width: self.size.width,
@@ -184,12 +189,36 @@ impl VelloDrawTarget {
                 },
             )
             .unwrap();
-        self.downloader.download(f)
+    }
+
+    fn push_surface_image(
+        &mut self,
+        surface: <Self as GenericDrawTarget>::SourceSurface,
+        size: Size2D<u32>,
+        x_extend: peniko::Extend,
+        y_extend: peniko::Extend,
+        quality: peniko::ImageQuality,
+        alpha: f32,
+    ) {
+        self.images.push(peniko::Image {
+            data: peniko::Blob::new(Arc::new(Vec::new())),
+            format: peniko::ImageFormat::Rgba8,
+            width: size.width,
+            height: size.height,
+            x_extend,
+            y_extend,
+            quality,
+            alpha,
+        });
+        let image = self.images.last().unwrap();
+        self.renderer
+            .borrow_mut()
+            .override_image(image, Some(surface));
     }
 }
 
 impl GenericDrawTarget for VelloDrawTarget {
-    type SourceSurface = Vec<u8>; // TODO: this should be texture
+    type SourceSurface = TexelCopyTextureInfoBase<Texture>;
 
     fn new(size: Size2D<u32>) -> Self {
         // TODO: we should read prefs instead of env
@@ -224,6 +253,7 @@ impl GenericDrawTarget for VelloDrawTarget {
             scene,
             size,
             downloader,
+            images: Vec::new(),
         }
     }
 
@@ -242,7 +272,12 @@ impl GenericDrawTarget for VelloDrawTarget {
         self.scene.pop_layer();
     }
 
-    fn copy_surface(&mut self, surface: Vec<u8>, source: Rect<i32>, destination: Point2D<i32>) {
+    fn copy_surface(
+        &mut self,
+        surface: Self::SourceSurface,
+        source: Rect<i32>,
+        destination: Point2D<i32>,
+    ) {
         let destination: kurbo::Point = destination.cast::<f64>().into();
         let rect = kurbo::Rect::from_origin_size(destination, source.size.cast());
 
@@ -257,19 +292,18 @@ impl GenericDrawTarget for VelloDrawTarget {
         self.scene
             .push_layer(peniko::Compose::Copy, 1.0, kurbo::Affine::IDENTITY, &rect);
 
+        self.push_surface_image(
+            surface,
+            source.size.cast(),
+            peniko::Extend::Pad,
+            peniko::Extend::Pad,
+            peniko::ImageQuality::Low,
+            1.0,
+        );
         self.scene.fill(
             peniko::Fill::NonZero,
             kurbo::Affine::IDENTITY,
-            &peniko::Image {
-                data: peniko::Blob::from(surface),
-                format: peniko::ImageFormat::Rgba8,
-                width: source.size.width as u32,
-                height: source.size.height as u32,
-                x_extend: peniko::Extend::Pad,
-                y_extend: peniko::Extend::Pad,
-                quality: peniko::ImageQuality::Low,
-                alpha: 1.0,
-            },
+            self.images.last().unwrap(),
             Some(kurbo::Affine::translate(destination.to_vec2())),
             &rect,
         );
@@ -289,12 +323,13 @@ impl GenericDrawTarget for VelloDrawTarget {
             } else {
                 GPUTextureDownloader::new(&self.device, &self.queue, size.cast())
             },
+            images: Vec::new(),
         }
     }
 
     fn draw_surface(
         &mut self,
-        surface: Vec<u8>,
+        surface: Self::SourceSurface,
         dest: Rect<f64>,
         source: Rect<f64>,
         filter: Filter,
@@ -304,24 +339,23 @@ impl GenericDrawTarget for VelloDrawTarget {
         let scale_up = dest.size.width > source.size.width || dest.size.height > source.size.height;
         let shape: kurbo::Rect = dest.into();
         self.with_draw_options(&composition_options, move |self_| {
+            self_.push_surface_image(
+                surface,
+                source.size.cast(),
+                peniko::Extend::Pad,
+                peniko::Extend::Pad,
+                // we should only do bicubic when scaling up
+                if scale_up {
+                    filter.convert()
+                } else {
+                    peniko::ImageQuality::Low
+                },
+                composition_options.alpha as f32,
+            );
             self_.scene.fill(
                 peniko::Fill::NonZero,
                 transform.cast().into(),
-                &peniko::Image {
-                    data: peniko::Blob::from(surface),
-                    format: peniko::ImageFormat::Rgba8,
-                    width: source.size.width as u32,
-                    height: source.size.height as u32,
-                    x_extend: peniko::Extend::Pad,
-                    y_extend: peniko::Extend::Pad,
-                    // we should only do bicubic when scaling up
-                    quality: if scale_up {
-                        filter.convert()
-                    } else {
-                        peniko::ImageQuality::Low
-                    },
-                    alpha: composition_options.alpha as f32,
-                },
+                self_.images.last().unwrap(),
                 Some(
                     kurbo::Affine::translate((dest.origin.x, dest.origin.y)).pre_scale_non_uniform(
                         dest.size.width / source.size.width,
@@ -335,7 +369,7 @@ impl GenericDrawTarget for VelloDrawTarget {
 
     fn draw_surface_with_shadow(
         &self,
-        _surface: Vec<u8>,
+        _surface: Self::SourceSurface,
         _dest: &Point2D<f32>,
         _shadow_options: ShadowOptions,
         _composition_options: CompositionOptions,
@@ -514,7 +548,8 @@ impl GenericDrawTarget for VelloDrawTarget {
         &mut self,
     ) -> (ImageDescriptor, SerializableImageData) {
         let size = self.size;
-        self.render_and_download(|stride, data| {
+        self.render_to_texture(&self.downloader.texture_view);
+        self.downloader.download(|stride, data| {
             let image_desc = ImageDescriptor {
                 format: webrender_api::ImageFormat::RGBA8,
                 size: size.cast().cast_unit(),
@@ -538,7 +573,8 @@ impl GenericDrawTarget for VelloDrawTarget {
 
     fn snapshot(&mut self) -> pixels::Snapshot {
         let size = self.size;
-        self.render_and_download(|padded_byte_width, data| {
+        self.render_to_texture(&self.downloader.texture_view);
+        self.downloader.download(|padded_byte_width, data| {
             let data = data
                 .map(|data| {
                     let mut result_unpadded = Vec::<u8>::with_capacity(size.area() as usize * 4);
@@ -561,18 +597,70 @@ impl GenericDrawTarget for VelloDrawTarget {
         })
     }
 
-    fn surface(&mut self) -> Vec<u8> {
-        self.snapshot().to_vec(None, None).0
+    fn surface(&mut self) -> Self::SourceSurface {
+        let size = Extent3d {
+            width: self.size.width,
+            height: self.size.height,
+            depth_or_array_layers: 1,
+        };
+        let texture = self.device.create_texture(&TextureDescriptor {
+            label: None,
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            usage: TextureUsages::COPY_SRC | TextureUsages::STORAGE_BINDING,
+            view_formats: &[],
+        });
+        let texture_view = texture.create_view(&TextureViewDescriptor::default());
+        self.render_to_texture(&texture_view);
+        TexelCopyTextureInfoBase {
+            texture,
+            mip_level: 0,
+            origin: Origin3d::ZERO,
+            aspect: TextureAspect::All,
+        }
     }
 
-    fn create_source_surface_from_data(&self, data: Snapshot) -> Option<Vec<u8>> {
+    fn create_source_surface_from_data(&self, data: Snapshot) -> Option<Self::SourceSurface> {
+        let size = Extent3d {
+            width: data.size().width,
+            height: data.size().height,
+            depth_or_array_layers: 1,
+        };
+        let texture = self.device.create_texture(&TextureDescriptor {
+            label: None,
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            usage: TextureUsages::COPY_SRC | TextureUsages::COPY_DST,
+            view_formats: &[TextureFormat::Rgba8Unorm],
+        });
         let (data, _, _) = data.to_vec(
             Some(SnapshotAlphaMode::Transparent {
                 premultiplied: false,
             }),
             Some(SnapshotPixelFormat::RGBA),
         );
-        Some(data)
+        self.queue.write_texture(
+            texture.as_image_copy(),
+            &data,
+            TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * size.width),
+                rows_per_image: Some(size.height),
+            },
+            size,
+        );
+        Some(TexelCopyTextureInfoBase {
+            texture,
+            mip_level: 0,
+            origin: Origin3d::ZERO,
+            aspect: TextureAspect::All,
+        })
     }
 }
 
