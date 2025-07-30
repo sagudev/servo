@@ -513,7 +513,17 @@ impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
     }
 
     pub(crate) fn clear_rect(&mut self, rect: &Rect<f32>, transform: Transform2D<f32>) {
-        self.drawtarget.clear_rect(rect, transform);
+        let transformed_rect = transform.outer_transformed_rect(rect);
+        if transformed_rect.is_empty() {
+            return;
+        }
+        if transformed_rect.contains_rect(&Rect::from_size(self.drawtarget.get_size().cast())) {
+            self.drawtarget = self
+                .drawtarget
+                .create_similar_draw_target(&self.drawtarget.get_size().cast());
+        } else {
+            self.drawtarget.clear_rect(rect, transform);
+        }
     }
 
     pub(crate) fn stroke_rect(
