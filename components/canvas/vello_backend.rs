@@ -15,6 +15,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::num::NonZeroUsize;
 use std::rc::Rc;
+use std::sync::LazyLock;
 
 use canvas_traits::canvas::{
     CompositionOptions, FillOrStrokeStyle, FillRule, LineOptions, Path, ShadowOptions,
@@ -47,6 +48,20 @@ thread_local! {
     static SHARED_FONT_CACHE: RefCell<HashMap<FontIdentifier, peniko::Font>> = RefCell::default();
 }
 
+static WGPU_INSTANCE: LazyLock<Instance> = LazyLock::new(|| {
+    // TODO: we should read prefs instead of env
+
+    // we forbid GL because it clashes with servo's GL usage
+    let backends = Backends::from_env().unwrap_or_default() - Backends::GL;
+    let flags = InstanceFlags::from_build_config().with_env();
+    let backend_options = BackendOptions::from_env_or_default();
+    Instance::new(&InstanceDescriptor {
+        backends,
+        flags,
+        backend_options,
+    })
+});
+
 pub(crate) struct VelloDrawTarget {
     device: Device,
     queue: Queue,
@@ -63,6 +78,7 @@ pub(crate) struct VelloDrawTarget {
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 enum State {
+    Clean,
     /// Scene is drawing. It will be consumed when rendered.
     Drawing,
     /// Scene is already rendered
@@ -123,7 +139,7 @@ impl VelloDrawTarget {
             scene: vello::Scene::new(),
             size,
             clips: Vec::new(),
-            state: State::RenderedToBuffer,
+            state: State::Clean,
             render_texture,
             render_image,
             padded_byte_width,
@@ -173,6 +189,9 @@ impl VelloDrawTarget {
 
     fn ensure_drawing(&mut self) {
         match self.state {
+            State::Clean => {
+                self.state = State::Drawing;
+            },
             State::Drawing => {},
             State::RenderedToBuffer | State::RenderedToTexture => {
                 self.ignore_clips(|self_| {
@@ -190,19 +209,8 @@ impl GenericDrawTarget for VelloDrawTarget {
     type SourceSurface = Vec<u8>; // TODO: this should be texture
 
     fn new(size: Size2D<u32>) -> Self {
-        // TODO: we should read prefs instead of env
-
-        // we forbid GL because it clashes with servo's GL usage
-        let backends = Backends::from_env().unwrap_or_default() - Backends::GL;
-        let flags = InstanceFlags::from_build_config().with_env();
-        let backend_options = BackendOptions::from_env_or_default();
-        let instance = Instance::new(&InstanceDescriptor {
-            backends,
-            flags,
-            backend_options,
-        });
         let mut context = vello::util::RenderContext {
-            instance,
+            instance: WGPU_INSTANCE.clone(),
             devices: Vec::new(),
         };
         let device_id = pollster::block_on(context.device(None)).unwrap();
@@ -667,6 +675,9 @@ impl VelloDrawTarget {
     }
 
     fn map_read<R>(&mut self, f: impl FnOnce(Option<&[u8]>) -> R) -> R {
+        if self.state == State::Clean {
+            return f(None);
+        }
         self.render_to_buffer();
         let result = {
             let buf_slice = self.rendered_buffer.slice(..);

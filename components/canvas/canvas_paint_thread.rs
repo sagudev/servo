@@ -16,12 +16,12 @@ use compositing_traits::CrossProcessCompositorApi;
 use crossbeam_channel::{Sender, select, unbounded};
 use euclid::default::{Rect, Size2D, Transform2D};
 use fonts::{FontContext, SystemFontServiceProxy};
-use ipc_channel::ipc::{self, IpcSender};
+use ipc_channel::ipc::{self, IpcSender, IpcSharedMemory};
 use ipc_channel::router::ROUTER;
 use log::warn;
 use net_traits::ResourceThreads;
 use pixels::Snapshot;
-use webrender_api::ImageKey;
+use webrender_api::{ImageDescriptor, ImageDescriptorFlags, ImageKey};
 
 use crate::canvas_data::*;
 
@@ -85,8 +85,8 @@ impl CanvasPaintThread {
                         }
                         recv(create_receiver) -> msg => {
                             match msg {
-                                Ok(ConstellationCanvasMsg::Create { sender: creator, size }) => {
-                                    creator.send(canvas_paint_thread.create_canvas(size)).unwrap();
+                                Ok(ConstellationCanvasMsg::Create { sender, size }) => {
+                                    canvas_paint_thread.create_canvas(size, sender);
                                 },
                                 Ok(ConstellationCanvasMsg::Exit(exit_sender)) => {
                                     let _ = exit_sender.send(());
@@ -106,15 +106,39 @@ impl CanvasPaintThread {
         (create_sender, ipc_sender)
     }
 
-    pub fn create_canvas(&mut self, size: Size2D<u64>) -> Option<(CanvasId, ImageKey)> {
+    pub fn create_canvas(
+        &mut self,
+        size: Size2D<u64>,
+        sender: Sender<Option<(CanvasId, ImageKey)>>,
+    ) {
         let canvas_id = self.next_canvas_id;
         self.next_canvas_id.0 += 1;
-
-        let canvas = Canvas::new(size, self.compositor_api.clone(), self.font_context.clone())?;
-        let image_key = canvas.image_key();
+        let image_key = self.compositor_api.generate_image_key_blocking().unwrap();
+        let Some(canvas) = Canvas::new(
+            size,
+            image_key,
+            self.compositor_api.clone(),
+            self.font_context.clone(),
+        ) else {
+            sender.send(None).unwrap();
+            return;
+        };
+        sender.send(Some((canvas_id, image_key))).unwrap();
         self.canvases.insert(canvas_id, canvas);
-
-        Some((canvas_id, image_key))
+        self.compositor_api.add_image(
+            image_key,
+            ImageDescriptor {
+                format: webrender_api::ImageFormat::BGRA8,
+                size: size.cast().cast_unit(),
+                stride: None,
+                offset: 0,
+                flags: ImageDescriptorFlags::empty(),
+            },
+            compositing_traits::SerializableImageData::Raw(IpcSharedMemory::from_byte(
+                0,
+                size.cast::<usize>().area() * 4,
+            )),
+        );
     }
 
     fn process_canvas_2d_message(&mut self, message: Canvas2dMsg, canvas_id: CanvasId) {
@@ -304,6 +328,7 @@ enum Canvas {
 impl Canvas {
     fn new(
         size: Size2D<u64>,
+        image_key: ImageKey,
         compositor_api: CrossProcessCompositorApi,
         font_context: Arc<FontContext>,
     ) -> Option<Self> {
@@ -314,18 +339,21 @@ impl Canvas {
             #[cfg(feature = "raqote")]
             "" | "auto" | "raqote" => Some(Self::Raqote(CanvasData::new(
                 size,
+                image_key,
                 compositor_api,
                 font_context,
             ))),
             #[cfg(feature = "vello")]
             "" | "auto" | "vello" => Some(Self::Vello(CanvasData::new(
                 size,
+                image_key,
                 compositor_api,
                 font_context,
             ))),
             #[cfg(feature = "vello_cpu")]
             "" | "auto" | "vello_cpu" => Some(Self::VelloCPU(CanvasData::new(
                 size,
+                image_key,
                 compositor_api,
                 font_context,
             ))),

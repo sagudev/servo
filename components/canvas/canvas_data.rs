@@ -112,14 +112,12 @@ pub(crate) struct CanvasData<DrawTarget: GenericDrawTarget> {
 impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
     pub(crate) fn new(
         size: Size2D<u64>,
+        image_key: ImageKey,
         compositor_api: CrossProcessCompositorApi,
         font_context: Arc<FontContext>,
     ) -> CanvasData<DrawTarget> {
         let size = size.max(MIN_WR_IMAGE_SIZE);
-        let mut draw_target = DrawTarget::new(size.cast());
-        let image_key = compositor_api.generate_image_key_blocking().unwrap();
-        let (descriptor, data) = draw_target.image_descriptor_and_serializable_data();
-        compositor_api.add_image(image_key, descriptor, data);
+        let draw_target = DrawTarget::new(size.cast());
         CanvasData {
             drawtarget: draw_target,
             compositor_api,
