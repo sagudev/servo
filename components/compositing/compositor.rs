@@ -656,6 +656,7 @@ impl IOCompositor {
                 {
                     warn!("Skipping display list!")
                 }
+                println!("awaiting {pipeline_id:?}");
                 self.maybe_send_awaiting_display_list_for_pipeline(pipeline_id);
             },
 
@@ -679,6 +680,7 @@ impl IOCompositor {
             CompositorMsg::UpdateImages(updates) => {
                 let mut txn = Transaction::new();
                 for update in updates {
+                    println!("{update:?}");
                     match update {
                         ImageUpdate::AddImage(key, desc, data, epoch) => {
                             if let Some(epoch) = epoch {
@@ -798,6 +800,7 @@ impl IOCompositor {
         let old_scale = webview_renderer.device_pixels_per_page_pixel();
 
         let pipeline_id = display_list_info.pipeline_id;
+        println!("awaited {pipeline_id:?}");
         let _ = self.global.borrow().constellation_sender.send(
             EmbedderToConstellationMessage::DisplayListDone(pipeline_id.into()),
         );

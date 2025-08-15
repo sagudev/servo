@@ -160,7 +160,7 @@ impl WGPU {
     pub(crate) fn run(&mut self) {
         loop {
             if let Ok(msg) = self.receiver.recv() {
-                log::trace!("recv: {msg:?}");
+                //println!("recv: {msg:?}");
                 match msg {
                     WebGPURequest::BufferMapAsync {
                         sender,
@@ -509,22 +509,16 @@ impl WGPU {
                         };
                         self.create_context(context_id, image_key, size, buffer_ids);
                     },
-                    WebGPURequest::UpdateContext {
-                        context_id,
-                        size,
-                        configuration,
-                        epoch,
-                    } => {
-                        self.update_context(context_id, size, configuration, epoch);
-                    },
                     WebGPURequest::SwapChainPresent {
                         context_id,
                         texture_id,
                         encoder_id,
                         image_epoch,
+                        size,
+                        configuration,
                     } => {
                         let result =
-                            self.swapchain_present(context_id, encoder_id, texture_id, image_epoch);
+                            self.swapchain_present(context_id, size, configuration, encoder_id, texture_id, image_epoch);
                         if let Err(e) = result {
                             log::error!("Error occured in SwapChainPresent: {e:?}");
                         }

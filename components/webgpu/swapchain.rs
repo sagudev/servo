@@ -380,12 +380,11 @@ impl crate::WGPU {
     pub(crate) fn update_context(
         &self,
         context_id: WebGPUContextId,
-        size: DeviceIntSize,
-        config: Option<ContextConfiguration>,
+
         epoch: Epoch,
     ) {
         let mut webgpu_contexts = self.wgpu_image_map.lock().unwrap();
-        let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
+
 
         let presentation_id = context_data.next_presentation_id();
         context_data.check_and_update_presentation_id(presentation_id);
@@ -423,6 +422,8 @@ impl crate::WGPU {
     pub(crate) fn swapchain_present(
         &mut self,
         context_id: WebGPUContextId,
+        size: DeviceIntSize,
+        config: Option<ContextConfiguration>,
         encoder_id: id::Id<id::markers::CommandEncoder>,
         texture_id: id::Id<id::markers::Texture>,
         image_epoch: Epoch,
@@ -442,18 +443,16 @@ impl crate::WGPU {
         let image_desc;
         let presentation_id;
         {
-            if let Some(context_data) = self.wgpu_image_map.lock().unwrap().get_mut(&context_id) {
-                let Some(swap_chain) = context_data.swap_chain.as_ref() else {
-                    return Ok(());
-                };
-                device_id = swap_chain.device_id;
-                queue_id = swap_chain.queue_id;
-                buffer_id = context_data.get_available_buffer(global).unwrap();
-                image_desc = context_data.image_desc;
-                presentation_id = context_data.next_presentation_id();
-            } else {
-                return Ok(());
-            }
+            let mut webgpu_contexts = self.wgpu_image_map.lock().unwrap();
+            let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
+
+
+            device_id = swap_chain.device_id;
+            queue_id = swap_chain.queue_id;
+            buffer_id = context_data.get_available_buffer(global).unwrap();
+            image_desc = context_data.image_desc;
+            presentation_id = context_data.next_presentation_id();
+
         }
         let comm_desc = wgt::CommandEncoderDescriptor { label: None };
         let (encoder_id, error) =
@@ -544,6 +543,7 @@ fn update_wr_image(
     presentation_id: PresentationId,
     image_epoch: Epoch,
 ) {
+    println!("async mapped {image_epoch:?}");
     match result {
         Ok(()) => {
             if let Some(context_data) = wgpu_image_map.lock().unwrap().get_mut(&context_id) {

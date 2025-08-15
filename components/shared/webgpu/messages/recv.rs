@@ -152,17 +152,12 @@ pub enum WebGPURequest {
         size: DeviceIntSize,
         sender: IpcSender<(WebGPUContextId, ImageKey)>,
     },
-    /// Recreates swapchain (if needed)
-    UpdateContext {
-        context_id: WebGPUContextId,
-        size: DeviceIntSize,
-        configuration: Option<ContextConfiguration>,
-        epoch: Epoch,
-    },
-    /// Reads texture to swapchains buffer and maps it
+    /// Recreates swapchain and reads texture to swapchains buffer and maps it
     SwapChainPresent {
         context_id: WebGPUContextId,
         texture_id: TextureId,
+        size: DeviceIntSize,
+        configuration: ContextConfiguration,
         encoder_id: CommandEncoderId,
         image_epoch: Epoch,
     },

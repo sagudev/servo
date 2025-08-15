@@ -215,17 +215,6 @@ impl GPUCanvasContext {
         } else {
             drawing_buffer.config.take();
         };
-        // TODO: send less
-        self.image_epoch.borrow_mut().next();
-        self.channel
-            .0
-            .send(WebGPURequest::UpdateContext {
-                context_id: self.context_id,
-                size: drawing_buffer.size,
-                configuration: drawing_buffer.config,
-                epoch: *self.image_epoch.borrow(),
-            })
-            .expect("Failed to update webgpu context");
     }
 }
 
@@ -233,14 +222,17 @@ impl GPUCanvasContext {
 impl GPUCanvasContext {
     fn layout_handle(&self) -> Option<(ImageKey, Epoch)> {
         if self.drawing_buffer.borrow().cleared {
+            println!("layout: cleared");
             None
         } else {
+            println!("layout: {:?}", (self.webrender_image, *self.image_epoch.borrow()));
             Some((self.webrender_image, *self.image_epoch.borrow()))
         }
     }
 
     fn send_swap_chain_present(&self, texture_id: WebGPUTexture) {
-        self.drawing_buffer.borrow_mut().cleared = false;
+        let mut drawing_buffer = self.drawing_buffer.borrow_mut();
+        drawing_buffer.cleared = false;
         self.image_epoch.borrow_mut().next();
         let encoder_id = self.global().wgpu_id_hub().create_command_encoder_id();
         let image_epoch = *self.image_epoch.borrow();
@@ -248,6 +240,8 @@ impl GPUCanvasContext {
             context_id: self.context_id,
             texture_id: texture_id.0,
             encoder_id,
+            size: drawing_buffer.size,
+            configuration: drawing_buffer.config,
             image_epoch,
         }) {
             warn!(
