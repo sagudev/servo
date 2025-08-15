@@ -188,9 +188,8 @@ impl GPUCanvasContext {
 
     /// <https://gpuweb.github.io/gpuweb/#abstract-opdef-expire-the-current-texture>
     fn expire_current_texture(&self) {
+        self.mark_as_dirty();
         if let Some(current_texture) = self.current_texture.take() {
-            // Make copy of texture content
-            self.send_swap_chain_present(current_texture.id());
             // Step 1
             current_texture.Destroy()
         }
@@ -217,12 +216,14 @@ impl GPUCanvasContext {
             drawing_buffer.config.take();
         };
         // TODO: send less
+        self.image_epoch.borrow_mut().next();
         self.channel
             .0
             .send(WebGPURequest::UpdateContext {
                 context_id: self.context_id,
                 size: drawing_buffer.size,
                 configuration: drawing_buffer.config,
+                epoch: *self.image_epoch.borrow(),
             })
             .expect("Failed to update webgpu context");
     }
@@ -266,6 +267,10 @@ impl CanvasContext for GPUCanvasContext {
 
     /// <https://gpuweb.github.io/gpuweb/#abstract-opdef-updating-the-rendering-of-a-webgpu-canvas>
     fn update_rendering(&self) {
+        if let Some(current_texture) = self.current_texture.take() {
+            // Make copy of texture content
+            self.send_swap_chain_present(current_texture.id());
+        }
         // Step 1
         self.expire_current_texture();
     }
@@ -396,8 +401,6 @@ impl GPUCanvasContextMethods<crate::DomTypeHolder> for GPUCanvasContext {
             // Step 4.2
             let current_texture = configuration.device.CreateTexture(texture_descriptor)?;
             self.current_texture.set(Some(&current_texture));
-            // We only need to mark new texture
-            self.mark_as_dirty();
             current_texture
         };
         // Step 6

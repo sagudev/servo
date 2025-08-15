@@ -513,8 +513,9 @@ impl WGPU {
                         context_id,
                         size,
                         configuration,
+                        epoch,
                     } => {
-                        self.update_context(context_id, size, configuration);
+                        self.update_context(context_id, size, configuration, epoch);
                     },
                     WebGPURequest::SwapChainPresent {
                         context_id,

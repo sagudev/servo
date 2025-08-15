@@ -157,6 +157,7 @@ pub enum WebGPURequest {
         context_id: WebGPUContextId,
         size: DeviceIntSize,
         configuration: Option<ContextConfiguration>,
+        epoch: Epoch,
     },
     /// Reads texture to swapchains buffer and maps it
     SwapChainPresent {

@@ -157,16 +157,6 @@ impl WebGPUImageDescriptor {
         Self::new(DEFAULT_IMAGE_FORMAT, size, false)
     }
 
-    /// Returns true if needs image update (if it's changed)
-    fn update(&mut self, new: Self) -> bool {
-        if self.0 != new.0 {
-            self.0 = new.0;
-            true
-        } else {
-            false
-        }
-    }
-
     fn buffer_stride(&self) -> i32 {
         self.0
             .stride
@@ -392,6 +382,7 @@ impl crate::WGPU {
         context_id: WebGPUContextId,
         size: DeviceIntSize,
         config: Option<ContextConfiguration>,
+        epoch: Epoch,
     ) {
         let mut webgpu_contexts = self.wgpu_image_map.lock().unwrap();
         let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
@@ -401,7 +392,7 @@ impl crate::WGPU {
 
         // If configuration is not provided
         // the context will be dummy/empty until recreation
-        let needs_image_update = if let Some(config) = config {
+        context_data.image_desc = if let Some(config) = config {
             let new_image_desc =
                 WebGPUImageDescriptor::new(config.format(), size, config.is_opaque);
             let needs_swapchain_rebuild = context_data.swap_chain.is_none() ||
@@ -414,22 +405,18 @@ impl crate::WGPU {
                     data: None,
                 });
             }
-            context_data.image_desc.update(new_image_desc)
+            new_image_desc
         } else {
             context_data.destroy_swapchain(&self.global);
-            context_data
-                .image_desc
-                .update(WebGPUImageDescriptor::default(size))
+            WebGPUImageDescriptor::default(size)
         };
 
-        if needs_image_update {
-            self.compositor_api.update_image(
-                context_data.image_key,
-                context_data.image_desc.0,
-                SerializableImageData::External(context_data.image_data),
-                None, // we do not need to update epoch as cleared is handled in script
-            );
-        }
+        self.compositor_api.update_image(
+            context_data.image_key,
+            context_data.image_desc.0,
+            SerializableImageData::External(context_data.image_data),
+            Some(epoch),
+        );
     }
 
     /// Copies data async from provided texture using encoder_id to available staging presentation buffer
