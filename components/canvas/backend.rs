@@ -12,8 +12,7 @@ use webrender_api::ImageDescriptor;
 
 use crate::canvas_data::{Filter, TextRun};
 
-// This defines required methods for a DrawTarget (currently only implemented for raqote).  The
-// prototypes are derived from the now-removed Azure backend's methods.
+// This defines required methods for a DrawTarget.
 pub(crate) trait GenericDrawTarget {
     type SourceSurface;
 

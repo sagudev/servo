@@ -298,8 +298,6 @@ impl CanvasPaintThread {
 
 #[allow(clippy::large_enum_variant)]
 enum Canvas {
-    #[cfg(feature = "raqote")]
-    Raqote(CanvasData<raqote::DrawTarget>),
     #[cfg(feature = "vello")]
     Vello(CanvasData<crate::vello_backend::VelloDrawTarget>),
     #[cfg(feature = "vello_cpu")]
@@ -322,12 +320,6 @@ impl Canvas {
                 compositor_api,
                 font_context,
             ))),
-            #[cfg(feature = "raqote")]
-            "" | "auto" | "raqote" => Some(Self::Raqote(CanvasData::new(
-                size,
-                compositor_api,
-                font_context,
-            ))),
             #[cfg(feature = "vello")]
             "" | "auto" | "vello" => Some(Self::Vello(CanvasData::new(
                 size,
@@ -343,8 +335,6 @@ impl Canvas {
 
     fn image_key(&self) -> ImageKey {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.image_key(),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.image_key(),
             #[cfg(feature = "vello_cpu")]
@@ -355,8 +345,6 @@ impl Canvas {
 
     fn pop_clips(&mut self, clips: usize) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.pop_clips(clips),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.pop_clips(clips),
             #[cfg(feature = "vello_cpu")]
@@ -379,19 +367,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.fill_text(
-                text,
-                x,
-                y,
-                max_width,
-                is_rtl,
-                style,
-                text_options,
-                shadow_options,
-                composition_options,
-                transform,
-            ),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.fill_text(
                 text,
@@ -431,10 +406,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => {
-                canvas_data.fill_rect(rect, style, shadow_options, composition_options, transform)
-            },
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => {
                 canvas_data.fill_rect(rect, style, shadow_options, composition_options, transform)
@@ -457,15 +428,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.stroke_rect(
-                rect,
-                style,
-                line_options,
-                shadow_options,
-                composition_options,
-                transform,
-            ),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.stroke_rect(
                 rect,
@@ -498,15 +460,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.fill_path(
-                path,
-                fill_rule,
-                style,
-                shadow_options,
-                composition_options,
-                transform,
-            ),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.fill_path(
                 path,
@@ -539,15 +492,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.stroke_path(
-                path,
-                style,
-                line_options,
-                shadow_options,
-                composition_options,
-                transform,
-            ),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.stroke_path(
                 path,
@@ -572,8 +516,6 @@ impl Canvas {
 
     fn clear_rect(&mut self, rect: &Rect<f32>, transform: Transform2D<f64>) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.clear_rect(rect, transform),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.clear_rect(rect, transform),
             #[cfg(feature = "vello_cpu")]
@@ -593,16 +535,6 @@ impl Canvas {
         transform: Transform2D<f64>,
     ) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.draw_image(
-                snapshot,
-                dest_rect,
-                source_rect,
-                smoothing_enabled,
-                shadow_options,
-                composition_options,
-                transform,
-            ),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.draw_image(
                 snapshot,
@@ -629,8 +561,6 @@ impl Canvas {
 
     fn read_pixels(&mut self, read_rect: Option<Rect<u32>>) -> Snapshot {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.read_pixels(read_rect),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.read_pixels(read_rect),
             #[cfg(feature = "vello_cpu")]
@@ -641,8 +571,6 @@ impl Canvas {
 
     fn measure_text(&mut self, text: String, text_options: TextOptions) -> TextMetrics {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.measure_text(text, text_options),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.measure_text(text, text_options),
             #[cfg(feature = "vello_cpu")]
@@ -653,8 +581,6 @@ impl Canvas {
 
     fn clip_path(&mut self, path: &Path, fill_rule: FillRule, transform: Transform2D<f64>) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.clip_path(path, fill_rule, transform),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.clip_path(path, fill_rule, transform),
             #[cfg(feature = "vello_cpu")]
@@ -665,8 +591,6 @@ impl Canvas {
 
     fn put_image_data(&mut self, snapshot: Snapshot, rect: Rect<u32>) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.put_image_data(snapshot, rect),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.put_image_data(snapshot, rect),
             #[cfg(feature = "vello_cpu")]
@@ -677,8 +601,6 @@ impl Canvas {
 
     fn update_image_rendering(&mut self) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.update_image_rendering(),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.update_image_rendering(),
             #[cfg(feature = "vello_cpu")]
@@ -689,8 +611,6 @@ impl Canvas {
 
     fn recreate(&mut self, size: Option<Size2D<u64>>) {
         match self {
-            #[cfg(feature = "raqote")]
-            Canvas::Raqote(canvas_data) => canvas_data.recreate(size),
             #[cfg(feature = "vello")]
             Canvas::Vello(canvas_data) => canvas_data.recreate(size),
             #[cfg(feature = "vello_cpu")]
