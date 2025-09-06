@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use std::cell::Cell;
+use std::cmp::max;
 use std::fmt;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -17,7 +18,7 @@ use canvas_traits::canvas::{
 use constellation_traits::ScriptToConstellationMessage;
 use cssparser::color::clamp_unit_f32;
 use cssparser::{Parser, ParserInput};
-use euclid::default::{Point2D, Rect, Size2D, Transform2D};
+use euclid::default::{Box2D, Point2D, Rect, Size2D, Transform2D};
 use euclid::{Vector2D, vec2};
 use fonts::{
     ByteIndex, FontBaseline, FontContext, FontGroup, FontIdentifier, FontMetrics, FontRef,
@@ -1497,6 +1498,49 @@ impl CanvasState {
             ideographic_baseline - anchor_y,
             can_gc,
         )
+    }
+
+    /// <https://html.spec.whatwg.org/multipage/canvas.html#text-preparation-algorithm>
+    fn text_preparation_algorithm(&self, global: &GlobalScope, canvas: Option<&HTMLCanvasElement>, text: &str, max_width: Option<f64>) -> Option<(Vec<()>, CanvasTextAlign, Box2D<f64>)> {
+        // > Step 1: If maxWidth was provided but is less than or equal to zero or equal to NaN, then return an empty array.0
+        if matches!(max_width, Some(max_width) if max_width <= 0.0 || max_width.is_nan()) {
+            return None;
+        }
+
+        // > Step 2: Replace all ASCII whitespace in text with U+0020 SPACE characters.
+        let text = replace_ascii_whitespace(text);
+
+        // > Step 3: Let font be the current font of target, as given by that object's font
+        // > attribute.
+        if self.state.borrow().font_style.is_none() {
+            self.set_font(canvas, CanvasContextState::DEFAULT_FONT_STYLE.into());
+        }
+
+        let Some(font_context) = global.font_context() else {
+            warn!("Tried to paint to a canvas of GlobalScope without a FontContext.");
+            return None;
+        };
+
+        let font_style = self.font_style();
+        let font_group = font_context.font_group(font_style.clone());
+        let mut font_group = font_group.write();
+        let font = font_group.first(font_context).expect("couldn't find font");
+
+        // Step 4: Let language be the target's language.
+        // Step 5: If language is "inherit":
+        // Step 6: If language is the empty string, then set language to explicitly unknown.
+        // unimplemented
+
+        // Step 7: Apply the appropriate step from the following list to determine the value of direction:
+        let direction = match self.direction() {
+            CanvasDirection::Ltr => CanvasDirection::Ltr,
+            CanvasDirection::Rtl => CanvasDirection::Rtl,
+            CanvasDirection::Inherit => CanvasDirection::Ltr, // TODO: actual impl
+        };
+
+        // Step 11: Let result be an array constructed by iterating over each glyph in the inline box from left to right (if any), adding to the array, for each glyph, the shape of the glyph as it is in the inline box, positioned on a coordinate space using CSS pixels with its origin at the anchor point.
+        // Step 12: Return result, physical alignment, and the inline box.
+        None
     }
 
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-font
