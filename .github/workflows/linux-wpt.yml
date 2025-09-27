@@ -30,7 +30,7 @@ env:
 jobs:
   chunks:
     name: Generate chunks array
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       chunks-array: ${{ steps.generate-chunks-array.outputs.result }}
     steps:
@@ -41,7 +41,7 @@ jobs:
             return Array.from({length: ${{ inputs.number-of-wpt-chunks }}}, (_, i) => i + 1)
   linux-wpt:
     name: WPT
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: chunks
     strategy:
       fail-fast: false

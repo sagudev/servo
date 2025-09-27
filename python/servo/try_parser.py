@@ -105,9 +105,10 @@ def handle_preset(s: str) -> Optional[JobConfig]:
             "WebGPU CTS",
             Workflow.LINUX,
             wpt=True,
-            wpt_args="_webgpu",  # run only webgpu cts
+            wpt_args="--processes 1 _webgpu",  # run only webgpu cts
             profile="production",  # WebGPU works to slow with debug assert
             unit_tests=False,
+            number_of_wpt_chunks=40,
         )  # production profile does not work with unit-tests
     elif any(word in s for word in ["webdriver", "wd"]):
         return JobConfig(
