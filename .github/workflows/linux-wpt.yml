@@ -26,6 +26,7 @@ env:
   INTERMITTENT_TRACKER_DASHBOARD_SECRET_PROD: ${{ !inputs.wpt-sync-from-upstream && secrets.INTERMITTENT_TRACKER_DASHBOARD_SECRET_PROD || '' }}
   INTERMITTENT_TRACKER_DASHBOARD_SECRET_STAGING: ${{ !inputs.wpt-sync-from-upstream && secrets.INTERMITTENT_TRACKER_DASHBOARD_SECRET_STAGING || '' }}
   WPT_ALWAYS_SUCCEED_ARG: "${{ inputs.wpt-sync-from-upstream && '--always-succeed' || '' }}"
+  LP_NUM_THREADS: 0
 
 jobs:
   chunks:
@@ -48,6 +49,16 @@ jobs:
       matrix:
         chunk_id: ${{ fromJson(needs.chunks.outputs.chunks-array) }}
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+          swap-storage: false
+      - uses: thejerrybao/setup-swap-space@v1
+        with:
+          swap-space-path: /swapfile
+          swap-size-gb: 12
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request_target'
       # This is necessary to checkout the pull request if this run was triggered via a
@@ -82,7 +93,7 @@ jobs:
           mkdir -p wpt-full-logs/linux
           ./mach test-wpt \
             $WPT_ALWAYS_SUCCEED_ARG \
-            --${{ inputs.profile }} --processes $(nproc) --timeout-multiplier 2 \
+            --${{ inputs.profile }} --processes 1 --timeout-multiplier 2 \
             --total-chunks ${{ inputs.number-of-wpt-chunks }} --this-chunk ${{ matrix.chunk_id }} \
             --log-raw wpt-full-logs/linux/raw/${{ matrix.chunk_id }}.log \
             --log-wptreport wpt-full-logs/linux/wptreport/${{ matrix.chunk_id }}.json \

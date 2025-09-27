@@ -78,7 +78,7 @@ void (async () => {
       // Unfortunately, it seems not possible to surface any logs for warn/skip.
       if (res.status === 'fail' || res.status === 'warn' && failOnWarnings) {
         const logs = (res.logs ?? []).map(prettyPrintLog);
-        assert_unreached('\n' + logs.join('\n') + '\n');
+        assert_unreached('e');
       }
     };
 
