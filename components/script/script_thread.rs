@@ -1378,10 +1378,6 @@ impl ScriptThread {
             debug!("Processing event {:?}.", msg);
             let category = self.categorize_msg(&msg);
             let pipeline_id = msg.pipeline_id();
-            let _realm = pipeline_id.and_then(|id| {
-                let global = self.documents.borrow().find_global(id);
-                global.map(|global| enter_realm(&*global))
-            });
 
             if self.closing.load(Ordering::SeqCst) {
                 // If we've received the closed signal from the BHM, only handle exit messages.
@@ -1926,6 +1922,7 @@ impl ScriptThread {
             } => {
                 self.gpu_id_hub.free_device_id(device_id);
                 if let Some(global) = self.documents.borrow().find_global(pipeline_id) {
+                    let _ac = enter_realm(&*global);
                     global.remove_gpu_device(WebGPUDevice(device_id));
                 } // page can already be destroyed
             },
@@ -1955,6 +1952,7 @@ impl ScriptThread {
                 msg,
             } => {
                 let global = self.documents.borrow().find_global(pipeline_id).unwrap();
+                let _ac = enter_realm(&*global);
                 global.gpu_device_lost(device, reason, msg);
             },
             WebGPUMsg::UncapturedError {
@@ -2932,6 +2930,8 @@ impl ScriptThread {
         // to prevent any further incoming networking messages from being handled.
         let document = self.documents.borrow_mut().remove(pipeline_id);
         if let Some(document) = document {
+            let global = document.window().upcast::<GlobalScope>();
+            let _ac = enter_realm(global);
             // We should never have a pipeline that's still an incomplete load, but also has a Document.
             debug_assert!(
                 !self
