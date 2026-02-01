@@ -89,4 +89,4 @@ pub(crate) use crate::dom::bindings::inheritance::HasParent;
 pub(crate) use crate::dom::bindings::reflector::{
     AssociatedMemory, DomObject, MutDomObject, Reflector,
 };
-pub(crate) use crate::dom::bindings::trace::{CustomTraceable, JSTraceable};
+pub(crate) use crate::dom::bindings::trace::{CustomTraceable, JSTraceable, UnsafeDrop};

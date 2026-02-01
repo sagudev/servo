@@ -439,3 +439,10 @@ unsafe impl<T: CustomTraceable> CustomTraceable for Option<T> {
         }
     }
 }
+
+/// A drop implementation that is unsafe
+///
+/// For usage in JSTraceable types that should not access JSManaged data during drop
+pub unsafe trait UnsafeDrop {
+    unsafe fn unsafe_drop(&mut self);
+}

@@ -5,7 +5,7 @@
 use syn::parse_quote;
 use synstructure::{decl_derive, quote};
 
-decl_derive!([JSTraceable, attributes(no_trace, custom_trace)] =>
+decl_derive!([JSTraceable, attributes(no_trace, custom_trace, unsafe_drop)] =>
 /// Implements `JSTraceable` on structs and enums
 ///
 /// Example:
@@ -146,10 +146,13 @@ fn assert_not_impl_traceable(ty: &syn::Type) -> proc_macro2::TokenStream {
 }
 
 fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
+    let ast = s.ast();
+    let global_no_trace = ast.attrs.iter().any(|attr| attr.path().is_ident("no_trace"));
+    let unsafe_drop = ast.attrs.iter().any(|attr| attr.path().is_ident("unsafe_drop"));
     let mut asserts = quote!();
     let match_body = s.each(|binding| {
         for attr in binding.ast().attrs.iter() {
-            if attr.path().is_ident("no_trace") {
+            if attr.path().is_ident("no_trace") || global_no_trace {
                 // If no reason argument is provided to `no_trace` (ie `#[no_trace="This types does not need..."]`),
                 // assert that the type in this bound field does not implement traceable.
                 if !matches!(attr.meta, syn::Meta::NameValue(_)) {
@@ -163,7 +166,6 @@ fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
         Some(quote!(#binding.trace(tracer);))
     });
 
-    let ast = s.ast();
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let mut where_clause = where_clause.unwrap_or(&parse_quote!(where)).clone();
@@ -174,7 +176,29 @@ fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
             .push(parse_quote!(#ident: crate::JSTraceable))
     }
 
+    let drop_impl = if global_no_trace {
+        quote!()
+    } else if unsafe_drop {
+        quote!(
+            impl #impl_generics Drop for #name #ty_generics #where_clause {
+                fn drop(&mut self) {
+                    unsafe {
+                        crate::UnsafeDrop::unsafe_drop(self);
+                    }
+                }
+            }
+        )
+    } else {
+        quote!(
+            impl #impl_generics Drop for #name #ty_generics #where_clause {
+                fn drop(&mut self) {}
+            }
+        )
+    };
+
     let tokens = quote! {
+        #drop_impl
+
         #asserts
 
         #[expect(unsafe_code)]
