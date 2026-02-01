@@ -56,6 +56,7 @@ pub enum ExceptionHandling {
 /// callback interface types.
 #[derive(JSTraceable, MallocSizeOf)]
 #[cfg_attr(crown, crown::unrooted_must_root_lint::must_root)]
+#[unsafe_drop]
 pub struct CallbackObject<D: DomTypes> {
     /// The underlying `JSObject`.
     #[ignore_malloc_size_of = "measured by mozjs"]
@@ -106,9 +107,9 @@ impl<D: DomTypes> CallbackObject<D> {
     }
 }
 
-impl<D: DomTypes> Drop for CallbackObject<D> {
+unsafe impl<D: DomTypes> crate::UnsafeDrop for CallbackObject<D> {
     #[expect(unsafe_code)]
-    fn drop(&mut self) {
+    unsafe fn drop(&mut self) {
         unsafe {
             if let Some(cx) = Runtime::get() {
                 RemoveRawValueRoot(cx.as_ptr(), self.permanent_js_root.get_unsafe());
