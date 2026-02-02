@@ -147,6 +147,18 @@ fn assert_not_impl_traceable(ty: &syn::Type) -> proc_macro2::TokenStream {
 
 fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
     let ast = s.ast();
+    let is_copy = ast.attrs.iter().any(|attr| {
+        attr.path().is_ident("derive") && {
+            let mut copy = false;
+            let _ = attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("Copy") {
+                    copy = true;
+                }
+                Ok(())
+            });
+            copy
+        }
+    });
     let global_no_trace = ast
         .attrs
         .iter()
@@ -155,6 +167,9 @@ fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
         .attrs
         .iter()
         .any(|attr| attr.path().is_ident("unsafe_drop"));
+    if unsafe_drop && is_copy {
+        panic!("No need to use #[unsafe_drop] on Copy types");
+    }
     let mut asserts = quote!();
     let match_body = s.each(|binding| {
         if global_no_trace {
@@ -179,7 +194,7 @@ fn js_traceable_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let mut where_clause = where_clause.unwrap_or(&parse_quote!(where)).clone();
-    let drop_impl = if global_no_trace {
+    let drop_impl = if global_no_trace || is_copy {
         quote!()
     } else if unsafe_drop {
         quote!(

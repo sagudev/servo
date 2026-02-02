@@ -12,7 +12,6 @@ use num_traits::Float;
 
 /// Encapsulates the IDL restricted float type.
 #[derive(Clone, Copy, Debug, Eq, JSTraceable, PartialEq)]
-#[no_trace]
 pub struct Finite<T: Float>(T);
 
 impl<T: Float> Finite<T> {
