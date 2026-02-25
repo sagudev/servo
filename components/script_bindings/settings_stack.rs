@@ -3,15 +3,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 use std::marker::PhantomData;
-use std::thread;
 
+use js::context::JSContext;
 use js::jsapi::{HideScriptedCaller, UnhideScriptedCaller};
 use js::rust::Runtime;
 
 use crate::DomTypes;
 use crate::interfaces::{DomHelpers, GlobalScopeHelpers};
 use crate::root::Dom;
-use crate::script_runtime::temp_cx;
 
 #[derive(Debug, Eq, JSTraceable, PartialEq)]
 pub enum StackEntryKind {
@@ -30,7 +29,11 @@ pub struct StackEntry<D: DomTypes> {
 ///
 /// <https://html.spec.whatwg.org/multipage/#prepare-to-run-script>
 /// <https://html.spec.whatwg.org/multipage/#clean-up-after-running-script>
-pub fn run_a_script<D: DomTypes, R>(global: &D::GlobalScope, f: impl FnOnce() -> R) -> R {
+pub fn run_a_script<D: DomTypes, R>(
+    cx: &mut JSContext,
+    global: &D::GlobalScope,
+    f: impl FnOnce(&mut JSContext) -> R,
+) -> R {
     let settings_stack = <D as DomHelpers<D>>::settings_stack();
     settings_stack.with(|stack| {
         trace!("Prepare to run script with {:p}", global);
@@ -47,7 +50,7 @@ pub fn run_a_script<D: DomTypes, R>(global: &D::GlobalScope, f: impl FnOnce() ->
         )
         .entered()
     });
-    let r = f();
+    let r = f(cx);
     let stack_is_empty = settings_stack.with(|stack| {
         let mut stack = stack.borrow_mut();
         let entry = stack.pop().unwrap();
@@ -61,9 +64,8 @@ pub fn run_a_script<D: DomTypes, R>(global: &D::GlobalScope, f: impl FnOnce() ->
     });
 
     // Step 5
-    if !thread::panicking() && stack_is_empty {
-        let mut cx = unsafe { temp_cx() };
-        global.perform_a_microtask_checkpoint(&mut cx);
+    if stack_is_empty {
+        global.perform_a_microtask_checkpoint(cx);
     }
     r
 }

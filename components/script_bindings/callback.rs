@@ -7,12 +7,12 @@
 use std::default::Default;
 use std::ffi::CString;
 use std::mem::drop;
+use std::ptr::NonNull;
 use std::rc::Rc;
 
-use js::jsapi::{
-    AddRawValueRoot, EnterRealm, Heap, IsCallable, JSObject, LeaveRealm, RemoveRawValueRoot,
-};
+use js::jsapi::{AddRawValueRoot, Heap, IsCallable, JSObject, RemoveRawValueRoot};
 use js::jsval::{JSVal, NullValue, ObjectValue, UndefinedValue};
+use js::realm::AutoRealm;
 use js::rust::wrappers::{JS_GetProperty, JS_WrapObject};
 use js::rust::{HandleObject, MutableHandleValue, Runtime};
 
@@ -258,9 +258,10 @@ pub(crate) fn wrap_call_this_value<T: ThisReflector>(
 ///
 /// <https://webidl.spec.whatwg.org/#es-invoking-callback-functions>
 pub fn call_setup<D: DomTypes, T: CallbackContainer<D>, R>(
+    cx: &mut js::context::JSContext,
     callback: &T,
     handling: ExceptionHandling,
-    f: impl FnOnce(JSContext) -> R,
+    f: impl FnOnce(&mut js::context::JSContext) -> R,
 ) -> R {
     // The global for reporting exceptions. This is the global object of the
     // (possibly wrapped) callback object.
@@ -268,28 +269,25 @@ pub fn call_setup<D: DomTypes, T: CallbackContainer<D>, R>(
     if let Some(window) = global.downcast::<D::Window>() {
         window.Document().ensure_safe_to_run_script_or_layout();
     }
-    let cx = D::GlobalScope::get_cx();
 
     let global = &global;
 
     // Step 8: Prepare to run script with relevant settings.
-    run_a_script::<D, R>(global, move || {
+    run_a_script::<D, R>(cx, global, |cx| {
         // Step 9: Prepare to run a callback with stored settings.
         let ais = callback
             .incumbent()
             .map(GenericAutoIncumbentScript::<D>::new);
-        let old_realm = unsafe { EnterRealm(*cx, callback.callback()) };
-        let r = f(cx);
-        unsafe {
-            LeaveRealm(*cx, old_realm);
-        }
+        let mut realm = AutoRealm::new(cx, NonNull::new(callback.callback()).unwrap());
+        let r = f(&mut realm);
+        drop(realm);
         if handling == ExceptionHandling::Report {
             let ar = enter_realm::<D>(&**global);
             <D as DomHelpers<D>>::report_pending_exception(
-                cx,
+                cx.into(),
                 true,
                 InRealm::Entered(&ar),
-                CanGc::note(),
+                CanGc::from_cx(cx),
             );
         }
         // Step 14.1: Clean up after running a callback with stored settings.

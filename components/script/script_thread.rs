@@ -2103,7 +2103,7 @@ impl ScriptThread {
             DevtoolScriptControlMsg::EvaluateJS(id, s, reply) => match documents.find_window(id) {
                 Some(window) => {
                     let global = window.as_global_scope();
-                    run_a_script::<DomTypeHolder, _>(global, || {
+                    run_a_script::<DomTypeHolder, _>(cx, global, |cx| {
                         devtools::handle_evaluate_js(global, s, reply, cx)
                     });
                 },

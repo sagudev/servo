@@ -373,7 +373,9 @@ pub(crate) fn jsval_to_webdriver(
     global_scope: &GlobalScope,
     val: HandleValue,
 ) -> WebDriverJSResult {
-    run_a_script::<DomTypeHolder, _>(global_scope, || {
+    run_a_script::<DomTypeHolder, _>(cx, global_scope, |cx| {
+        let mut realm = CurrentRealm::assert(cx);
+        let cx = &mut realm;
         let mut seen = HashSet::new();
         let result = jsval_to_webdriver_inner(cx.into(), global_scope, val, &mut seen);
 
