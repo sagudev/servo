@@ -98,7 +98,7 @@ jobs:
           sudo apt update
           ./mach bootstrap --yes --skip-lints --skip-nextest
           # FIXME #41043, #41044
-          sudo apt install -qy --no-install-recommends mesa-vulkan-drivers fonts-noto-cjk fonts-dejavu-extra
+          sudo apt install -qy --no-install-recommends mesa-vulkan-drivers fonts-noto-cjk fonts-dejavu-extra lldb
           # FIXME #35029
           sudo apt purge -y fonts-droid-fallback
       - name: Sync from upstream WPT
@@ -107,6 +107,10 @@ jobs:
           ./mach update-wpt --sync --patch
       - name: Run tests
         run: |
+          sudo mkdir /cores
+          sudo chmod 777 /cores
+          sudo bash -c 'echo "/cores/%e.%p.%t" > /proc/sys/kernel/core_pattern'
+          ulimit -c unlimited
           mkdir -p wpt-filtered-logs/linux
           mkdir -p wpt-full-logs/linux
           nproc=$(nproc)
@@ -122,6 +126,19 @@ jobs:
             ${{ inputs.wpt-args }}
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
+      - run: |
+          for core in /cores/*; do lldb ${{ inputs.binary-path }} -c "$core" -o "thread backtrace all" -o "quit" > "${core}.txt"; done
+          find /cores -depth -name '*[:\"<>|*?]*' | while IFS= read -r file; do
+            new=$(echo "$file" | sed 's/[:\"<>|*?]/_/g')
+            if [ "$file" != "$new" ]; then
+              mv -v -- "$file" "$new"
+            fi
+          done
+      - uses: actions/upload-artifact@v6
+        if: ${{ always() }}
+        with:
+          name: cores-${{ matrix.chunk_id }}
+          path: /cores/*.txt
       - name: Archive results (filtered)
         uses: actions/upload-artifact@v6
         if: ${{ always() }}
