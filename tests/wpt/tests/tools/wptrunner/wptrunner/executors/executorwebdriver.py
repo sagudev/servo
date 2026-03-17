@@ -7,6 +7,7 @@ import socket
 import threading
 import traceback
 from urllib.parse import urljoin
+from time import sleep
 
 from .base import (AsyncCallbackHandler,
                    CallbackHandler,
@@ -1137,6 +1138,7 @@ class WebDriverProtocol(Protocol):
         return True
 
     def after_connect(self):
+        sleep(40)
         self.testharness.load_runner(self.executor.last_environment["protocol"])
 
 
