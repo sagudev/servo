@@ -27,12 +27,14 @@ use wgc::id::DeviceId;
 use wgc::pipeline::ShaderModuleDescriptor;
 use wgc::resource::BufferMapOperation;
 pub use wgpu_core as wgc;
-use wgpu_core::command::RenderPassDescriptor;
-use wgpu_core::resource::BufferAccessResult;
+use wgpu_core::command::{RenderPassDescriptor, TexelCopyTextureInfo};
+use wgpu_core::resource::{BufferAccessResult, TextureViewDescriptor};
 pub use wgpu_types as wgt;
 use wgpu_types::error::WebGpuError;
 use wgpu_types::{
-    ExperimentalFeatures, MemoryHints, TexelCopyBufferLayout, TextureDimension, TextureUsages,
+    ExperimentalFeatures, Extent3d, ExternalTextureDescriptor, ExternalTextureFormat,
+    ExternalTextureTransferFunction, MemoryHints, Origin3d, TexelCopyBufferLayout, TextureAspect,
+    TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use wgt::InstanceDescriptor;
 
@@ -1250,6 +1252,152 @@ impl WGPU {
                             destination_offset,
                         );
                         self.maybe_dispatch_wgpu_error(device_id, result.err());
+                    },
+                    WebGPURequest::CreatePlanarTexture {
+                        device_id,
+                        size,
+                        format,
+                        texture_id,
+                        texture_view_id,
+                    } => {
+                        let (_, maybe_error) = self.global.device_create_texture(
+                            device_id,
+                            &TextureDescriptor {
+                                label: None,
+                                size: Extent3d {
+                                    width: size.width,
+                                    height: size.height,
+                                    depth_or_array_layers: 1,
+                                },
+                                mip_level_count: 1,
+                                sample_count: 1,
+                                dimension: TextureDimension::D2,
+                                format: match format {
+                                    pixels::SnapshotPixelFormat::RGBA => TextureFormat::Rgba8Unorm,
+                                    pixels::SnapshotPixelFormat::BGRA => TextureFormat::Bgra8Unorm,
+                                },
+                                usage: TextureUsages::COPY_DST,
+                                view_formats: Vec::new(),
+                            },
+                            Some(texture_id),
+                        );
+                        if let Some(error) = maybe_error {
+                            log::error!(
+                                "Failed to create planar texture {:?} ({:?})",
+                                texture_id,
+                                error
+                            );
+                        }
+                        let (_, maybe_error) = self.global.texture_create_view(
+                            texture_id,
+                            &TextureViewDescriptor {
+                                ..Default::default()
+                            },
+                            Some(texture_view_id),
+                        );
+                        if let Some(error) = maybe_error {
+                            log::error!(
+                                "Failed to create planar texture view {:?} ({:?})",
+                                texture_view_id,
+                                error
+                            );
+                        }
+                    },
+                    WebGPURequest::UpdatePlanarTexture {
+                        queue_id,
+                        texture_id,
+                        snapshot,
+                    } => {
+                        let result = self.global.queue_write_texture(
+                            queue_id,
+                            &TexelCopyTextureInfo {
+                                texture: texture_id,
+                                mip_level: 0,
+                                origin: Origin3d::ZERO,
+                                aspect: TextureAspect::All,
+                            },
+                            snapshot.data(),
+                            &TexelCopyBufferLayout {
+                                offset: 0,
+                                bytes_per_row: Some(snapshot.size().width * 4),
+                                rows_per_image: None,
+                            },
+                            &Extent3d {
+                                width: snapshot.size().width,
+                                height: snapshot.size().height,
+                                depth_or_array_layers: 1,
+                            },
+                        );
+                        if let Err(e) = result {
+                            log::error!(
+                                "Failed to write planar texture {:?} ({:?})",
+                                texture_id,
+                                e
+                            );
+                        }
+                    },
+                    WebGPURequest::DropPlanarTexture(id, view_id) => {
+                        self.global.texture_view_drop(view_id);
+                        self.global.texture_drop(id);
+                        self.poller.wake();
+                        if let Err(e) = self.script_sender.send(WebGPUMsg::FreeTextureView(view_id))
+                        {
+                            warn!("Unable to send FreeTextureView({:?}) ({:?})", view_id, e);
+                        };
+                        if let Err(e) = self.script_sender.send(WebGPUMsg::FreeTexture(id)) {
+                            warn!("Unable to send FreeTexture({:?}) ({:?})", id, e);
+                        };
+                    },
+                    WebGPURequest::ImportExternalTexture {
+                        device_id,
+                        external_texture_id,
+                        size,
+                        label,
+                        plane0,
+                    } => {
+                        let desc = ExternalTextureDescriptor {
+                            label: Some(label.into()),
+                            width: size.width,
+                            height: size.height,
+                            format: ExternalTextureFormat::Rgba,
+                            yuv_conversion_matrix: [0.; 16],
+                            gamut_conversion_matrix: [
+                                1., 0., 0., //
+                                0., 1., 0., //
+                                0., 0., 1., //
+                            ],
+                            src_transfer_function: ExternalTextureTransferFunction::default(),
+                            dst_transfer_function: ExternalTextureTransferFunction::default(),
+                            sample_transform: [
+                                1., 0., 0., //
+                                0., 1., 0., //
+                            ],
+                            load_transform: [
+                                1., 0., 0., //
+                                0., 1., 0., //
+                            ],
+                        };
+                        if let Some(plane0) = plane0 {
+                            self.global.device_create_external_texture(
+                                device_id,
+                                &desc,
+                                &[plane0],
+                                Some(external_texture_id),
+                            );
+                        } else {
+                            self.global
+                                .create_external_texture_error(Some(external_texture_id), &desc);
+                        }
+                    },
+                    WebGPURequest::DestroyExternalTexture(id) => {
+                        self.global.external_texture_destroy(id);
+                    },
+                    WebGPURequest::DropExternalTexture(id) => {
+                        self.global.external_texture_drop(id);
+                        if let Err(e) = self.script_sender.send(WebGPUMsg::FreeExternalTexture(id))
+                        {
+                            warn!("Unable to send FreeExternalTexture({:?}) ({:?})", id, e);
+                        };
                     },
                 }
             }
