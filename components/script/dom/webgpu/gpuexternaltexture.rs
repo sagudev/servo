@@ -2,6 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+use std::cell::Cell;
+use std::rc::Rc;
+
 use dom_struct::dom_struct;
 use euclid::default::Size2D;
 use js::context::JSContext;
@@ -38,6 +41,9 @@ pub(crate) struct PlanarTexture {
     texture_id: WebGPUTexture,
     #[no_trace]
     texture_view_id: WebGPUTextureView,
+    expired: Cell<bool>,
+    #[no_trace]
+    size: Size2D<u32>,
 }
 
 impl PlanarTexture {
@@ -47,11 +53,12 @@ impl PlanarTexture {
         let texture_id = WebGPUTexture(device.global().wgpu_id_hub().create_texture_id());
         let texture_view_id =
             WebGPUTextureView(device.global().wgpu_id_hub().create_texture_view_id());
+        let size = snapshot.size();
         if let Err(error) = channel.0.send(WebGPURequest::CreatePlanarTexture {
             device_id: device_id.0,
             texture_id: texture_id.0,
             texture_view_id: texture_view_id.0,
-            size: snapshot.size(),
+            size,
             format: snapshot.format(),
         }) {
             warn!("Failed to send CreatePlanarTexture ({error})");
@@ -62,12 +69,21 @@ impl PlanarTexture {
             queue_id,
             texture_id,
             texture_view_id,
+            size,
+            expired: Cell::new(true),
         };
         self_.update(snapshot);
         self_
     }
 
+    pub(crate) fn size(&self) -> Size2D<u32> {
+        self.size
+    }
+
     pub(crate) fn update(&self, snapshot: Snapshot) {
+        if !self.expired.get() {
+            return;
+        }
         if let Err(error) = self.channel.0.send(WebGPURequest::UpdatePlanarTexture {
             queue_id: self.queue_id.0,
             texture_id: self.texture_id.0,
@@ -75,6 +91,15 @@ impl PlanarTexture {
         }) {
             warn!("Failed to send UpdatePlanarTexture ({error})");
         }
+        self.expired.set(false);
+    }
+
+    pub(crate) fn expire(&self) {
+        self.expired.set(true);
+    }
+
+    pub(crate) fn is_expired(&self) -> bool {
+        self.expired.get()
     }
 }
 
@@ -117,7 +142,8 @@ impl Drop for DroppableGPUExternalTexture {
 pub(crate) struct GPUExternalTexture {
     reflector_: Reflector,
     label: DomRefCell<USVString>,
-    planar_texture: Option<PlanarTexture>,
+    #[ignore_malloc_size_of = "rc"]
+    planar_texture: Option<Rc<PlanarTexture>>,
     droppable: DroppableGPUExternalTexture,
 }
 
@@ -126,7 +152,7 @@ impl GPUExternalTexture {
         channel: WebGPU,
         external_texture: WebGPUExternalTexture,
         label: USVString,
-        planar_texture: Option<PlanarTexture>,
+        planar_texture: Option<Rc<PlanarTexture>>,
     ) -> GPUExternalTexture {
         Self {
             reflector_: Reflector::new(),
@@ -145,7 +171,7 @@ impl GPUExternalTexture {
         channel: WebGPU,
         external_texture: WebGPUExternalTexture,
         label: USVString,
-        planar_texture: Option<PlanarTexture>,
+        planar_texture: Option<Rc<PlanarTexture>>,
     ) -> DomRoot<GPUExternalTexture> {
         reflect_dom_object_with_cx(
             Box::new(GPUExternalTexture::new_inherited(
@@ -160,6 +186,9 @@ impl GPUExternalTexture {
     }
 
     pub(crate) fn expire(&self) {
+        if let Some(planar_texture) = &self.planar_texture {
+            planar_texture.expire();
+        }
         if let Err(error) = self
             .droppable
             .channel
@@ -181,33 +210,7 @@ impl GPUExternalTexture {
         device: &super::gpudevice::GPUDevice,
         descriptor: &GPUExternalTextureDescriptor,
     ) -> Fallible<DomRoot<GPUExternalTexture>> {
-        // 1. If source is not origin-clean, throw a SecurityError and return.
-        if !descriptor.source.origin_is_clean() {
-            return Err(script_bindings::error::Error::Security(Some(
-                "Source is not origin-clean".to_string(),
-            )));
-        }
-        // 2. Let usability be ? check the usability of the image argument(source).
-        let (size, planar_texture) = if !descriptor.source.is_usable() {
-            // 3. If usability is not good:
-            // Generate a validation error.
-            // Return an invalidated GPUExternalTexture.
-            (Size2D::zero(), None)
-        } else {
-            // 4. Let data be the result of converting the current image contents of source into the color space descriptor.colorSpace with unpremultiplied alpha.
-            descriptor
-                .source
-                .get_current_frame_data()
-                .map(|snapshot| {
-                    let size = snapshot.size();
-                    let planar_texture = PlanarTexture::new(device.channel(), device, snapshot);
-                    (size, Some(planar_texture))
-                })
-                .unwrap_or_else(|| {
-                    warn!("Failed to get current frame data");
-                    (Size2D::zero(), None)
-                })
-        };
+        let (size, planar_texture) = descriptor.source.planar_video_for_webgpu(device)?;
         // 5. Let result be a new GPUExternalTexture object wrapping data.
         let device_id = device.id().0;
         let channel = device.channel();
