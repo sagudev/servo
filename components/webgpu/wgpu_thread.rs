@@ -658,7 +658,7 @@ impl WGPU {
                         queue_id,
                         pipeline_id,
                     } => {
-                        let desc = DeviceDescriptor {
+                        let mut desc = DeviceDescriptor {
                             label: descriptor.label.as_ref().map(crate::Cow::from),
                             required_features: descriptor.required_features,
                             required_limits: descriptor.required_limits.clone(),
@@ -667,6 +667,11 @@ impl WGPU {
                             experimental_features: ExperimentalFeatures::disabled(),
                         };
                         let global = &self.global;
+                        // enable external texture support if available
+                        let features = global.adapter_features(adapter_id.0);
+                        if features.contains(wgpu_types::Features::EXTERNAL_TEXTURE) {
+                            desc.required_features |= wgpu_types::Features::EXTERNAL_TEXTURE;
+                        }
                         let device = WebGPUDevice(device_id);
                         let queue = WebGPUQueue(queue_id);
                         let result = global

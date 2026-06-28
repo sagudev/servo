@@ -10,16 +10,19 @@ use euclid::default::Size2D;
 use js::context::JSContext;
 use pixels::Snapshot;
 use script_bindings::cell::DomRefCell;
+use script_bindings::codegen::GenericBindings::WebGPUBinding::GPUDeviceMethods as _;
 use script_bindings::error::Fallible;
 use script_bindings::reflector::{Reflector, reflect_dom_object_with_cx};
 use webgpu_traits::{
     WebGPU, WebGPUDevice, WebGPUExternalTexture, WebGPUQueue, WebGPURequest, WebGPUTexture,
     WebGPUTextureView,
 };
+use wgpu_types::Features;
 
 use crate::dom::bindings::codegen::Bindings::WebGPUBinding::{
     GPUExternalTextureDescriptor, GPUExternalTextureMethods,
 };
+use crate::dom::bindings::error::Error;
 use crate::dom::bindings::refcounted::Trusted;
 use crate::dom::bindings::reflector::DomGlobal as _;
 use crate::dom::bindings::root::DomRoot;
@@ -210,7 +213,18 @@ impl GPUExternalTexture {
         device: &super::gpudevice::GPUDevice,
         descriptor: &GPUExternalTextureDescriptor,
     ) -> Fallible<DomRoot<GPUExternalTexture>> {
-        let (size, planar_texture) = descriptor.source.planar_video_for_webgpu(device)?;
+        let (size, planar_texture) = if device
+            .Features()
+            .wgpu_features()
+            .contains(Features::EXTERNAL_TEXTURE)
+        {
+            descriptor.source.planar_video_for_webgpu(device)?
+        } else {
+            // spec assumes that this is always supported, but that is not the case in wgpu
+            return Err(Error::NotSupported(Some(
+                "ExternalTexture is not supported on this device".to_string(),
+            )));
+        };
         // 5. Let result be a new GPUExternalTexture object wrapping data.
         let device_id = device.id().0;
         let channel = device.channel();
