@@ -214,6 +214,17 @@ skip = [
     # Duplicated by ml-kem. This should be gone in next version (>0.3.2)
     # of ml-kem.
     "sha3",
+
+    # Old wgpu used by vello which is disabled by default.
+    "bit-set",
+    "naga",
+    "wgpu-core",
+    "wgpu-core-deps-apple",
+    "wgpu-core-deps-emscripten",
+    "wgpu-core-deps-windows-linux-android",
+    "wgpu-hal",
+    "wgpu-naga-bridge",
+    "wgpu-types",
 ]
 
 # github.com organizations to allow git sources for
