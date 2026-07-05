@@ -618,6 +618,8 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
                 unsignedLongValue: 0,
                 unsignedShortValue: 0,
                 usvstringValue: USVString("".to_owned()),
+                sequenceOfOptional: vec![Some(DOMString::from("foo")), None],
+                sequenceOfOptionalDictionary: vec![None],
             }),
             doubleValue: None,
             enumValue: None,
@@ -694,6 +696,8 @@ impl TestBindingMethods<crate::DomTypeHolder> for TestBinding {
     fn PassCallbackInterface(&self, _: Rc<EventListener>) {}
     fn PassSequence(&self, _: Vec<i32>) {}
     fn PassAnySequence(&self, _: CustomAutoRooterGuard<Vec<JSVal>>) {}
+    fn PassSequenceOfOptional(&self, _: Vec<Option<DOMString>>) {}
+    fn PassSequenceOfOptionalDictionary(&self, _: Vec<Option<TestDictionary>>) {}
     fn AnySequencePassthrough(
         &self,
 

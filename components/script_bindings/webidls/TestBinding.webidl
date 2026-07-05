@@ -100,6 +100,8 @@ dictionary TestDictionaryDefaults {
   USVString? nullableUsvstringValue = "foo";
   // TestEnum? nullableEnumValue = "bar";
   object? nullableObjectValue = null;
+  sequence<DOMString?> sequenceOfOptional = [];
+  sequence<TestDictionaryParent?> sequenceOfOptionalDictionary = [];
 };
 
 dictionary TestURLLike {
@@ -292,6 +294,8 @@ interface TestBinding {
   undefined passCallbackInterface(EventListener listener);
   undefined passSequence(sequence<long> seq);
   undefined passAnySequence(sequence<any> seq);
+  undefined passSequenceOfOptional(sequence<DOMString?> seq);
+  undefined passSequenceOfOptionalDictionary(sequence<TestDictionaryParent?> seq);
   sequence<any> anySequencePassthrough(sequence<any> seq);
   undefined passObjectSequence(sequence<object> seq);
   undefined passStringSequence(sequence<DOMString> seq);
