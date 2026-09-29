@@ -8466,7 +8466,6 @@ dependencies = [
  "strum",
  "uuid",
  "webrender_api",
- "wgpu-core 30.0.0",
  "zeroize",
 ]
 
