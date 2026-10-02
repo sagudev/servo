@@ -112,18 +112,12 @@ where
         let entries = descriptor
             .entries
             .iter()
-            .map(|bgle| convert_bind_group_layout_entry::<D>(bgle, device))
-            .collect::<Fallible<Result<Vec<_>, _>>>()?;
+            .map(|bgle| convert_bind_group_layout_entry::<D>(bgle))
+            .collect::<Fallible<Vec<_>>>()?;
 
-        let desc = match entries {
-            Ok(entries) => Some(BindGroupLayoutDescriptor {
-                label: (&descriptor.parent).convert(),
-                entries: Cow::Owned(entries),
-            }),
-            Err(error) => {
-                device.dispatch_error(error);
-                None
-            },
+        let desc = BindGroupLayoutDescriptor {
+            label: (&descriptor.parent).convert(),
+            entries: Cow::Owned(entries),
         };
 
         let global = device.global_from_reflector();

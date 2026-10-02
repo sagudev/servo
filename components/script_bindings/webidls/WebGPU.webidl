@@ -114,6 +114,7 @@ interface GPUAdapter {
 dictionary GPUDeviceDescriptor : GPUObjectDescriptorBase {
     sequence<GPUFeatureName> requiredFeatures = [];
     record<DOMString, GPUSize64> requiredLimits;// = {};
+    GPUQueueDescriptor defaultQueue = {};
 };
 
 enum GPUFeatureName {

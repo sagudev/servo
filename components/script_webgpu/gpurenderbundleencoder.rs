@@ -17,7 +17,7 @@ use script_bindings::codegen::GenericBindings::WebGPUBinding::{
 use script_bindings::interfaces::PromiseHelpers;
 use script_bindings::reflector::{DomGlobalGeneric, Reflector, reflect_dom_object_with_wrap};
 use webgpu_traits::{
-    BindingCommand, BufferSize, DebugCommand, RenderBundleDepthStencil, RenderBundleDescriptor,
+    BindingCommand, DebugCommand, RenderBundleDepthStencil, RenderBundleDescriptor,
     RenderBundleEncoderCommand, RenderBundleEncoderDescriptor, RenderCommand, WebGPU,
     WebGPURenderBundle, WebGPURenderBundleEncoder, WebGPURequest,
 };
@@ -144,7 +144,6 @@ where
                 })
                 .transpose()?,
             sample_count: descriptor.parent.sampleCount,
-            multiview: None,
         };
 
         let id = device
@@ -261,7 +260,7 @@ where
                             buffer: buffer.id().0,
                             index_format: index_format.convert(),
                             offset,
-                            size: BufferSize::new(size),
+                            size: Some(size),
                         },
                     ),
                     device_id: self.device.id().0,
@@ -287,7 +286,7 @@ where
                             slot,
                             buffer: buffer.map(|b| b.id().0),
                             offset,
-                            size: BufferSize::new(size),
+                            size: Some(size),
                         },
                     ),
                     device_id: self.device.id().0,
@@ -489,11 +488,13 @@ where
             self.droppable
                 .channel
                 .0
-                .send(WebGPURequest::RenderBundleEncoderFinish {
-                    render_bundle_encoder_id: self.id().0,
-                    descriptor: desc,
-                    render_bundle_id,
+                .send(WebGPURequest::RenderBundleEncoderCommand {
                     device_id: self.device.id().0,
+                    render_bundle_encoder_id: self.id().0,
+                    render_command: RenderBundleEncoderCommand::Finish {
+                        render_bundle_id,
+                        desc,
+                    },
                 })
         {
             warn!(

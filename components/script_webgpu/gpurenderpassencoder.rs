@@ -17,8 +17,8 @@ use script_bindings::interfaces::PromiseHelpers;
 use script_bindings::reflector::{Reflector, reflect_dom_object_with_wrap};
 use script_bindings::root::DomRoot;
 use webgpu_traits::{
-    BindingCommand, BufferSize, DebugCommand, IndexFormat, RenderCommand, RenderPassEncoderCommand,
-    WebGPU, WebGPURenderPass, WebGPURequest,
+    BindingCommand, DebugCommand, IndexFormat, RenderCommand, RenderPassEncoderCommand, WebGPU,
+    WebGPURenderPass, WebGPURequest,
 };
 
 use crate::JSTraceable;
@@ -195,12 +195,7 @@ where
 
     /// <https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-end>
     fn End(&self) {
-        if let Err(e) = self.droppable.channel.0.send(WebGPURequest::EndRenderPass {
-            render_pass_id: self.id().0,
-            device_id: self.command_encoder.device_id().0,
-        }) {
-            warn!("Failed to send WebGPURequest::EndRenderPass: {e:?}");
-        }
+        self.send_render_command(RenderPassEncoderCommand::End);
     }
 
     /// <https://gpuweb.github.io/gpuweb/#dom-gpurenderencoderbase-setpipeline>
@@ -226,7 +221,7 @@ where
                     GPUIndexFormat::Uint32 => IndexFormat::Uint32,
                 },
                 offset,
-                size: BufferSize::new(size),
+                size: Some(size),
             },
         ))
     }
@@ -238,7 +233,7 @@ where
                 slot,
                 buffer: buffer.map(|b| b.id().0),
                 offset,
-                size: BufferSize::new(size),
+                size: Some(size),
             },
         ))
     }

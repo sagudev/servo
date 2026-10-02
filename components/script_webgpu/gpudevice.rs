@@ -42,11 +42,11 @@ use script_bindings::{DomTypes, cformat, task};
 use stylo_atoms::atom;
 use webgpu_traits::{
     BlendState, ColorTargetState, ColorWrites, DepthBiasState, DepthStencilState, Features,
-    FragmentState, Limits, MultisampleState, PopError, RenderPipelineDescriptor, StencilFaceState,
-    StencilState, TextureFormat, VertexAttribute, VertexBufferLayout, VertexState, VertexStepMode,
-    WebGPU, WebGPUComputePipeline, WebGPUComputePipelineResponse, WebGPUDevice,
-    WebGPUPoppedErrorScopeResponse, WebGPUQueue, WebGPURenderPipeline,
-    WebGPURenderPipelineResponse, WebGPURequest,
+    FragmentState, Limits, MultisampleState, PipelineError, RenderPipelineDescriptor,
+    StencilFaceState, StencilState, TextureFormat, VertexAttribute, VertexBufferLayout,
+    VertexState, VertexStepMode, WebGPU, WebGPUComputePipeline, WebGPUComputePipelineResponse,
+    WebGPUDevice, WebGPUPoppedErrorScopeResponse, WebGPUQueue, WebGPURenderPipeline,
+    WebGPURenderPipelineResponse, WebGPURequest, full_features,
 };
 
 use super::gpudevicelostinfo::GPUDeviceLostInfo;
@@ -276,9 +276,7 @@ where
         format: &GPUTextureFormat,
     ) -> Fallible<TextureFormat> {
         let texture_format: TextureFormat = (*format).convert();
-        if self
-            .features
-            .wgpu_features()
+        if full_features(*self.features.wgpu_features())
             .contains(texture_format.required_features())
         {
             Ok(texture_format)
@@ -308,7 +306,6 @@ where
         let desc = RenderPipelineDescriptor {
             label: (&descriptor.parent.parent).convert(),
             layout: pipeline_layout.explicit(),
-            cache: None,
             vertex: VertexState {
                 stage: (&descriptor.vertex.parent).convert(),
                 buffers: Cow::Owned(
@@ -413,7 +410,6 @@ where
                 mask: descriptor.multisample.mask as u64,
                 alpha_to_coverage_enabled: descriptor.multisample.alphaToCoverageEnabled,
             },
-            multiview_mask: None,
         };
         Ok(desc)
     }
@@ -723,10 +719,8 @@ where
         promise: &<D::Promise as PromiseHelpers<D>>::StackRoot,
     ) {
         match response {
-            Ok(None) | Err(PopError::Lost) => {
-                promise.resolve_native(cx, &None::<Option<GPUError<D>>>)
-            },
-            Err(PopError::Empty) => promise.reject_error(
+            Ok(None) => promise.resolve_native(cx, &None::<Option<GPUError<D>>>),
+            Err(()) => promise.reject_error(
                 cx,
                 Error::Operation(Some("Error scope stack is empty".into())),
             ),
@@ -764,7 +758,7 @@ where
                 );
                 promise.resolve_native(cx, &gpu_compute_pipeline)
             },
-            Err(webgpu_traits::Error::Validation(msg)) => {
+            Err(PipelineError::Validation(msg)) => {
                 let gpu_pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -773,7 +767,7 @@ where
                 );
                 promise.reject_native(cx, &gpu_pipeline_error)
             },
-            Err(webgpu_traits::Error::OutOfMemory(msg) | webgpu_traits::Error::Internal(msg)) => {
+            Err(PipelineError::Internal(msg)) => {
                 let gpu_pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -812,7 +806,7 @@ where
                 );
                 promise.resolve_native(cx, &gpu_pipeline)
             },
-            Err(webgpu_traits::Error::Validation(msg)) => {
+            Err(PipelineError::Validation(msg)) => {
                 let pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -822,7 +816,7 @@ where
 
                 promise.reject_native(cx, &pipeline_error)
             },
-            Err(webgpu_traits::Error::OutOfMemory(msg) | webgpu_traits::Error::Internal(msg)) => {
+            Err(PipelineError::Internal(msg)) => {
                 let pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),

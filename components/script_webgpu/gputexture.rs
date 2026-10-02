@@ -18,8 +18,8 @@ use script_bindings::dom::MutNullableDom;
 use script_bindings::interfaces::PromiseHelpers;
 use script_bindings::reflector::{DomGlobalGeneric, Reflector, reflect_dom_object_with_wrap};
 use webgpu_traits::{
-    Extent3d, ImageSubresourceRange, TextureAspect, TextureDescriptor, TextureUsages,
-    TextureViewDescriptor, WebGPU, WebGPURequest, WebGPUTexture, WebGPUTextureView,
+    Extent3d, ImageSubresourceRange, TextureAspect, TextureComponentSwizzle, TextureDescriptor,
+    TextureUsages, TextureViewDescriptor, WebGPU, WebGPURequest, WebGPUTexture, WebGPUTextureView,
 };
 
 use crate::JSTraceable;
@@ -248,6 +248,7 @@ where
                     base_array_layer: descriptor.baseArrayLayer,
                     array_layer_count: descriptor.arrayLayerCount,
                 },
+                swizzle: TextureComponentSwizzle::default(),
             })
         } else {
             self.device

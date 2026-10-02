@@ -2605,7 +2605,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3173,7 +3173,7 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5560,7 +5560,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "arrayvec",
  "bit-set 0.11.1",
@@ -5585,7 +5585,7 @@ dependencies = [
 [[package]]
 name = "naga-types"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "hashbrown 0.17.1",
  "indexmap 2.14.2",
@@ -6495,7 +6495,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7717,7 +7717,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7774,7 +7774,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -9560,6 +9560,7 @@ dependencies = [
  "malloc_size_of_derive",
  "mozjs",
  "num-traits",
+ "parking_lot",
  "serde_core",
  "servo-base",
  "servo-constellation-traits",
@@ -10603,7 +10604,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.5",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -12057,7 +12058,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "arrayvec",
  "bit-set 0.11.1",
@@ -12102,7 +12103,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-apple"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "wgpu-hal 30.0.0",
 ]
@@ -12119,7 +12120,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-emscripten"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "wgpu-hal 30.0.0",
 ]
@@ -12127,7 +12128,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-linux-android-bsd"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "wgpu-hal 30.0.0",
 ]
@@ -12135,7 +12136,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-windows"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "wgpu-hal 30.0.0",
 ]
@@ -12152,7 +12153,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-remote"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "raw-window-handle",
  "wgpu-core 30.0.0",
@@ -12164,7 +12165,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-remote-types"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "hashbrown 0.17.1",
  "naga-types",
@@ -12229,7 +12230,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -12290,7 +12291,7 @@ dependencies = [
 [[package]]
 name = "wgpu-naga-bridge"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "naga 30.0.0",
  "wgpu-types 30.0.0",
@@ -12299,7 +12300,7 @@ dependencies = [
 [[package]]
 name = "wgpu-sync"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "cfg-if",
  "lock_api",
@@ -12324,7 +12325,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "30.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?branch=trunk#d1c95d96cd9b112595fe8cd84f1600e2ae7253f3"
+source = "git+https://github.com/sagudev/wgpu?branch=serde-on-err#dcff83027545c60ee09fa84e82b6d575ebf60553"
 dependencies = [
  "bitflags 2.13.2",
  "bytemuck",
@@ -12360,7 +12361,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

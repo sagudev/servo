@@ -14,16 +14,15 @@ use malloc_size_of_derive::MallocSizeOf;
 use pixels::Snapshot;
 use script_bindings::cell::DomRefCell;
 use script_bindings::codegen::GenericBindings::WebGPUBinding::{
-    GPUDeviceMethods, GPUExternalTextureDescriptor, GPUExternalTextureMethods,
-    GPUExternalTextureWrap,
+    GPUExternalTextureDescriptor, GPUExternalTextureMethods, GPUExternalTextureWrap,
 };
-use script_bindings::error::{Error, Fallible};
+use script_bindings::error::Fallible;
 use script_bindings::interfaces::PromiseHelpers;
 use script_bindings::reflector::{DomGlobalGeneric, Reflector, reflect_dom_object_with_wrap};
 use script_bindings::{DomTypes, task};
 use webgpu_traits::{
-    Features, WebGPU, WebGPUDevice, WebGPUExternalTexture, WebGPUQueue, WebGPURequest,
-    WebGPUTexture, WebGPUTextureView,
+    WebGPU, WebGPUDevice, WebGPUExternalTexture, WebGPUQueue, WebGPURequest, WebGPUTexture,
+    WebGPUTextureView,
 };
 
 use crate::JSTraceable;
@@ -241,19 +240,8 @@ where
         device: &GPUDevice<D>,
         descriptor: &GPUExternalTextureDescriptor<D>,
     ) -> Fallible<DomRoot<GPUExternalTexture<D>>> {
-        let (size, planar_texture) = if device
-            .Features()
-            .wgpu_features()
-            .contains(Features::EXTERNAL_TEXTURE)
-        {
-            // 2.1 - 2.4 inside the method
-            descriptor.source.planar_video_for_webgpu(device)?
-        } else {
-            // spec assumes that this is always supported, but that is not the case in wgpu
-            return Err(Error::NotSupported(Some(
-                "ExternalTexture is not supported on this device".to_string(),
-            )));
-        };
+        // 2.1 - 2.4 inside the method
+        let (size, planar_texture) = descriptor.source.planar_video_for_webgpu(device)?;
         // 2.5. Let result be a new GPUExternalTexture object wrapping data.
         let device_id = device.id().0;
         let channel = device.channel();
