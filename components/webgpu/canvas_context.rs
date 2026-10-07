@@ -17,23 +17,22 @@ use pixels::{SharedSnapshot, Snapshot, SnapshotAlphaMode, SnapshotPixelFormat};
 use rustc_hash::FxHashMap;
 use servo_base::Epoch;
 use servo_base::generic_channel::GenericSender;
-use webgpu_traits::id::{
-    self, BufferId, CommandBufferId, CommandEncoderId, DeviceId, QueueId, TextureId,
-};
 use webgpu_traits::{
-    BufferDescriptor, BufferUsages, CommandBufferDescriptor, CommandEncoderDescriptor,
-    ContextConfiguration, Extent3d, HostMap, Origin3d, PRESENTATION_BUFFER_COUNT, PendingTexture,
-    TexelCopyBufferInfo, TexelCopyBufferLayout, TexelCopyTextureInfo, TextureAspect,
-    WebGPUContextId, WebGPUMsg,
+    CommandBufferDescriptor, CommandEncoderDescriptor, ContextConfiguration, Error, Extent3d,
+    HostMap, Origin3d, PRESENTATION_BUFFER_COUNT, PendingTexture, TextureAspect, WebGPUContextId,
 };
 use webrender_api::units::DeviceIntSize;
 use webrender_api::{
     ExternalImageData, ExternalImageId, ExternalImageType, ImageDescriptor, ImageDescriptorFlags,
     ImageFormat, ImageKey,
 };
-use wgpu_core::global::Global;
-use wgpu_core::resource::{BufferAccessError, BufferMapOperation, CreateBufferError};
-use wgpu_types::COPY_BYTES_PER_ROW_ALIGNMENT;
+use wgpu_core::command::CommandBuffer;
+use wgpu_core::device::Device;
+use wgpu_core::device::queue::Queue;
+use wgpu_core::resource::{BufferAccessError, BufferMapOperation, ParentDevice, Texture};
+use wgpu_types::{BufferUsages, COPY_BYTES_PER_ROW_ALIGNMENT};
+
+use crate::wgpu_thread::WGPU;
 
 pub type WebGpuExternalImageMap = Arc<Mutex<FxHashMap<WebGPUContextId, ContextData>>>;
 
@@ -46,18 +45,42 @@ const fn image_data(context_id: WebGPUContextId) -> ExternalImageData {
     }
 }
 
-/// Allocated buffer on GPU device
-#[derive(Clone, Copy, Debug)]
-struct Buffer {
-    device_id: DeviceId,
-    queue_id: QueueId,
-    size: u64,
+pub type ResolvedContextConfiguration = ContextConfiguration<Arc<Device>, Arc<Queue>>;
+pub type ResolvedPendingTexture = PendingTexture<Arc<Texture>, ResolvedContextConfiguration>;
+
+impl WGPU {
+    pub(crate) fn resolve_canvas_config(
+        &self,
+        config: ContextConfiguration,
+    ) -> ResolvedContextConfiguration {
+        ContextConfiguration {
+            device: self.global.resolve_device_id(config.device),
+            queue: self.global.resolve_queue_id(config.queue),
+            format: config.format,
+            is_opaque: config.is_opaque,
+            size: config.size,
+        }
+    }
+
+    pub(crate) fn resolve_pending_texture(
+        &self,
+        pending_texture: PendingTexture,
+    ) -> ResolvedPendingTexture {
+        ResolvedPendingTexture {
+            texture: self.global.resolve_texture_id(pending_texture.texture),
+            configuration: self.resolve_canvas_config(pending_texture.configuration),
+        }
+    }
 }
+
+/// Allocated buffer on GPU device
+#[derive(Clone, Debug)]
+struct Buffer(Arc<wgpu_core::resource::Buffer>);
 
 impl Buffer {
     /// Returns true if buffer is compatible with provided configuration
-    fn has_compatible_config(&self, config: &ContextConfiguration) -> bool {
-        config.device_id == self.device_id && self.size == config.buffer_size()
+    fn has_compatible_config(&self, config: &ResolvedContextConfiguration) -> bool {
+        self.0.same_device(&config.device).is_ok() && self.0.size() == config.buffer_size()
     }
 }
 
@@ -74,6 +97,7 @@ struct MappedBuffer {
 
 // Mapped buffer can be shared between safely (it's read-only)
 unsafe impl Send for MappedBuffer {}
+unsafe impl Sync for MappedBuffer {}
 
 impl MappedBuffer {
     const fn slice(&'_ self) -> &'_ [u8] {
@@ -87,8 +111,10 @@ impl MappedBuffer {
     }
 }
 
-#[derive(Debug)]
-enum StagingBufferState {
+/// A staging buffer used for texture to buffer to CPU copy operations.
+#[derive(Debug, Default)]
+enum StagingBuffer {
+    #[default]
     /// The Initial state: the buffer has yet to be created with only an
     /// id reserved for it.
     Unassigned,
@@ -100,35 +126,22 @@ enum StagingBufferState {
     Mapped(MappedBuffer),
 }
 
-/// A staging buffer used for texture to buffer to CPU copy operations.
-#[derive(Debug)]
-struct StagingBuffer {
-    global: Arc<Global>,
-    buffer_id: BufferId,
-    state: StagingBufferState,
-}
-
-// [`StagingBuffer`] only used for reading (never for writing)
-// so it is safe to share between threads.
-unsafe impl Sync for StagingBuffer {}
-
 impl StagingBuffer {
-    fn new(global: Arc<Global>, buffer_id: BufferId) -> Self {
-        Self {
-            global,
-            buffer_id,
-            state: StagingBufferState::Unassigned,
-        }
+    fn new() -> Self {
+        Self::Unassigned
     }
 
     const fn is_mapped(&self) -> bool {
-        matches!(self.state, StagingBufferState::Mapped(..))
+        matches!(self, StagingBuffer::Mapped(..))
     }
 
     /// Return true if buffer can be used directly with provided config
     /// without any additional work
-    fn is_available_and_has_compatible_config(&self, config: &ContextConfiguration) -> bool {
-        let StagingBufferState::Available(buffer) = &self.state else {
+    fn is_available_and_has_compatible_config(
+        &self,
+        config: &ResolvedContextConfiguration,
+    ) -> bool {
+        let StagingBuffer::Available(buffer) = self else {
             return false;
         };
         buffer.has_compatible_config(config)
@@ -137,47 +150,44 @@ impl StagingBuffer {
     /// Return true if buffer is not mapping or being mapped
     const fn needs_assignment(&self) -> bool {
         matches!(
-            self.state,
-            StagingBufferState::Unassigned | StagingBufferState::Available(_)
+            self,
+            StagingBuffer::Unassigned | StagingBuffer::Available(_)
         )
     }
 
     /// Make buffer available by unmapping / destroying it and then recreating it if needed.
-    fn ensure_available(&mut self, config: &ContextConfiguration) -> Result<(), CreateBufferError> {
-        let recreate = match &self.state {
-            StagingBufferState::Unassigned => true,
-            StagingBufferState::Available(buffer) |
-            StagingBufferState::Mapping(buffer) |
-            StagingBufferState::Mapped(MappedBuffer { buffer, .. }) => {
+    fn ensure_available(&mut self, config: &ResolvedContextConfiguration) -> Result<(), Error> {
+        let recreate = match self {
+            StagingBuffer::Unassigned => true,
+            StagingBuffer::Available(buffer) |
+            StagingBuffer::Mapping(buffer) |
+            StagingBuffer::Mapped(MappedBuffer { buffer, .. }) => {
                 if buffer.has_compatible_config(config) {
-                    let _ = self.global.buffer_unmap(self.buffer_id);
+                    buffer.0.unmap();
                     false
                 } else {
-                    self.global.buffer_drop(self.buffer_id);
                     true
                 }
             },
         };
         if recreate {
             let buffer_size = config.buffer_size();
-            let (_, error) = self.global.device_create_buffer(
-                config.device_id,
-                &BufferDescriptor {
+            config
+                .device
+                .push_error_scope(webgpu_traits::ErrorFilter::Validation);
+            let buffer = config
+                .device
+                .create_buffer(&wgpu_core::resource::BufferDescriptor {
                     label: None,
                     size: buffer_size,
                     usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST,
                     mapped_at_creation: false,
-                },
-                Some(self.buffer_id),
-            );
-            if let Some(error) = error {
-                return Err(error);
+                });
+
+            if let Ok(Some(error)) = config.device.pop_error_scope() {
+                return Err(error.into());
             };
-            self.state = StagingBufferState::Available(Buffer {
-                device_id: config.device_id,
-                queue_id: config.queue_id,
-                size: buffer_size,
-            });
+            *self = StagingBuffer::Available(Buffer(buffer));
         }
         Ok(())
     }
@@ -188,35 +198,28 @@ impl StagingBuffer {
     /// Caller must submit command buffer to queue.
     fn prepare_load_texture_command_buffer(
         &mut self,
-        texture_id: TextureId,
-        encoder_id: CommandEncoderId,
-        command_buffer_id: CommandBufferId,
-        config: &ContextConfiguration,
-    ) -> Result<CommandBufferId, Box<dyn std::error::Error>> {
+        texture: Arc<Texture>,
+        config: &ResolvedContextConfiguration,
+    ) -> Result<Arc<CommandBuffer>, Box<dyn std::error::Error>> {
         self.ensure_available(config)?;
-        let StagingBufferState::Available(buffer) = &self.state else {
+        let StagingBuffer::Available(buffer) = self else {
             unreachable!("Should be made available by `ensure_available`")
         };
-        let device_id = buffer.device_id;
         let command_descriptor = CommandEncoderDescriptor { label: None };
-        let (encoder_id, error) = self.global.device_create_command_encoder(
-            device_id,
-            &command_descriptor,
-            Some(encoder_id),
-        );
-        if let Some(error) = error {
-            return Err(error.into());
-        };
-        let buffer_info = TexelCopyBufferInfo {
-            buffer: self.buffer_id,
-            layout: TexelCopyBufferLayout {
+        config
+            .device
+            .push_error_scope(webgpu_traits::ErrorFilter::Validation);
+        let encoder = config.device.create_command_encoder(&command_descriptor);
+        let buffer_info = wgpu_types::TexelCopyBufferInfo {
+            buffer: buffer.0.clone(),
+            layout: wgpu_types::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(config.stride()),
                 rows_per_image: None,
             },
         };
-        let texture_info = TexelCopyTextureInfo {
-            texture: texture_id,
+        let texture_info = wgpu_types::TexelCopyTextureInfo {
+            texture,
             mip_level: 0,
             origin: Origin3d::ZERO,
             aspect: TextureAspect::All,
@@ -226,38 +229,30 @@ impl StagingBuffer {
             height: config.size.height,
             depth_or_array_layers: 1,
         };
-        self.global.command_encoder_copy_texture_to_buffer(
-            encoder_id,
-            &texture_info,
-            &buffer_info,
-            &copy_size,
-        )?;
-        let (command_buffer_id, error) = self.global.command_encoder_finish(
-            encoder_id,
-            &CommandBufferDescriptor::default(),
-            Some(command_buffer_id),
-        );
-        if let Some((_, error)) = error {
-            return Err(error.into());
-        };
-        Ok(command_buffer_id)
+        encoder.copy_texture_to_buffer(&texture_info, &buffer_info, &copy_size);
+        let cmd_buffer = encoder.finish(&CommandBufferDescriptor::default());
+        if let Ok(Some(error)) = config.device.pop_error_scope() {
+            Err(error.into())
+        } else {
+            Ok(cmd_buffer)
+        }
     }
 
     /// Unmaps the buffer or cancels a mapping operation if one is in progress.
     fn unmap(&mut self) {
-        match self.state {
-            StagingBufferState::Unassigned | StagingBufferState::Available(_) => {},
-            StagingBufferState::Mapping(buffer) |
-            StagingBufferState::Mapped(MappedBuffer { buffer, .. }) => {
-                let _ = self.global.buffer_unmap(self.buffer_id);
-                self.state = StagingBufferState::Available(buffer)
+        let t = std::mem::take(self);
+        *self = match t {
+            s @ StagingBuffer::Unassigned | s @ StagingBuffer::Available(_) => s,
+            StagingBuffer::Mapping(buffer) | StagingBuffer::Mapped(MappedBuffer { buffer, .. }) => {
+                buffer.0.unmap();
+                StagingBuffer::Available(buffer)
             },
-        }
+        };
     }
 
     /// Obtain a snapshot from this buffer if is mapped or return `None` if it is not mapped.
     fn snapshot(&self) -> Option<Snapshot> {
-        let StagingBufferState::Mapped(mapped) = &self.state else {
+        let StagingBuffer::Mapped(mapped) = &self else {
             return None;
         };
         let format = match mapped.image_format {
@@ -293,19 +288,6 @@ impl StagingBuffer {
     }
 }
 
-impl Drop for StagingBuffer {
-    fn drop(&mut self) {
-        match self.state {
-            StagingBufferState::Unassigned => {},
-            StagingBufferState::Available(_) |
-            StagingBufferState::Mapping(_) |
-            StagingBufferState::Mapped(_) => {
-                self.global.buffer_drop(self.buffer_id);
-            },
-        }
-    }
-}
-
 pub struct WebGpuExternalImages {
     pub image_map: WebGpuExternalImageMap,
     pub locked_ids: FxHashMap<WebGPUContextId, PresentationStagingBuffer>,
@@ -334,7 +316,7 @@ impl WebRenderExternalImageApi for WebGpuExternalImages {
         };
         self.locked_ids.insert(id, presentation);
         let presentation = self.locked_ids.get(&id).unwrap();
-        let StagingBufferState::Mapped(mapped_buffer) = &presentation.staging_buffer.state else {
+        let StagingBuffer::Mapped(mapped_buffer) = &*presentation.staging_buffer else {
             unreachable!("Presentation staging buffer should be mapped")
         };
         let size = mapped_buffer.image_size;
@@ -408,17 +390,13 @@ pub struct ContextData {
 }
 
 impl ContextData {
-    fn new(
-        global: &Arc<Global>,
-        buffer_ids: ArrayVec<id::BufferId, PRESENTATION_BUFFER_COUNT>,
-        size: DeviceIntSize,
-    ) -> Self {
+    fn new(size: DeviceIntSize) -> Self {
         Self {
             image_key: None,
             size,
-            inactive_staging_buffers: buffer_ids
-                .iter()
-                .map(|buffer_id| StagingBuffer::new(global.clone(), *buffer_id))
+            inactive_staging_buffers: (0..PRESENTATION_BUFFER_COUNT)
+                .into_iter()
+                .map(|_| StagingBuffer::new())
                 .collect(),
             presentation: None,
             next_epoch: Epoch(1),
@@ -428,7 +406,7 @@ impl ContextData {
     /// Returns `None` if no staging buffer is unused or failure when making it available
     fn get_or_make_available_buffer(
         &'_ mut self,
-        config: &ContextConfiguration,
+        config: &ResolvedContextConfiguration,
     ) -> Option<StagingBuffer> {
         self.inactive_staging_buffers
             .iter()
@@ -464,21 +442,7 @@ impl ContextData {
 
     /// Destroy the context that this [`ContextData`] represents,
     /// freeing all of its buffers, and deleting the associated WebRender image.
-    fn destroy(
-        mut self,
-        script_sender: &GenericSender<WebGPUMsg>,
-        paint_api: &CrossProcessPaintApi,
-    ) {
-        // This frees the id in the `ScriptThread`.
-        for staging_buffer in self.inactive_staging_buffers {
-            if let Err(error) = script_sender.send(WebGPUMsg::FreeBuffer(staging_buffer.buffer_id))
-            {
-                warn!(
-                    "Unable to send FreeBuffer({:?}) ({error})",
-                    staging_buffer.buffer_id
-                );
-            };
-        }
+    fn destroy(mut self, paint_api: &CrossProcessPaintApi) {
         if let Some(image_key) = self.image_key.take() {
             paint_api.delete_image(image_key);
         }
@@ -521,13 +485,8 @@ impl ContextData {
 }
 
 impl crate::WGPU {
-    pub(crate) fn create_context(
-        &self,
-        context_id: WebGPUContextId,
-        size: DeviceIntSize,
-        buffer_ids: ArrayVec<id::BufferId, PRESENTATION_BUFFER_COUNT>,
-    ) {
-        let context_data = ContextData::new(&self.global, buffer_ids, size);
+    pub(crate) fn create_context(&self, context_id: WebGPUContextId, size: DeviceIntSize) {
+        let context_data = ContextData::new(size);
         assert!(
             self.wgpu_image_map
                 .lock()
@@ -563,15 +522,13 @@ impl crate::WGPU {
     pub(crate) fn get_image(
         &self,
         context_id: WebGPUContextId,
-        pending_texture: Option<PendingTexture>,
+        pending_texture: Option<ResolvedPendingTexture>,
         sender: GenericSender<SharedSnapshot>,
     ) {
         let mut webgpu_contexts = self.wgpu_image_map.lock().unwrap();
         let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
         if let Some(PendingTexture {
-            texture_id,
-            encoder_id,
-            command_buffer_id,
+            texture,
             configuration,
         }) = pending_texture
         {
@@ -589,11 +546,9 @@ impl crate::WGPU {
             let sender = sender;
             drop(webgpu_contexts);
             self.texture_download(
-                texture_id,
-                encoder_id,
-                command_buffer_id,
+                texture,
                 staging_buffer,
-                configuration,
+                configuration.clone(),
                 move |staging_buffer| {
                     let mut webgpu_contexts = wgpu_image_map.lock().unwrap();
                     let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
@@ -638,7 +593,7 @@ impl crate::WGPU {
     pub(crate) fn present(
         &self,
         context_id: WebGPUContextId,
-        pending_texture: Option<PendingTexture>,
+        pending_texture: Option<ResolvedPendingTexture>,
         size: Size2D<u32>,
         canvas_epoch: Epoch,
     ) {
@@ -650,9 +605,7 @@ impl crate::WGPU {
         };
 
         let Some(PendingTexture {
-            texture_id,
-            encoder_id,
-            command_buffer_id,
+            texture,
             configuration,
         }) = pending_texture
         else {
@@ -687,11 +640,9 @@ impl crate::WGPU {
         let paint_api = self.paint_api.clone();
         drop(webgpu_contexts);
         self.texture_download(
-            texture_id,
-            encoder_id,
-            command_buffer_id,
+            texture,
             staging_buffer,
-            configuration,
+            configuration.clone(),
             move |staging_buffer| {
                 let mut webgpu_contexts = wgpu_image_map.lock().unwrap();
                 let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
@@ -723,53 +674,46 @@ impl crate::WGPU {
     /// on success or [`StagingBufferState::Available`] on failure.
     fn texture_download(
         &self,
-        texture_id: TextureId,
-        encoder_id: CommandEncoderId,
-        command_buffer_id: CommandBufferId,
+        texture: Arc<Texture>,
         mut staging_buffer: StagingBuffer,
-        config: ContextConfiguration,
+        config: ResolvedContextConfiguration,
         callback: impl FnOnce(StagingBuffer) + Send + 'static,
     ) {
-        let Ok(command_buffer_id) = staging_buffer.prepare_load_texture_command_buffer(
-            texture_id,
-            encoder_id,
-            command_buffer_id,
-            &config,
-        ) else {
+        let Ok(command_buffer) =
+            staging_buffer.prepare_load_texture_command_buffer(texture, &config)
+        else {
             return callback(staging_buffer);
         };
-        let StagingBufferState::Available(buffer) = &staging_buffer.state else {
+        let StagingBuffer::Available(buffer) = &staging_buffer else {
             unreachable!("`prepare_load_texture_command_buffer` should make buffer available")
         };
-        let buffer_id = staging_buffer.buffer_id;
-        let buffer_size = buffer.size;
+        let buffer = buffer.0.clone();
+        let buffer_size = buffer.size();
         {
             let _guard = self.poller.lock();
-            let result = self
-                .global
-                .queue_submit(buffer.queue_id, &[command_buffer_id]);
-            if result.is_err() {
+            config
+                .device
+                .push_error_scope(webgpu_traits::ErrorFilter::Validation);
+            config.queue.submit(&[command_buffer]);
+            if let Ok(Some(_)) = config.device.pop_error_scope() {
                 return callback(staging_buffer);
             }
         }
-        staging_buffer.state = match staging_buffer.state {
-            StagingBufferState::Available(buffer) => StagingBufferState::Mapping(buffer),
+        let t = std::mem::take(&mut staging_buffer);
+        staging_buffer = match t {
+            StagingBuffer::Available(buffer) => StagingBuffer::Mapping(buffer),
             _ => unreachable!("`prepare_load_texture_command_buffer` should make buffer available"),
         };
         let map_callback = {
             let token = self.poller.token();
             Box::new(move |result: Result<(), BufferAccessError>| {
                 drop(token);
-                staging_buffer.state = match staging_buffer.state {
-                    StagingBufferState::Mapping(buffer) => {
-                        if let Ok((data, len)) = result.and_then(|_| {
-                            staging_buffer.global.buffer_get_mapped_range(
-                                staging_buffer.buffer_id,
-                                0,
-                                Some(buffer.size),
-                            )
-                        }) {
-                            StagingBufferState::Mapped(MappedBuffer {
+                staging_buffer = match staging_buffer {
+                    StagingBuffer::Mapping(buffer) => {
+                        if let Ok((data, len)) =
+                            result.and_then(|_| buffer.0.get_mapped_range(0, Some(buffer_size)))
+                        {
+                            StagingBuffer::Mapped(MappedBuffer {
                                 buffer,
                                 data,
                                 len,
@@ -778,7 +722,7 @@ impl crate::WGPU {
                                 is_opaque: config.is_opaque,
                             })
                         } else {
-                            StagingBufferState::Available(buffer)
+                            StagingBuffer::Available(buffer)
                         }
                     },
                     _ => {
@@ -789,14 +733,19 @@ impl crate::WGPU {
             })
         };
         let map_op = BufferMapOperation {
-            host: HostMap::Read,
+            mode: HostMap::Read,
             callback: Some(map_callback),
         };
-        // error is handled by map_callback
-        let _ = self
-            .global
-            .buffer_map_async(buffer_id, 0, Some(buffer_size), map_op);
-        self.poller.wake();
+        {
+            config
+                .device
+                .push_error_scope(webgpu_traits::ErrorFilter::Validation);
+
+            buffer.map_async(0, Some(buffer_size), map_op);
+            self.poller.wake();
+            // ignore errors here as they will be reported in the callback
+            let _ = config.device.pop_error_scope();
+        }
     }
 
     pub(crate) fn destroy_context(&mut self, context_id: WebGPUContextId) {
@@ -805,6 +754,6 @@ impl crate::WGPU {
             .unwrap()
             .remove(&context_id)
             .unwrap()
-            .destroy(&self.script_sender, &self.paint_api);
+            .destroy(&self.paint_api);
     }
 }

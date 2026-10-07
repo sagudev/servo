@@ -43,6 +43,8 @@ impl<D: Equivalence> WGSLLanguageFeatures<D> {
     ) -> DomRoot<Self> {
         let set = ImplementedLanguageExtension::all()
             .iter()
+            // we filter out this untit we implemeted this in servo
+            .filter(|ext| !matches!(ext, ImplementedLanguageExtension::ImmediateAddressSpace))
             .map(|le| le.to_ident().into())
             .collect();
         reflect_dom_object_with_proto_and_wrap::<D, _, _>(
