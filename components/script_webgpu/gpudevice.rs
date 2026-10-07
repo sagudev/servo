@@ -42,11 +42,11 @@ use script_bindings::{DomTypes, cformat, task};
 use stylo_atoms::atom;
 use webgpu_traits::{
     BlendState, ColorTargetState, ColorWrites, DepthBiasState, DepthStencilState, Features,
-    FragmentState, Limits, MultisampleState, PopError, RenderPipelineDescriptor, StencilFaceState,
-    StencilState, TextureFormat, VertexAttribute, VertexBufferLayout, VertexState, VertexStepMode,
-    WebGPU, WebGPUComputePipeline, WebGPUComputePipelineResponse, WebGPUDevice,
-    WebGPUPoppedErrorScopeResponse, WebGPUQueue, WebGPURenderPipeline,
-    WebGPURenderPipelineResponse, WebGPURequest,
+    FragmentState, Limits, MultisampleState, PipelineError, RenderPipelineDescriptor,
+    StencilFaceState, StencilState, TextureFormat, VertexAttribute, VertexBufferLayout,
+    VertexState, VertexStepMode, WebGPU, WebGPUComputePipeline, WebGPUComputePipelineResponse,
+    WebGPUDevice, WebGPUPoppedErrorScopeResponse, WebGPUQueue, WebGPURenderPipeline,
+    WebGPURenderPipelineResponse, WebGPURequest, full_features,
 };
 
 use super::gpudevicelostinfo::GPUDeviceLostInfo;
@@ -143,6 +143,7 @@ pub struct GPUDevice<D: DomTypes> {
     /// <https://gpuweb.github.io/gpuweb/#dom-gpudevice-lost>
     lost_promise: DomRefCell<<D::Promise as PromiseHelpers<D>>::HeapTraced>,
     valid: Cell<bool>,
+    external_texture_supported: bool,
     droppable: DroppableGPUDevice,
 }
 
@@ -162,6 +163,7 @@ where
         queue: &D::GPUQueue,
         label: String,
         lost_promise: &<D::Promise as PromiseHelpers<D>>::StackRoot,
+        external_texture_supported: bool,
     ) -> Self {
         Self {
             eventtarget: D::EventTarget::new_inherited(),
@@ -174,6 +176,7 @@ where
             default_queue: Dom::from_ref(queue),
             lost_promise: DomRefCell::new(lost_promise.to_traced()),
             valid: Cell::new(true),
+            external_texture_supported,
             droppable: DroppableGPUDevice { channel, device },
         }
     }
@@ -190,6 +193,7 @@ where
         device: WebGPUDevice,
         queue: WebGPUQueue,
         label: String,
+        external_texture_supported: bool,
     ) -> DomRoot<Self> {
         let queue = D::GPUQueue::new(cx, global, channel.clone(), queue);
         let limits = GPUSupportedLimits::new(cx, global, limits);
@@ -208,6 +212,7 @@ where
                 &queue,
                 label,
                 &lost_promise,
+                external_texture_supported,
             )),
             global,
             GPUDeviceWrap::<D>,
@@ -276,9 +281,7 @@ where
         format: &GPUTextureFormat,
     ) -> Fallible<TextureFormat> {
         let texture_format: TextureFormat = (*format).convert();
-        if self
-            .features
-            .wgpu_features()
+        if full_features(*self.features.wgpu_features())
             .contains(texture_format.required_features())
         {
             Ok(texture_format)
@@ -308,7 +311,6 @@ where
         let desc = RenderPipelineDescriptor {
             label: (&descriptor.parent.parent).convert(),
             layout: pipeline_layout.explicit(),
-            cache: None,
             vertex: VertexState {
                 stage: (&descriptor.vertex.parent).convert(),
                 buffers: Cow::Owned(
@@ -413,7 +415,6 @@ where
                 mask: descriptor.multisample.mask as u64,
                 alpha_to_coverage_enabled: descriptor.multisample.alphaToCoverageEnabled,
             },
-            multiview_mask: None,
         };
         Ok(desc)
     }
@@ -423,6 +424,10 @@ impl<D> GPUDevice<D>
 where
     D: Equivalence,
 {
+    pub(crate) fn external_texture_supported(&self) -> bool {
+        self.external_texture_supported
+    }
+
     pub fn channel(&self) -> WebGPU {
         self.droppable.channel.clone()
     }
@@ -723,10 +728,8 @@ where
         promise: &<D::Promise as PromiseHelpers<D>>::StackRoot,
     ) {
         match response {
-            Ok(None) | Err(PopError::Lost) => {
-                promise.resolve_native(cx, &None::<Option<GPUError<D>>>)
-            },
-            Err(PopError::Empty) => promise.reject_error(
+            Ok(None) => promise.resolve_native(cx, &None::<Option<GPUError<D>>>),
+            Err(()) => promise.reject_error(
                 cx,
                 Error::Operation(Some("Error scope stack is empty".into())),
             ),
@@ -764,7 +767,7 @@ where
                 );
                 promise.resolve_native(cx, &gpu_compute_pipeline)
             },
-            Err(webgpu_traits::Error::Validation(msg)) => {
+            Err(PipelineError::Validation(msg)) => {
                 let gpu_pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -773,7 +776,7 @@ where
                 );
                 promise.reject_native(cx, &gpu_pipeline_error)
             },
-            Err(webgpu_traits::Error::OutOfMemory(msg) | webgpu_traits::Error::Internal(msg)) => {
+            Err(PipelineError::Internal(msg)) => {
                 let gpu_pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -812,7 +815,7 @@ where
                 );
                 promise.resolve_native(cx, &gpu_pipeline)
             },
-            Err(webgpu_traits::Error::Validation(msg)) => {
+            Err(PipelineError::Validation(msg)) => {
                 let pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),
@@ -822,7 +825,7 @@ where
 
                 promise.reject_native(cx, &pipeline_error)
             },
-            Err(webgpu_traits::Error::OutOfMemory(msg) | webgpu_traits::Error::Internal(msg)) => {
+            Err(PipelineError::Internal(msg)) => {
                 let pipeline_error = GPUPipelineError::<D>::new(
                     cx,
                     &self.global_from_reflector(),

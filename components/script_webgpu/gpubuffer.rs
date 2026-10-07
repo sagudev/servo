@@ -24,7 +24,7 @@ use script_bindings::routed_promise::RoutedPromiseListener;
 use script_bindings::trace::RootedTraceableBox;
 use servo_base::generic_channel::GenericSharedMemory;
 use webgpu_traits::{
-    BufferAccessError, BufferAddress, BufferDescriptor, BufferUpdate, BufferUsages,
+    BufferAddress, BufferDescriptor, BufferMapError, BufferUpdate, BufferUsages,
     COPY_BUFFER_ALIGNMENT, HostMap, MAP_ALIGNMENT, Mapping, WebGPU, WebGPUBuffer, WebGPURequest,
 };
 
@@ -558,11 +558,11 @@ where
     }
 }
 
-impl<D: Equivalence> RoutedPromiseListener<D, Result<Mapping, BufferAccessError>> for GPUBuffer<D> {
+impl<D: Equivalence> RoutedPromiseListener<D, Result<Mapping, BufferMapError>> for GPUBuffer<D> {
     fn handle_response(
         &self,
         cx: &mut js::context::JSContext,
-        response: Result<Mapping, BufferAccessError>,
+        response: Result<Mapping, BufferMapError>,
         promise: &<D::Promise as PromiseHelpers<D>>::StackRoot,
     ) {
         match response {
