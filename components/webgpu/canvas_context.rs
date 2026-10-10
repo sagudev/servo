@@ -4,7 +4,6 @@
 
 //! Main process implementation of [GPUCanvasContext](https://www.w3.org/TR/webgpu/#canvas-context)
 
-use std::ptr::NonNull;
 use std::sync::{Arc, Mutex};
 
 use arrayvec::ArrayVec;
@@ -88,8 +87,7 @@ impl Buffer {
 #[derive(Debug)]
 struct MappedBuffer {
     buffer: Buffer,
-    data: NonNull<u8>,
-    len: u64,
+    mapping: wgpu_core::resource::BufferMapping,
     image_size: Size2D<u32>,
     image_format: ImageFormat,
     is_opaque: bool,
@@ -100,9 +98,11 @@ unsafe impl Send for MappedBuffer {}
 unsafe impl Sync for MappedBuffer {}
 
 impl MappedBuffer {
-    const fn slice(&'_ self) -> &'_ [u8] {
+    fn slice(&'_ self) -> &'_ [u8] {
         // Safety: Pointer is from wgpu, and we only use it here
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len as usize) }
+        unsafe {
+            std::slice::from_raw_parts(self.mapping.ptr().as_ptr(), self.mapping.len() as usize)
+        }
     }
 
     fn stride(&self) -> u32 {
@@ -710,13 +710,12 @@ impl crate::WGPU {
                 drop(token);
                 staging_buffer = match staging_buffer {
                     StagingBuffer::Mapping(buffer) => {
-                        if let Ok((data, len)) =
+                        if let Ok(mapping) =
                             result.and_then(|_| buffer.0.get_mapped_range(0, Some(buffer_size)))
                         {
                             StagingBuffer::Mapped(MappedBuffer {
                                 buffer,
-                                data,
-                                len,
+                                mapping,
                                 image_size: config.size,
                                 image_format: config.format,
                                 is_opaque: config.is_opaque,

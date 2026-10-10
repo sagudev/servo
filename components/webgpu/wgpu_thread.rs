@@ -4,8 +4,6 @@
 
 //! Data and main loop of WebGPU thread.
 
-use std::ptr::NonNull;
-use std::slice;
 use std::sync::{Arc, Mutex};
 
 use log::{info, warn};
@@ -142,18 +140,13 @@ impl WGPU {
                                         || GenericSharedMemory::from_byte(0, buffer_size as usize),
                                     );
                                 if host_map == HostMap::Read {
-                                    let (slice_pointer, range_size) =
-                                        buffer.get_mapped_range(offset, size)?;
-                                    // SAFETY: guarantee to be safe from wgpu
-                                    let slice = unsafe {
-                                        slice::from_raw_parts(
-                                            slice_pointer.as_ptr(),
-                                            range_size as usize,
-                                        )
-                                    };
+                                    let mapping = buffer.get_mapped_range(offset, size)?;
                                     let data = unsafe { data.deref_mut() };
-                                    data[offset as usize..(offset + range_size) as usize]
-                                        .copy_from_slice(slice);
+                                    mapping.read(
+                                        &mut data
+                                            [offset as usize..(offset + mapping.len()) as usize],
+                                        0,
+                                    );
                                 }
 
                                 Ok(Mapping {
@@ -598,20 +591,13 @@ impl WGPU {
                         buffer_update,
                     } => {
                         if let BufferUpdate::Write(data, range) = &buffer_update &&
-                            let Ok((slice_pointer, range_size)) =
-                                self.global.buffer_get_mapped_range(
-                                    buffer_id,
-                                    range.start,
-                                    Some(range.end - range.start),
-                                )
+                            let Ok(mapping) = self.global.buffer_get_mapped_range(
+                                buffer_id,
+                                range.start,
+                                Some(range.end - range.start),
+                            )
                         {
-                            let mut write_slice = unsafe {
-                                wgpu_types::WriteOnly::new(NonNull::slice_from_raw_parts(
-                                    slice_pointer,
-                                    range_size as usize,
-                                ))
-                            };
-                            write_slice.copy_from_slice(
+                            mapping.write_slice().copy_from_slice(
                                 &data.as_ref()[range.start as usize..range.end as usize],
                             );
                         }
