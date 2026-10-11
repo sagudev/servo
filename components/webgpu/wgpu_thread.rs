@@ -580,7 +580,6 @@ impl WGPU {
                         queue_id,
                         command_buffers,
                     } => {
-                        let _guard = self.poller.lock();
                         self.global.queue_submit(queue_id, &command_buffers);
                     },
                     WebGPURequest::UnmapBuffer {
@@ -628,7 +627,6 @@ impl WGPU {
                         size,
                         data,
                     } => {
-                        let _guard = self.poller.lock();
                         self.global.queue_write_texture(
                             queue_id,
                             &texture_cv,
@@ -636,7 +634,6 @@ impl WGPU {
                             &data_layout,
                             &size,
                         );
-                        drop(_guard);
                     },
                     WebGPURequest::CopyExternalImageToTexture {
                         device_id,
@@ -686,7 +683,6 @@ impl WGPU {
                         // texture.format must be a plain color format supporting RENDER_ATTACHMENT and be a unorm/unorm-srgb or float/ufloat format (not snorm, uint, or sint).
                         // currently to to hard to check
                         // the rest will be checked as part of write texture
-                        let _guard = self.poller.lock();
                         self.global.queue_write_texture(
                             queue_id,
                             &destination,
@@ -698,7 +694,6 @@ impl WGPU {
                             },
                             &copy_size,
                         );
-                        drop(_guard);
                     },
                     WebGPURequest::QueueOnSubmittedWorkDone { sender, queue_id } => {
                         let global = &self.global;

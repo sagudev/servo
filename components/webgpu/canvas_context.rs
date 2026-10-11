@@ -690,7 +690,6 @@ impl crate::WGPU {
         let buffer = buffer.0.clone();
         let buffer_size = buffer.size();
         {
-            let _guard = self.poller.lock();
             config
                 .device
                 .push_error_scope(webgpu_traits::ErrorFilter::Validation);
