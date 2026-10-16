@@ -28,7 +28,9 @@ use webrender_api::{
 use wgpu_core::command::CommandBuffer;
 use wgpu_core::device::Device;
 use wgpu_core::device::queue::Queue;
-use wgpu_core::resource::{BufferAccessError, BufferMapOperation, ParentDevice, Texture};
+use wgpu_core::resource::{
+    BufferAccessError, BufferMapOperation, BufferMapping, ParentDevice, Texture,
+};
 use wgpu_types::{BufferUsages, COPY_BYTES_PER_ROW_ALIGNMENT};
 
 use crate::wgpu_thread::WGPU;
@@ -84,10 +86,9 @@ impl Buffer {
 }
 
 /// Mapped GPUBuffer
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MappedBuffer {
     buffer: Buffer,
-    mapping: wgpu_core::resource::BufferMapping,
     image_size: Size2D<u32>,
     image_format: ImageFormat,
     is_opaque: bool,
@@ -97,17 +98,45 @@ struct MappedBuffer {
 unsafe impl Send for MappedBuffer {}
 unsafe impl Sync for MappedBuffer {}
 
-impl MappedBuffer {
-    fn slice(&'_ self) -> &'_ [u8] {
-        // Safety: Pointer is from wgpu, and we only use it here
-        unsafe {
-            std::slice::from_raw_parts(self.mapping.ptr().as_ptr(), self.mapping.len() as usize)
-        }
-    }
+fn stride(image_size: Size2D<u32>, image_format: ImageFormat) -> u32 {
+    (image_size.width * image_format.bytes_per_pixel() as u32)
+        .next_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT)
+}
 
-    fn stride(&self) -> u32 {
-        (self.image_size.width * self.image_format.bytes_per_pixel() as u32)
-            .next_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT)
+impl MappedBuffer {
+    /// Obtain a snapshot from this buffer if is mapped or return `None` if it is not mapped.
+    fn snapshot(&self) -> Option<Snapshot> {
+        let mapping = self.buffer.0.get_mapped_range(0, None).ok()?;
+        let padded_byte_width = stride(self.image_size, self.image_format) as usize;
+        let bytes_per_pixel = self.image_format.bytes_per_pixel() as usize;
+        let unpadded_byte_width = self.image_size.width as usize * bytes_per_pixel;
+        let mut data = vec![0; self.image_size.height as usize * unpadded_byte_width];
+        let read_slice = mapping.read_slice();
+        for row in 0..self.image_size.height {
+            let data_start = row as usize * unpadded_byte_width;
+            let read_start = row as usize * padded_byte_width;
+            data[data_start..data_start + unpadded_byte_width]
+                .copy_from_slice(&read_slice[read_start..read_start + unpadded_byte_width]);
+        }
+        let format = match self.image_format {
+            ImageFormat::RGBA8 => SnapshotPixelFormat::RGBA,
+            ImageFormat::BGRA8 => SnapshotPixelFormat::BGRA,
+            _ => unreachable!("GPUCanvasContext does not support other formats per spec"),
+        };
+        let alpha_mode = if self.is_opaque {
+            SnapshotAlphaMode::AsOpaque {
+                premultiplied: false,
+            }
+        } else {
+            SnapshotAlphaMode::Transparent {
+                premultiplied: true,
+            }
+        };
+        let mut snapshot = Snapshot::from_vec(self.image_size, format, alpha_mode, data);
+        if self.is_opaque {
+            snapshot.transform(SnapshotAlphaMode::Opaque, snapshot.format())
+        }
+        Some(snapshot)
     }
 }
 
@@ -122,17 +151,11 @@ enum StagingBuffer {
     Available(Buffer),
     /// `mapAsync` is currently running on the buffer.
     Mapping(Buffer),
-    /// The buffer is currently mapped.
-    Mapped(MappedBuffer),
 }
 
 impl StagingBuffer {
     fn new() -> Self {
         Self::Unassigned
-    }
-
-    const fn is_mapped(&self) -> bool {
-        matches!(self, StagingBuffer::Mapped(..))
     }
 
     /// Return true if buffer can be used directly with provided config
@@ -159,9 +182,7 @@ impl StagingBuffer {
     fn ensure_available(&mut self, config: &ResolvedContextConfiguration) -> Result<(), Error> {
         let recreate = match self {
             StagingBuffer::Unassigned => true,
-            StagingBuffer::Available(buffer) |
-            StagingBuffer::Mapping(buffer) |
-            StagingBuffer::Mapped(MappedBuffer { buffer, .. }) => {
+            StagingBuffer::Available(buffer) | StagingBuffer::Mapping(buffer) => {
                 if buffer.has_compatible_config(config) {
                     buffer.0.unmap();
                     false
@@ -237,60 +258,11 @@ impl StagingBuffer {
             Ok(cmd_buffer)
         }
     }
-
-    /// Unmaps the buffer or cancels a mapping operation if one is in progress.
-    fn unmap(&mut self) {
-        let t = std::mem::take(self);
-        *self = match t {
-            s @ StagingBuffer::Unassigned | s @ StagingBuffer::Available(_) => s,
-            StagingBuffer::Mapping(buffer) | StagingBuffer::Mapped(MappedBuffer { buffer, .. }) => {
-                buffer.0.unmap();
-                StagingBuffer::Available(buffer)
-            },
-        };
-    }
-
-    /// Obtain a snapshot from this buffer if is mapped or return `None` if it is not mapped.
-    fn snapshot(&self) -> Option<Snapshot> {
-        let StagingBuffer::Mapped(mapped) = &self else {
-            return None;
-        };
-        let format = match mapped.image_format {
-            ImageFormat::RGBA8 => SnapshotPixelFormat::RGBA,
-            ImageFormat::BGRA8 => SnapshotPixelFormat::BGRA,
-            _ => unreachable!("GPUCanvasContext does not support other formats per spec"),
-        };
-        let alpha_mode = if mapped.is_opaque {
-            SnapshotAlphaMode::AsOpaque {
-                premultiplied: false,
-            }
-        } else {
-            SnapshotAlphaMode::Transparent {
-                premultiplied: true,
-            }
-        };
-        let padded_byte_width = mapped.stride();
-        let data = mapped.slice();
-        let bytes_per_pixel = mapped.image_format.bytes_per_pixel() as usize;
-        let mut result_unpadded =
-            Vec::<u8>::with_capacity(mapped.image_size.area() as usize * bytes_per_pixel);
-        for row in 0..mapped.image_size.height {
-            let start = (row * padded_byte_width).try_into().ok()?;
-            result_unpadded
-                .extend(&data[start..start + mapped.image_size.width as usize * bytes_per_pixel]);
-        }
-        let mut snapshot =
-            Snapshot::from_vec(mapped.image_size, format, alpha_mode, result_unpadded);
-        if mapped.is_opaque {
-            snapshot.transform(SnapshotAlphaMode::Opaque, snapshot.format())
-        }
-        Some(snapshot)
-    }
 }
 
 pub struct WebGpuExternalImages {
     pub image_map: WebGpuExternalImageMap,
-    pub locked_ids: FxHashMap<WebGPUContextId, PresentationStagingBuffer>,
+    pub locked_ids: FxHashMap<WebGPUContextId, BufferMapping>,
 }
 
 impl WebGpuExternalImages {
@@ -307,66 +279,56 @@ impl WebRenderExternalImageApi for WebGpuExternalImages {
         let id = WebGPUContextId(id);
         let presentation = {
             let mut webgpu_contexts = self.image_map.lock().unwrap();
-            webgpu_contexts
-                .get_mut(&id)
-                .and_then(|context_data| context_data.presentation.clone())
+            webgpu_contexts.get_mut(&id).and_then(|context_data| {
+                context_data
+                    .presentation
+                    .as_ref()
+                    .map(|presentation_staging_buffer| {
+                        presentation_staging_buffer.mapped_buffer.clone()
+                    })
+            })
         };
         let Some(presentation) = presentation else {
             return (ExternalImageSource::Invalid, Size2D::zero());
         };
-        self.locked_ids.insert(id, presentation);
-        let presentation = self.locked_ids.get(&id).unwrap();
-        let StagingBuffer::Mapped(mapped_buffer) = &*presentation.staging_buffer else {
-            unreachable!("Presentation staging buffer should be mapped")
+        let Ok(buffer_mapping) = presentation.buffer.0.get_mapped_range(0, None) else {
+            return (ExternalImageSource::Invalid, Size2D::zero());
         };
-        let size = mapped_buffer.image_size;
+        self.locked_ids.insert(id, buffer_mapping);
+        let size = presentation.image_size;
+        let buffer_mapping = self.locked_ids.get(&id).unwrap();
         (
-            ExternalImageSource::RawData(mapped_buffer.slice()),
+            ExternalImageSource::RawData(buffer_mapping.read_slice()),
             size.cast().cast_unit(),
         )
     }
 
     fn unlock(&mut self, id: u64) {
         let id = WebGPUContextId(id);
-        let Some(presentation) = self.locked_ids.remove(&id) else {
-            return;
-        };
-        let mut webgpu_contexts = self.image_map.lock().unwrap();
-        if let Some(context_data) = webgpu_contexts.get_mut(&id) {
-            // We use this to return staging buffer if a newer one exists.
-            presentation.maybe_destroy(context_data);
-        } else {
-            // This will not free this buffer id in script,
-            // but that's okay because we still have many free ids.
-            drop(presentation);
-        }
+        let _ = self.locked_ids.remove(&id);
     }
 }
 
 /// Staging buffer currently used for presenting the epoch.
 ///
 /// Users should [`ContextData::replace_presentation`] when done.
-#[derive(Clone)]
 pub struct PresentationStagingBuffer {
     epoch: Epoch,
-    staging_buffer: Arc<StagingBuffer>,
+    mapped_buffer: MappedBuffer,
 }
 
 impl PresentationStagingBuffer {
-    fn new(epoch: Epoch, staging_buffer: StagingBuffer) -> Self {
+    fn new(epoch: Epoch, mapped_buffer: MappedBuffer) -> Self {
         Self {
             epoch,
-            staging_buffer: Arc::new(staging_buffer),
+            mapped_buffer,
         }
     }
 
-    /// If the internal staging buffer is not shared,
-    /// unmap it and call [`ContextData::return_staging_buffer`] with it.
-    fn maybe_destroy(self, context_data: &mut ContextData) {
-        if let Some(mut staging_buffer) = Arc::into_inner(self.staging_buffer) {
-            staging_buffer.unmap();
-            context_data.return_staging_buffer(staging_buffer);
-        }
+    fn destroy(self) -> StagingBuffer {
+        let buffer = self.mapped_buffer.buffer;
+        buffer.0.unmap();
+        StagingBuffer::Available(buffer)
     }
 }
 
@@ -469,13 +431,13 @@ impl ContextData {
             Some(presentation)
         };
         if let Some(stale_presentation) = stale_presentation {
-            stale_presentation.maybe_destroy(self);
+            self.return_staging_buffer(stale_presentation.destroy());
         }
     }
 
     fn clear_presentation(&mut self) {
         if let Some(stale_presentation) = self.presentation.take() {
-            stale_presentation.maybe_destroy(self);
+            self.return_staging_buffer(stale_presentation.destroy());
         }
     }
 
@@ -549,26 +511,29 @@ impl crate::WGPU {
                 texture,
                 staging_buffer,
                 configuration.clone(),
-                move |staging_buffer| {
+                move |result| {
                     let mut webgpu_contexts = wgpu_image_map.lock().unwrap();
                     let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
                     sender
                         .send(
-                            staging_buffer
-                                .snapshot()
+                            result
                                 .as_ref()
-                                .map(Snapshot::to_shared)
+                                .ok()
+                                .and_then(|mb| mb.snapshot())
+                                .map(|snapshot| snapshot.to_shared())
                                 .unwrap_or_else(|| SharedSnapshot::cleared(configuration.size)),
                         )
                         .unwrap();
-                    if staging_buffer.is_mapped() {
-                        context_data.replace_presentation(PresentationStagingBuffer::new(
-                            epoch,
-                            staging_buffer,
-                        ));
-                    } else {
-                        // failure
-                        context_data.return_staging_buffer(staging_buffer);
+                    match result {
+                        Ok(mapped_buffer) => {
+                            context_data.replace_presentation(PresentationStagingBuffer::new(
+                                epoch,
+                                mapped_buffer,
+                            ));
+                        },
+                        Err(staging_buffer) => {
+                            context_data.return_staging_buffer(staging_buffer);
+                        },
                     }
                 },
             );
@@ -579,7 +544,7 @@ impl crate::WGPU {
                         .presentation
                         .as_ref()
                         .and_then(|presentation_staging_buffer| {
-                            presentation_staging_buffer.staging_buffer.snapshot()
+                            presentation_staging_buffer.mapped_buffer.snapshot()
                         })
                         .unwrap_or_else(Snapshot::empty)
                         .into_shared(),
@@ -643,17 +608,16 @@ impl crate::WGPU {
             texture,
             staging_buffer,
             configuration.clone(),
-            move |staging_buffer| {
+            move |result| {
                 let mut webgpu_contexts = wgpu_image_map.lock().unwrap();
                 let context_data = webgpu_contexts.get_mut(&context_id).unwrap();
-                if staging_buffer.is_mapped() {
-                    context_data.replace_presentation(PresentationStagingBuffer::new(
-                        epoch,
-                        staging_buffer,
-                    ));
-                } else {
-                    context_data.return_staging_buffer(staging_buffer);
-                    context_data.clear_presentation();
+                match result {
+                    Ok(mapped_buffer) => context_data
+                        .replace_presentation(PresentationStagingBuffer::new(epoch, mapped_buffer)),
+                    Err(staging_buffer) => {
+                        context_data.return_staging_buffer(staging_buffer);
+                        context_data.clear_presentation();
+                    },
                 }
                 // update image in WR
                 paint_api.update_image(
@@ -677,12 +641,12 @@ impl crate::WGPU {
         texture: Arc<Texture>,
         mut staging_buffer: StagingBuffer,
         config: ResolvedContextConfiguration,
-        callback: impl FnOnce(StagingBuffer) + Send + 'static,
+        callback: impl FnOnce(Result<MappedBuffer, StagingBuffer>) + Send + 'static,
     ) {
         let Ok(command_buffer) =
             staging_buffer.prepare_load_texture_command_buffer(texture, &config)
         else {
-            return callback(staging_buffer);
+            return callback(Err(staging_buffer));
         };
         let StagingBuffer::Available(buffer) = &staging_buffer else {
             unreachable!("`prepare_load_texture_command_buffer` should make buffer available")
@@ -695,7 +659,7 @@ impl crate::WGPU {
                 .push_error_scope(webgpu_traits::ErrorFilter::Validation);
             config.queue.submit(&[command_buffer]);
             if let Ok(Some(_)) = config.device.pop_error_scope() {
-                return callback(staging_buffer);
+                return callback(Err(staging_buffer));
             }
         }
         let t = std::mem::take(&mut staging_buffer);
@@ -707,27 +671,21 @@ impl crate::WGPU {
             let token = self.poller.token();
             Box::new(move |result: Result<(), BufferAccessError>| {
                 drop(token);
-                staging_buffer = match staging_buffer {
-                    StagingBuffer::Mapping(buffer) => {
-                        if let Ok(mapping) =
-                            result.and_then(|_| buffer.0.get_mapped_range(0, Some(buffer_size)))
-                        {
-                            StagingBuffer::Mapped(MappedBuffer {
-                                buffer,
-                                mapping,
-                                image_size: config.size,
-                                image_format: config.format,
-                                is_opaque: config.is_opaque,
-                            })
-                        } else {
-                            StagingBuffer::Available(buffer)
-                        }
+                let result = match staging_buffer {
+                    StagingBuffer::Mapping(buffer) => match result {
+                        Ok(_) => Ok(MappedBuffer {
+                            buffer,
+                            image_size: config.size,
+                            image_format: config.format,
+                            is_opaque: config.is_opaque,
+                        }),
+                        Err(_) => Err(StagingBuffer::Available(buffer)),
                     },
                     _ => {
                         unreachable!("Mapping buffer should have StagingBufferState::Mapping state")
                     },
                 };
-                callback(staging_buffer);
+                callback(result);
             })
         };
         let map_op = BufferMapOperation {
