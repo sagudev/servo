@@ -22,7 +22,7 @@ use webgpu_traits::{
 };
 use webrender_api::ExternalImageId;
 use wgpu_core::LabelHelpers;
-use wgpu_core::resource::{BufferAccessResult, BufferMapOperation};
+use wgpu_core::resource::BufferAccessResult;
 use wgpu_core_remote::global::Global;
 use wgpu_core_remote::map_buffer_access_error;
 use wgpu_types::{
@@ -123,7 +123,7 @@ impl WGPU {
                         callback: sender,
                         buffer_id,
                         device_id: _,
-                        host_map,
+                        mode,
                         offset,
                         size,
                         buffer_size,
@@ -134,12 +134,12 @@ impl WGPU {
                         let token = self.poller.token();
                         let callback = Box::from(move |result: BufferAccessResult| {
                             drop(token);
-                            let response = result.and_then(|_| {
+                            let response = result.and_then(|mode| {
                                 let mut data =
                                     buffers.lock().unwrap().remove(&buffer_id).unwrap_or_else(
                                         || GenericSharedMemory::from_byte(0, buffer_size as usize),
                                     );
-                                if host_map == HostMap::Read {
+                                if mode == HostMap::Read {
                                     let mapping = buffer.get_mapped_range(offset, size)?;
                                     let data = unsafe { data.deref_mut() };
                                     data[offset as usize..(offset + mapping.len()) as usize]
@@ -149,7 +149,7 @@ impl WGPU {
                                 Ok(Mapping {
                                     data,
                                     range: offset..size.map(|s| offset + s).unwrap_or(buffer_size),
-                                    mode: host_map,
+                                    mode,
                                 })
                             });
                             if let Err(e) =
@@ -159,12 +159,8 @@ impl WGPU {
                             }
                         });
 
-                        let operation = BufferMapOperation {
-                            mode: host_map,
-                            callback: Some(callback),
-                        };
                         self.global
-                            .buffer_map_async(buffer_id, offset, size, operation);
+                            .buffer_map_async(buffer_id, mode, offset, size, Some(callback));
                         self.poller.wake();
                     },
                     WebGPURequest::CommandEncoderCommand {

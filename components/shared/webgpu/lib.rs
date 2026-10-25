@@ -48,7 +48,7 @@ pub use wgpu_core_remote_types::pipelines::{
 };
 pub use wgpu_core_remote_types::{
     BufferDescriptor, BufferMapError, DeviceDescriptor, ImplementedLanguageExtension, Label,
-    PipelineError, PipelineLayoutDescriptor, QuerySetDescriptor, QueueDescriptor,
+    MapMode, PipelineError, PipelineLayoutDescriptor, QuerySetDescriptor, QueueDescriptor,
     RequestAdapterOptions, RequestDeviceError, SamplerDescriptor, ShaderModuleDescriptor,
     TextureDescriptor, TextureViewDescriptor,
 };

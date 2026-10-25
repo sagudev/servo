@@ -28,9 +28,7 @@ use webrender_api::{
 use wgpu_core::command::CommandBuffer;
 use wgpu_core::device::Device;
 use wgpu_core::device::queue::Queue;
-use wgpu_core::resource::{
-    BufferAccessError, BufferMapOperation, BufferMapping, ParentDevice, Texture,
-};
+use wgpu_core::resource::{BufferAccessError, BufferMapping, ParentDevice, Texture};
 use wgpu_types::{BufferUsages, COPY_BYTES_PER_ROW_ALIGNMENT};
 
 use crate::wgpu_thread::WGPU;
@@ -669,7 +667,7 @@ impl crate::WGPU {
         };
         let map_callback = {
             let token = self.poller.token();
-            Box::new(move |result: Result<(), BufferAccessError>| {
+            Box::new(move |result: Result<HostMap, BufferAccessError>| {
                 drop(token);
                 let result = match staging_buffer {
                     StagingBuffer::Mapping(buffer) => match result {
@@ -688,16 +686,12 @@ impl crate::WGPU {
                 callback(result);
             })
         };
-        let map_op = BufferMapOperation {
-            mode: HostMap::Read,
-            callback: Some(map_callback),
-        };
         {
             config
                 .device
                 .push_error_scope(webgpu_traits::ErrorFilter::Validation);
 
-            buffer.map_async(0, Some(buffer_size), map_op);
+            buffer.map_async(HostMap::Read, 0, Some(buffer_size), Some(map_callback));
             self.poller.wake();
             // ignore errors here as they will be reported in the callback
             let _ = config.device.pop_error_scope();
